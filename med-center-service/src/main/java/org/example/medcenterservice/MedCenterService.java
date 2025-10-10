@@ -33,6 +33,7 @@ public class MedCenterService {
         m_c.setPhone(new_m_c.getPhone());
         m_c.setSpecialization(new_m_c.getSpecialization());
         m_c.setUser_id(new_m_c.getUser_id());
+        m_c.setLicense_file(new_m_c.getLicense_file());
         return medCenterRepository.save(m_c);
     }
 
