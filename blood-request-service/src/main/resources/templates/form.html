@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>BloodConnect</title>
+</head>
+<body>
+<h2 th:text="${bloodRequest.blood_request_id} != null ? 'Edit request' : 'Create request'"></h2>
+
+<form th:action="@{/requests/save}" th:object="${bloodRequest}" method="post">
+
+  <input type="hidden" th:field="*{blood_request_id}" />
+
+  <label>Component Type:</label>
+  <select th:field="*{component_type}">
+    <option value="">-</option>
+    <option value="Plasma">Plasma</option>
+    <option value="Erythrocyte(RBC)">Erythrocyte(RBC)</option>
+    <option value="Leukocytes(WBC)">Leukocytes(WBC)</option>
+    <option value="Platelets(PLT)">Platelets(PLT)</option>
+    <option value="Whole">Whole</option>
+  </select>
+  <br/>
+
+  <label>Blood Group:</label>
+  <select th:field="*{blood_group}">
+    <option value="">-</option>
+    <option value="A">A</option>
+    <option value="B">B</option>
+    <option value="AB">AB</option>
+    <option value="O">O</option>
+  </select>
+  <br/>
+
+  <label>Rhesus Factor:</label>
+  <select th:field="*{rhesus_factor}">
+    <option value="">-</option>
+    <option value="+">Positive (+)</option>
+    <option value="-">Negative (-)</option>
+  </select>
+  <br/>
+
+  <label>Volume (units):</label>
+  <input type="number" min="1" max="10" th:field="*{volume}" /><br/>
+
+  <label>Deadline:</label>
+  <input type="datetime-local"
+         th:field="*{deadline}"/><br/>
+
+  <label>Comments:</label>
+  <textarea th:field="*{comments}"></textarea><br/>
+
+  <label>Medcenter ID:</label>
+  <input type="number" th:field="*{medcenter_id}" /><br/>
+
+  <button type="submit">Save</button>
+</form>
+
+<a th:href="@{/requests}">Back to list</a>
+</body>
+</html>
