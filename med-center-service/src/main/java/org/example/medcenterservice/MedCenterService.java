@@ -40,4 +40,8 @@ public class MedCenterService {
     public void delete(Long id) {
         medCenterRepository.deleteById(id);
     }
+
+    public List<MedCenter> searchByName(String name) {
+        return medCenterRepository.findByNameContainingIgnoreCase(name);
+    }
 }
