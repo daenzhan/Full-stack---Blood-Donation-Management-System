@@ -9,11 +9,9 @@ import java.util.Optional;
 public class MedCenterService {
 
     private final MedCenterRepository medCenterRepository;
-    private final UserFeignClient user_client;
 
-    public MedCenterService(MedCenterRepository medCenterRepository, UserFeignClient user_client) {
+    public MedCenterService(MedCenterRepository medCenterRepository) {
         this.medCenterRepository = medCenterRepository;
-        this.user_client = user_client;
     }
 
     public MedCenter create(MedCenter m_c) {
@@ -35,6 +33,7 @@ public class MedCenterService {
         m_c.setPhone(new_m_c.getPhone());
         m_c.setSpecialization(new_m_c.getSpecialization());
         m_c.setUser_id(new_m_c.getUser_id());
+        m_c.setLicense_file(new_m_c.getLicense_file());
         return medCenterRepository.save(m_c);
     }
 

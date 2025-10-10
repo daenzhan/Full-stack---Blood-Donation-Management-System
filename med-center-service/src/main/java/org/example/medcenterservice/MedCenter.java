@@ -15,14 +15,16 @@ public class MedCenter {
     private String phone;
     private String specialization;
     private Long user_id;
+    private String license_file;
 
-    public MedCenter(Long med_center_id, String name, String location, String phone, String specialization, Long user_id) {
+    public MedCenter(Long med_center_id, String name, String location, String phone, String specialization, Long user_id, String license_file) {
         this.med_center_id = med_center_id;
         this.name = name;
         this.location = location;
         this.phone = phone;
         this.specialization = specialization;
         this.user_id = user_id;
+        this.license_file=license_file;
     }
 
     public MedCenter (){}
@@ -73,5 +75,13 @@ public class MedCenter {
 
     public void setUser_id(Long user_id) {
         this.user_id = user_id;
+    }
+
+    public String getLicense_file() {
+        return license_file;
+    }
+
+    public void setLicense_file(String license_file) {
+        this.license_file = license_file;
     }
 }

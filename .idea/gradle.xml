@@ -4,15 +4,6 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/blood-request-service" />
-        <option name="gradleJvm" value="graalvm-jdk-21" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/blood-request-service" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/eureka-server" />
         <option name="gradleJvm" value="graalvm-jdk-21" />
         <option name="modules">
