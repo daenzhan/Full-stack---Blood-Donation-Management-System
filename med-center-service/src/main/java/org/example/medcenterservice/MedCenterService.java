@@ -14,7 +14,7 @@ public class MedCenterService {
         this.medCenterRepository = medCenterRepository;
     }
 
-    public MedCenter create(MedCenter m_c) {
+    public MedCenter save(MedCenter m_c) {
         return medCenterRepository.save(m_c);
     }
 

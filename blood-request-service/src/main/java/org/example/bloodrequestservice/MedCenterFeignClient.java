@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "med-center-server")
+@FeignClient(name = "med-center-service")
 public interface MedCenterFeignClient {
 
     @GetMapping("/medcenters/client/{medcenter_id}")

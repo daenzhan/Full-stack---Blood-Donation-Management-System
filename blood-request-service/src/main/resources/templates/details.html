@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Request Details</title>
+</head>
+<body>
+<h2>Blood Request Details</h2>
+
+<p><strong>ID:</strong> <span th:text="${request.blood_request_id}"></span></p>
+<p><strong>Component Type:</strong> <span th:text="${request.component_type}"></span></p>
+<p><strong>Blood Group:</strong> <span th:text="${request.blood_group}"></span></p>
+<p><strong>Rhesus Factor:</strong> <span th:text="${request.rhesus_factor}"></span></p>
+<p><strong>Volume:</strong> <span th:text="${request.volume}"></span></p>
+<p><strong>Deadline:</strong> <span th:text="${request.deadline}"></span></p>
+<p><strong>Comments:</strong> <span th:text="${request.comments}"></span></p>
+<p><strong>Medcenter ID:</strong> <span th:text="${request.medcenter_id}"></span></p>
+
+<a th:href="@{/requests}">Back to list</a>
+</body>
+</html>
