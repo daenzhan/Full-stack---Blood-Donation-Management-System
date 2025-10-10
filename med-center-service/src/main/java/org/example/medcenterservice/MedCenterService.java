@@ -9,11 +9,9 @@ import java.util.Optional;
 public class MedCenterService {
 
     private final MedCenterRepository medCenterRepository;
-    private final UserFeignClient user_client;
 
-    public MedCenterService(MedCenterRepository medCenterRepository, UserFeignClient user_client) {
+    public MedCenterService(MedCenterRepository medCenterRepository) {
         this.medCenterRepository = medCenterRepository;
-        this.user_client = user_client;
     }
 
     public MedCenter create(MedCenter m_c) {
