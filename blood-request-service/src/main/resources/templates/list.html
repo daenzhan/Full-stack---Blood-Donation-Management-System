@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>BloodConnect</title>
+  <style>
+    .filter-form {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+    .filter-form input, .filter-form select {
+      margin: 5px;
+      padding: 5px;
+    }
+    .filter-form button {
+      margin-left: 10px;
+      padding: 6px 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    .filter-info {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #e9f7fe;
+      border-radius: 3px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+<h2>All requests</h2>
+
+<!-- Показываем активные фильтры -->
+<div class="filter-info" th:if="${bloodGroup != null and bloodGroup != '' or
+                                 rheusFactor != null and rheusFactor != '' or
+                                 componentType != null and componentType != '' or
+                                 medcenterName != null and medcenterName != ''}">
+  <strong>Active filters:</strong>
+  <span th:if="${bloodGroup != null and bloodGroup != ''}">Blood Group: <strong th:text="${bloodGroup}"></strong> </span>
+  <span th:if="${rheusFactor != null and rheusFactor != ''}">Rhesus Factor: <strong th:text="${rheusFactor}"></strong> </span>
+  <span th:if="${componentType != null and componentType != ''}">Component Type: <strong th:text="${componentType}"></strong> </span>
+  <span th:if="${medcenterName != null and medcenterName != ''}">Medcenter: <strong th:text="${medcenterName}"></strong> </span>
+</div>
+
+<div class="filter-form">
+  <form th:action="@{/requests}" method="get">
+    <label>Blood Group:
+      <select name="bloodGroup">
+        <option value="">All</option>
+        <option value="A" th:selected="${bloodGroup == 'A'}">A</option>
+        <option value="B" th:selected="${bloodGroup == 'B'}">B</option>
+        <option value="AB" th:selected="${bloodGroup == 'AB'}">AB</option>
+        <option value="O" th:selected="${bloodGroup == 'O'}">O</option>
+      </select>
+    </label>
+
+    <label>Rhesus Factor:
+      <select name="rheusFactor">
+        <option value="">All</option>
+        <option value="+" th:selected="${rheusFactor == '+'}">+</option>
+        <option value="-" th:selected="${rheusFactor == '-'}">-</option>
+      </select>
+    </label>
+
+    <label>Component Type:
+      <select name="componentType">
+        <option value="">All</option>
+        <option value="Whole Blood" th:selected="${componentType == 'Whole Blood'}">Whole Blood</option>
+        <option value="Plasma" th:selected="${componentType == 'Plasma'}">Plasma</option>
+        <option value="Erythrocyte(RBC)" th:selected="${componentType == 'Erythrocyte(RBC)'}">Erythrocyte(RBC)</option>
+        <option value="Leukocytes (WBC)" th:selected="${componentType == 'Leukocytes (WBC)'}">Leukocytes (WBC)</option>
+        <option value="Platelets (PLT)" th:selected="${componentType == 'Platelets (PLT)'}">Platelets (PLT)</option>
+      </select>
+    </label>
+
+    <label>Med Center Name:
+      <input type="text" name="medcenterName" th:value="${medcenterName}" placeholder="Search by medcenter name...">
+    </label>
+
+    <button type="submit">Apply Filters</button>
+    <a th:href="@{/requests}"><button type="button">Clear All</button></a>
+  </form>
+</div>
+
+<a th:href="@{/requests/new}">new request</a>
+
+<div th:if="${not requests.empty}">
+  <table border="1">
+    <tr>
+      <th>ID</th>
+      <th>Component Type</th>
+      <th>Blood Group</th>
+      <th>Rhesus Factor</th>
+      <th>Volume</th>
+      <th>Comment</th>
+      <th>Deadline</th>
+      <th>Medcenter</th>
+      <th>Actions</th>
+    </tr>
+
+    <tr th:each="req : ${requests}">
+      <td th:text="${req.blood_request_id}"></td>
+      <td th:text="${req.component_type}"></td>
+      <td th:text="${req.blood_group}"></td>
+      <td th:text="${req.rhesus_factor}"></td>
+      <td th:text="${req.volume}"></td>
+      <td th:text="${req.comments}"></td>
+      <td th:text="${req.deadline}"></td>
+      <td>
+        <span th:text="${medcenterNames[req.medcenter_id] != null ? medcenterNames[req.medcenter_id] : 'Unknown'}"></span>
+        <br/>
+        <small style="color: #666;">ID: <span th:text="${req.medcenter_id}"></span></small>
+      </td>
+      <td>
+        <a th:href="@{'/requests/' + ${req.blood_request_id}}">View</a> |
+        <a th:href="@{'/requests/' + ${req.blood_request_id} + '/edit'}">Edit</a> |
+        <form th:action="@{'/requests/' + ${req.blood_request_id} + '/delete'}" method="post" style="display:inline">
+          <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div th:if="${requests.empty}" class="empty-state">
+  <p>No requests found matching your criteria.</p>
+  <p><a th:href="@{/requests}">Show all requests</a></p>
+</div>
+</body>
+</html>
