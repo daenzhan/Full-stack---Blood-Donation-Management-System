@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/db_blood_donation
     username: postgres
-    password: nrHwjxgC
+    password: Qt4076042
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -14,6 +14,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
+jwt:
+  secret: "mySuperSecureJWTSecretKeyForBloodDonationSystem2024WithMoreThan64CharactersToEnsure512bitSecurity"
+  expiration: 86400000
 
 server:
   port: 8081
