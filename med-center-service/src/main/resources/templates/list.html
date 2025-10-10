@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>BloodConnect</title>
+</head>
+<body>
+<h2>MedCenters</h2>
+
+<a th:href="@{/medcenters/new}">Create</a><br/><br/>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Phone</th>
+        <th>Specialization</th>
+        <th>License</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="medCenter : ${medCenters}">
+        <td th:text="${medCenter.med_center_id}"></td>
+        <td th:text="${medCenter.name}"></td>
+        <td th:text="${medCenter.location}"></td>
+        <td th:text="${medCenter.phone}"></td>
+        <td th:text="${medCenter.specialization}"></td>
+        <td>
+            <a th:if="${medCenter.license_file != null}"
+               th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license'}">
+                Просмотреть лицензию
+            </a>
+            <span th:if="${medCenter.license_file == null}">Нет файла</span>
+        </td>
+        <td>
+            <a th:href="@{'/medcenters/' + ${medCenter.med_center_id}}">View</a> |
+            <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/edit'}">Edit</a> |
+            <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/delete'}"
+               onclick="return confirm('Are you sure you want to delete this med center?')">Delete</a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
