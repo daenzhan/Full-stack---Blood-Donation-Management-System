@@ -1,0 +1,161 @@
+package org.example.bloodrequestservice;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/requests")
+public class BloodRequestController {
+
+    private final BloodRequestService service;
+
+    public BloodRequestController(BloodRequestService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public String list_requests(
+            @RequestParam(required = false) String bloodGroup,
+            @RequestParam(required = false) String rheusFactor,
+            @RequestParam(required = false) String componentType,
+            @RequestParam(required = false) String medcenterName,
+            Model model) {
+
+        List<BloodRequest> requests;
+
+        // Проверяем, есть ли хотя бы один непустой параметр фильтрации
+        boolean hasActiveFilters = hasActiveFilters(bloodGroup, rheusFactor, componentType, medcenterName);
+
+        if (hasActiveFilters) {
+            requests = service.search_and_filter(bloodGroup, rheusFactor, componentType, medcenterName);
+        } else {
+            requests = service.get_all_requests();
+        }
+
+        // Создаем Map с названиями медцентров
+        Map<Long, String> medcenterNames = new HashMap<>();
+        for (BloodRequest req : requests) {
+            if (req.getMedcenter_id() != null && !medcenterNames.containsKey(req.getMedcenter_id())) {
+                medcenterNames.put(req.getMedcenter_id(), service.getMedCenterName(req.getMedcenter_id()));
+            }
+        }
+
+        model.addAttribute("requests", requests);
+        model.addAttribute("medcenterNames", medcenterNames);
+        model.addAttribute("bloodGroup", bloodGroup);
+        model.addAttribute("rheusFactor", rheusFactor);
+        model.addAttribute("componentType", componentType);
+        model.addAttribute("medcenterName", medcenterName);
+
+        return "list";
+    }
+
+    // Вспомогательный метод для проверки активных фильтров
+    private boolean hasActiveFilters(String bloodGroup, String rheusFactor,
+                                     String componentType, String medcenterName) {
+        return (bloodGroup != null && !bloodGroup.trim().isEmpty()) ||
+                (rheusFactor != null && !rheusFactor.trim().isEmpty()) ||
+                (componentType != null && !componentType.trim().isEmpty()) ||
+                (medcenterName != null && !medcenterName.trim().isEmpty());
+    }
+
+    @GetMapping("/new")
+    public String create_request(Model model) {
+        model.addAttribute("bloodRequest", new BloodRequest());
+        return "form";
+    }
+
+    @PostMapping("/save")
+    public String save_request(@ModelAttribute BloodRequest blood_request) {
+        service.save_request(blood_request);
+        return "redirect:/requests";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit_request(@PathVariable Long id, Model model) {
+        var opt = service.get_request_by_id(id);
+        if (opt.isEmpty()) {
+            return "redirect:/requests";
+        }
+
+        BloodRequest bloodRequest = opt.get();
+        String medcenterName = service.getMedCenterName(bloodRequest.getMedcenter_id());
+
+        model.addAttribute("bloodRequest", bloodRequest);
+        model.addAttribute("medcenterName", medcenterName);
+
+        return "edit-form";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String update_request(@PathVariable Long id, @ModelAttribute BloodRequest bloodRequest) {
+        var opt = service.get_request_by_id(id);
+        if (opt.isEmpty()) {
+            return "redirect:/requests";
+        }
+
+        BloodRequest existingRequest = opt.get();
+
+        // Обновляем поля существующей заявки
+        existingRequest.setComponent_type(bloodRequest.getComponent_type());
+        existingRequest.setBlood_group(bloodRequest.getBlood_group());
+        existingRequest.setRhesus_factor(bloodRequest.getRhesus_factor());
+        existingRequest.setVolume(bloodRequest.getVolume());
+        existingRequest.setDeadline(bloodRequest.getDeadline());
+        existingRequest.setComments(bloodRequest.getComments());
+        // Medcenter_id не обновляем - он остается прежним
+
+        service.save_request(existingRequest);
+        return "redirect:/requests";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete_request(@PathVariable Long id) {
+        service.delete_request(id);
+        return "redirect:/requests";
+    }
+
+    @GetMapping("/{id}")
+    public String view_details(@PathVariable Long id, Model model) {
+        var opt = service.get_request_by_id(id);
+        if (opt.isEmpty()) {
+            return "redirect:/requests";
+        }
+        BloodRequest request = opt.get();
+        model.addAttribute("request", request);
+        model.addAttribute("medcenterName", service.getMedCenterName(request.getMedcenter_id()));
+        return "details";
+    }
+
+    @GetMapping("/medcenter/{medcenter_id}")
+    public String list_by_medcenter(
+            @PathVariable Long medcenter_id,
+            @RequestParam(required = false) String bloodGroup,
+            @RequestParam(required = false) String rheusFactor,
+            @RequestParam(required = false) String componentType,
+            Model model) {
+
+        List<BloodRequest> requests;
+
+        if (bloodGroup != null || rheusFactor != null || componentType != null) {
+            requests = service.search_by_medcenter(
+                    medcenter_id, bloodGroup, rheusFactor, componentType);
+        } else {
+            requests = service.get_requests_by_medcenter(medcenter_id);
+        }
+
+        model.addAttribute("requests", requests);
+        model.addAttribute("medcenter_id", medcenter_id);
+        model.addAttribute("medcenterName", service.getMedCenterName(medcenter_id));
+        model.addAttribute("bloodGroup", bloodGroup);
+        model.addAttribute("rheusFactor", rheusFactor);
+        model.addAttribute("componentType", componentType);
+
+        return "list-by-medcenter";
+    }
+}
