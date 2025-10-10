@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>BloodConnect</title>
+</head>
+<body>
+<h2>Edit</h2>
+
+<form th:action="@{'/medcenters/' + ${medCenter.med_center_id} + '/edit'}"
+      th:object="${medCenter}" method="post" enctype="multipart/form-data">
+  <input type="hidden" th:field="*{med_center_id}"/>
+
+  <label>Name:</label>
+  <input type="text" th:field="*{name}" required/><br/><br/>
+
+  <label>Location:</label>
+  <input type="text" th:field="*{location}" required/><br/><br/>
+
+  <label>Phone:</label>
+  <input type="text" th:field="*{phone}" required/><br/><br/>
+
+  <label>Specialization:</label>
+  <input type="text" th:field="*{specialization}" required/><br/><br/>
+
+  <label>User ID:</label>
+  <input type="number" th:field="*{user_id}" required/><br/><br/>
+
+  <div th:if="${medCenter.license_file != null}">
+    <label>Current License File:</label>
+    <a th:href="@{'/medcenters/download/' + ${medCenter.license_file}}" target="_blank">
+      View Current File
+    </a><br/><br/>
+  </div>
+
+  <label>License:</label>
+  <input type="file" name="license_file" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"/><br/><br/>
+
+  <button type="submit">Update</button>
+</form>
+
+<a th:href="@{/medcenters}">Back to list</a>
+</body>
+</html>
