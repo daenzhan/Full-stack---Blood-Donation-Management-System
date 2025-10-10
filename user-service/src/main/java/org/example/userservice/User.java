@@ -19,7 +19,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private String role; // DONOR, MED_CENTER, ADMIN
+    private String role;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }
