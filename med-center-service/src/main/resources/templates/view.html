@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MedCenter Details</title>
+</head>
+<body>
+<h2>MedCenter Details</h2>
+
+<div>
+    <strong>ID:</strong> <span th:text="${medCenter.med_center_id}"></span>
+</div>
+<div>
+    <strong>Name:</strong> <span th:text="${medCenter.name}"></span>
+</div>
+<div>
+    <strong>Location:</strong> <span th:text="${medCenter.location}"></span>
+</div>
+<div>
+    <strong>Phone:</strong> <span th:text="${medCenter.phone}"></span>
+</div>
+<div>
+    <strong>Specialization:</strong> <span th:text="${medCenter.specialization}"></span>
+</div>
+<div>
+    <strong>User ID:</strong> <span th:text="${medCenter.user_id}"></span>
+</div>
+<div>
+    <strong>License File:</strong>
+    <a th:if="${medCenter.license_file != null}"
+       th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license'}">
+        Просмотреть лицензию
+    </a>
+    <span th:if="${medCenter.license_file == null}">No file uploaded</span>
+</div>
+
+<br/>
+<a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/edit'}">Edit</a> |
+<a th:href="@{/medcenters}">Back to list</a>
+</body>
+</html>
