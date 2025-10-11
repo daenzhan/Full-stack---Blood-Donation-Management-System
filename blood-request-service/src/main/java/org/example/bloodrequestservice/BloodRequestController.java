@@ -24,6 +24,7 @@ public class BloodRequestController {
             @RequestParam(required = false) String rheusFactor,
             @RequestParam(required = false) String componentType,
             @RequestParam(required = false) String medcenterName,
+            @RequestParam(required = false) String sort,
             Model model) {
 
         List<BloodRequest> requests;
@@ -32,9 +33,13 @@ public class BloodRequestController {
         boolean hasActiveFilters = hasActiveFilters(bloodGroup, rheusFactor, componentType, medcenterName);
 
         if (hasActiveFilters) {
-            requests = service.search_and_filter(bloodGroup, rheusFactor, componentType, medcenterName);
+            requests = service.search_and_filter_with_sort(bloodGroup, rheusFactor, componentType, medcenterName, sort);
         } else {
-            requests = service.get_all_requests();
+            if (sort != null && !sort.trim().isEmpty()) {
+                requests = service.get_all_requests_sorted(sort);
+            } else {
+                requests = service.get_all_requests();
+            }
         }
 
         // Создаем Map с названиями медцентров
@@ -51,7 +56,15 @@ public class BloodRequestController {
         model.addAttribute("rheusFactor", rheusFactor);
         model.addAttribute("componentType", componentType);
         model.addAttribute("medcenterName", medcenterName);
-
+        model.addAttribute("sort", sort);
+        model.addAttribute("sortOptions", List.of(
+                "deadline_asc: По сроку (сначала ближайшие)",
+                "deadline_desc: По сроку (сначала дальние)",
+                "bloodgroup_asc: По группе крови (А-Я)",
+                "bloodgroup_desc: По группе крови (Я-А)",
+                "volume_asc: По объему (по возрастанию)",
+                "volume_desc: По объему (по убыванию)"
+        ));
         return "list";
     }
 
@@ -138,15 +151,22 @@ public class BloodRequestController {
             @RequestParam(required = false) String bloodGroup,
             @RequestParam(required = false) String rheusFactor,
             @RequestParam(required = false) String componentType,
+            @RequestParam(required = false) String sort,
             Model model) {
 
         List<BloodRequest> requests;
 
         if (bloodGroup != null || rheusFactor != null || componentType != null) {
-            requests = service.search_by_medcenter(
-                    medcenter_id, bloodGroup, rheusFactor, componentType);
+            requests = service.search_by_medcenter_with_sort(
+                    medcenter_id, bloodGroup, rheusFactor, componentType, sort);
         } else {
-            requests = service.get_requests_by_medcenter(medcenter_id);
+            if (sort != null && !sort.trim().isEmpty()) {
+                // Для случаев когда есть только сортировка без фильтров
+                requests = service.search_by_medcenter_with_sort(
+                        medcenter_id, null, null, null, sort);
+            } else {
+                requests = service.get_requests_by_medcenter(medcenter_id);
+            }
         }
 
         model.addAttribute("requests", requests);
@@ -155,7 +175,16 @@ public class BloodRequestController {
         model.addAttribute("bloodGroup", bloodGroup);
         model.addAttribute("rheusFactor", rheusFactor);
         model.addAttribute("componentType", componentType);
-
+        model.addAttribute("sort", sort);
+        model.addAttribute("sortOptions", List.of(
+                "deadline_asc: По сроку (сначала ближайшие)",
+                "deadline_desc: По сроку (сначала дальние)",
+                "bloodgroup_asc: По группе крови (А-Я)",
+                "bloodgroup_desc: По группе крови (Я-А)",
+                "volume_asc: По объему (по возрастанию)",
+                "volume_desc: По объему (по убыванию)"
+        ));
         return "list-by-medcenter";
     }
+
 }

@@ -20,6 +20,12 @@ public class BloodRequestService {
         return repository.findAll();
     }
 
+    // Новый метод с поддержкой сортировки
+    public List<BloodRequest> get_all_requests_sorted(String sort) {
+        String normalizedSort = normalizeSortParameter(sort);
+        return repository.findAllWithSort(normalizedSort);
+    }
+
     public Optional<BloodRequest> get_request_by_id(Long id) {
         return repository.findById(id);
     }
@@ -38,12 +44,19 @@ public class BloodRequestService {
 
     public List<BloodRequest> search_and_filter(String bloodGroup, String rheusFactor,
                                                 String componentType, String medcenterName) {
+        return search_and_filter_with_sort(bloodGroup, rheusFactor, componentType, medcenterName, null);
+    }
+
+    // Новый метод с поддержкой сортировки
+    public List<BloodRequest> search_and_filter_with_sort(String bloodGroup, String rheusFactor,
+                                                          String componentType, String medcenterName, String sort) {
 
         // Нормализуем параметры - преобразуем пустые строки в null
         String normalizedBloodGroup = normalizeParameter(bloodGroup);
         String normalizedRheusFactor = normalizeParameter(rheusFactor);
         String normalizedComponentType = normalizeParameter(componentType);
         String normalizedMedcenterName = normalizeParameter(medcenterName);
+        String normalizedSort = normalizeSortParameter(sort);
 
         List<Long> medcenterIds = null;
 
@@ -65,20 +78,27 @@ public class BloodRequestService {
             }
         }
 
-        // Используем один запрос с всеми фильтрами
-        return repository.searchAndFilter(normalizedBloodGroup, normalizedRheusFactor,
-                normalizedComponentType, medcenterIds);
+        // Используем один запрос с всеми фильтрами и сортировкой
+        return repository.searchAndFilterWithSort(normalizedBloodGroup, normalizedRheusFactor,
+                normalizedComponentType, medcenterIds, normalizedSort);
     }
 
     public List<BloodRequest> search_by_medcenter(Long medcenterId, String bloodGroup,
                                                   String rheusFactor, String componentType) {
+        return search_by_medcenter_with_sort(medcenterId, bloodGroup, rheusFactor, componentType, null);
+    }
+
+    // Новый метод с поддержкой сортировки для медцентра
+    public List<BloodRequest> search_by_medcenter_with_sort(Long medcenterId, String bloodGroup,
+                                                            String rheusFactor, String componentType, String sort) {
         // Нормализуем параметры для этого метода тоже
         String normalizedBloodGroup = normalizeParameter(bloodGroup);
         String normalizedRheusFactor = normalizeParameter(rheusFactor);
         String normalizedComponentType = normalizeParameter(componentType);
+        String normalizedSort = normalizeSortParameter(sort);
 
-        return repository.searchByMedcenter(medcenterId, normalizedBloodGroup,
-                normalizedRheusFactor, normalizedComponentType);
+        return repository.searchByMedcenterWithSort(medcenterId, normalizedBloodGroup,
+                normalizedRheusFactor, normalizedComponentType, normalizedSort);
     }
 
     // Вспомогательный метод для нормализации параметров
@@ -87,6 +107,28 @@ public class BloodRequestService {
             return null;
         }
         return param.trim();
+    }
+
+    // Вспомогательный метод для нормализации параметра сортировки
+    private String normalizeSortParameter(String sort) {
+        if (sort == null || sort.trim().isEmpty()) {
+            return "deadline_asc"; // значение по умолчанию
+        }
+
+        String normalizedSort = sort.trim().toLowerCase();
+
+        // Проверяем, что передан корректный параметр сортировки
+        List<String> validSortOptions = List.of(
+                "deadline_asc", "deadline_desc",
+                "bloodgroup_asc", "bloodgroup_desc",
+                "volume_asc", "volume_desc"
+        );
+
+        if (validSortOptions.contains(normalizedSort)) {
+            return normalizedSort;
+        } else {
+            return "deadline_asc"; // значение по умолчанию при некорректном параметре
+        }
     }
 
     // Вспомогательный метод для получения имени медцентра
@@ -103,4 +145,5 @@ public class BloodRequestService {
             return "Unknown (ID: " + medcenterId + ")";
         }
     }
+
 }

@@ -27,6 +27,22 @@
     .gradient-bg {
       background: linear-gradient(135deg, #dc3545, #ff6b7a);
     }
+    .sort-dropdown {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    .sort-dropdown:focus {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    .sort-badge {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body style="background: linear-gradient(135deg, #f8f9fa, #ffe6e9); min-height: 100vh;">
@@ -58,72 +74,123 @@
       </div>
     </div>
     <div class="card-body">
-      <!-- Active Filters Info -->
+      <!-- Active Filters & Sort Info -->
       <div th:if="${bloodGroup != null and bloodGroup != '' or
                          rheusFactor != null and rheusFactor != '' or
                          componentType != null and componentType != '' or
-                         medcenterName != null and medcenterName != ''}"
-           class="alert alert-info">
-        <strong>Active filters:</strong>
-        <span th:if="${bloodGroup != null and bloodGroup != ''}" class="badge bg-primary me-1">Blood Group: <span th:text="${bloodGroup}"></span></span>
-        <span th:if="${rheusFactor != null and rheusFactor != ''}" class="badge bg-primary me-1">Rhesus Factor: <span th:text="${rheusFactor}"></span></span>
-        <span th:if="${componentType != null and componentType != ''}" class="badge bg-primary me-1">Component Type: <span th:text="${componentType}"></span></span>
-        <span th:if="${medcenterName != null and medcenterName != ''}" class="badge bg-primary me-1">Medcenter: <span th:text="${medcenterName}"></span></span>
+                         medcenterName != null and medcenterName != '' or
+                         sort != null and sort != ''}"
+           class="alert alert-info d-flex justify-content-between align-items-center">
+        <div>
+          <strong>Active filters:</strong>
+          <span th:if="${bloodGroup != null and bloodGroup != ''}" class="badge bg-primary me-1">Blood Group: <span th:text="${bloodGroup}"></span></span>
+          <span th:if="${rheusFactor != null and rheusFactor != ''}" class="badge bg-primary me-1">Rhesus Factor: <span th:text="${rheusFactor}"></span></span>
+          <span th:if="${componentType != null and componentType != ''}" class="badge bg-primary me-1">Component Type: <span th:text="${componentType}"></span></span>
+          <span th:if="${medcenterName != null and medcenterName != ''}" class="badge bg-primary me-1">Medcenter: <span th:text="${medcenterName}"></span></span>
+          <span th:if="${sort != null and sort != ''}" class="sort-badge me-1">
+            <i class="fas fa-sort me-1"></i>
+            <span th:text="${#strings.substringAfter(sortOptions.?[#strings.startsWith(., sort)].![#strings.substringAfter(., ':')], ':')} ?: 'Sorted'"></span>
+          </span>
+        </div>
+        <a th:href="@{/requests}" class="btn btn-sm btn-outline-info">
+          <i class="fas fa-times me-1"></i>Clear All
+        </a>
       </div>
 
-      <!-- Filter Form -->
-      <div class="card mb-4 border-0" style="background: #f8f9fa;">
-        <div class="card-body">
-          <h5 class="card-title mb-3">
-            <i class="fas fa-filter me-2 text-danger"></i>Filter Requests
-          </h5>
-          <form th:action="@{/requests}" method="get" class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label fw-bold">Blood Group</label>
-              <select name="bloodGroup" class="form-select">
-                <option value="">All</option>
-                <option value="A" th:selected="${bloodGroup == 'A'}">🅰️ Type A</option>
-                <option value="B" th:selected="${bloodGroup == 'B'}">🅱️ Type B</option>
-                <option value="AB" th:selected="${bloodGroup == 'AB'}">🆎 Type AB</option>
-                <option value="O" th:selected="${bloodGroup == 'O'}">🅾️ Type O</option>
-              </select>
-            </div>
+      <!-- Filter and Sort Section -->
+      <div class="row mb-4">
+        <!-- Filter Form -->
+        <div class="col-md-8">
+          <div class="card border-0" style="background: #f8f9fa;">
+            <div class="card-body">
+              <h5 class="card-title mb-3">
+                <i class="fas fa-filter me-2 text-danger"></i>Filter Requests
+              </h5>
+              <form th:action="@{/requests}" method="get" class="row g-3">
+                <input type="hidden" name="sort" th:value="${sort}">
 
-            <div class="col-md-3">
-              <label class="form-label fw-bold">Rhesus Factor</label>
-              <select name="rheusFactor" class="form-select">
-                <option value="">All</option>
-                <option value="+" th:selected="${rheusFactor == '+'}">➕ Positive</option>
-                <option value="-" th:selected="${rheusFactor == '-'}">➖ Negative</option>
-              </select>
-            </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Blood Group</label>
+                  <select name="bloodGroup" class="form-select">
+                    <option value="">All</option>
+                    <option value="A" th:selected="${bloodGroup == 'A'}">🅰️ Type A</option>
+                    <option value="B" th:selected="${bloodGroup == 'B'}">🅱️ Type B</option>
+                    <option value="AB" th:selected="${bloodGroup == 'AB'}">🆎 Type AB</option>
+                    <option value="O" th:selected="${bloodGroup == 'O'}">🅾️ Type O</option>
+                  </select>
+                </div>
 
-            <div class="col-md-3">
-              <label class="form-label fw-bold">Component Type</label>
-              <select name="componentType" class="form-select">
-                <option value="">All</option>
-                <option value="Whole Blood" th:selected="${componentType == 'Whole Blood'}">💉 Whole Blood</option>
-                <option value="Plasma" th:selected="${componentType == 'Plasma'}">🩸 Plasma</option>
-                <option value="Erythrocyte(RBC)" th:selected="${componentType == 'Erythrocyte(RBC)'}">🔴 Erythrocyte</option>
-                <option value="Leukocytes (WBC)" th:selected="${componentType == 'Leukocytes (WBC)'}">⚪ Leukocytes</option>
-                <option value="Platelets (PLT)" th:selected="${componentType == 'Platelets (PLT)'}">🟡 Platelets</option>
-              </select>
-            </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Rhesus Factor</label>
+                  <select name="rheusFactor" class="form-select">
+                    <option value="">All</option>
+                    <option value="+" th:selected="${rheusFactor == '+'}">➕ Positive</option>
+                    <option value="-" th:selected="${rheusFactor == '-'}">➖ Negative</option>
+                  </select>
+                </div>
 
-            <div class="col-md-3">
-              <label class="form-label fw-bold">Med Center</label>
-              <input type="text" name="medcenterName" class="form-control" th:value="${medcenterName}" placeholder="Search by name...">
-            </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Component Type</label>
+                  <select name="componentType" class="form-select">
+                    <option value="">All</option>
+                    <option value="Whole Blood" th:selected="${componentType == 'Whole Blood'}">💉 Whole Blood</option>
+                    <option value="Plasma" th:selected="${componentType == 'Plasma'}">🩸 Plasma</option>
+                    <option value="Erythrocyte(RBC)" th:selected="${componentType == 'Erythrocyte(RBC)'}">🔴 Erythrocyte</option>
+                    <option value="Leukocytes (WBC)" th:selected="${componentType == 'Leukocytes (WBC)'}">⚪ Leukocytes</option>
+                    <option value="Platelets (PLT)" th:selected="${componentType == 'Platelets (PLT)'}">🟡 Platelets</option>
+                  </select>
+                </div>
 
-            <div class="col-12">
-              <button type="submit" class="btn btn-danger me-2">
-                <i class="fas fa-filter me-1"></i>Apply Filters
-              </button>
-              <a th:href="@{/requests}" class="btn btn-outline-secondary">
-                <i class="fas fa-times me-1"></i>Clear All
-              </a>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Med Center</label>
+                  <input type="text" name="medcenterName" class="form-control" th:value="${medcenterName}" placeholder="Search by name...">
+                </div>
+
+                <div class="col-12">
+                  <button type="submit" class="btn btn-danger me-2">
+                    <i class="fas fa-filter me-1"></i>Apply Filters
+                  </button>
+                  <a th:href="@{/requests}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Clear All
+                  </a>
+                </div>
+              </form>
             </div>
-          </form>
+          </div>
+        </div>
+
+        <!-- Sort Section -->
+        <div class="col-md-4">
+          <div class="card border-0" style="background: #f8f9fa;">
+            <div class="card-body">
+              <h5 class="card-title mb-3">
+                <i class="fas fa-sort me-2 text-primary"></i>Sort Results
+              </h5>
+              <form th:action="@{/requests}" method="get" class="sort-form">
+                <input type="hidden" name="bloodGroup" th:value="${bloodGroup}">
+                <input type="hidden" name="rheusFactor" th:value="${rheusFactor}">
+                <input type="hidden" name="componentType" th:value="${componentType}">
+                <input type="hidden" name="medcenterName" th:value="${medcenterName}">
+
+                <div class="mb-3">
+                  <select name="sort" class="form-select sort-dropdown" onchange="this.form.submit()">
+                    <option value="">Default Sorting</option>
+                    <option value="deadline_asc" th:selected="${sort == 'deadline_asc'}">📅 Deadline (Nearest First)</option>
+                    <option value="deadline_desc" th:selected="${sort == 'deadline_desc'}">📅 Deadline (Farthest First)</option>
+                    <option value="bloodgroup_asc" th:selected="${sort == 'bloodgroup_asc'}">🅰️ Blood Group (A-Z)</option>
+                    <option value="bloodgroup_desc" th:selected="${sort == 'bloodgroup_desc'}">🅱️ Blood Group (Z-A)</option>
+                    <option value="volume_asc" th:selected="${sort == 'volume_asc'}">💧 Volume (Low to High)</option>
+                    <option value="volume_desc" th:selected="${sort == 'volume_desc'}">💧 Volume (High to Low)</option>
+                  </select>
+                </div>
+
+                <div class="form-text">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Sort requests to find what you need faster
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
 
