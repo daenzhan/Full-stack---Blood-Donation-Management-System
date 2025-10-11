@@ -56,9 +56,11 @@
                             <li>Manage blood donations</li>
                             <li>Create blood requests</li>
                         </ul>
-                        <a th:href="@{/med-center/complete-profile(token=${token}, userId=${userId}, role=${role}, email=${email})}"
-                           class="btn btn-danger me-2">Complete Center Profile</a>
-                        <a th:href="@{/med-center/profile(userId=${userId})}" class="btn btn-outline-danger">View Center Profile</a>
+                        <a th:href="@{/donor/complete-profile(token=${token}, userId=${userId}, role=${role}, email=${email})}"
+                           class="btn btn-danger me-2">Dashboard</a>
+                        <a th:href="@{/donor/profile(userId=${userId})}" class="btn btn-outline-danger">View My Profile</a>
+                        class="btn btn-danger me-2">View </a>
+                    </div>
                     </div>
                 </div>
             </div>
