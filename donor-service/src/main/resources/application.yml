@@ -19,6 +19,7 @@ jwt:
 secret: "mySuperSecureJWTSecretKeyForBloodDonationSystem2024WithMoreThan64CharactersToEnsure512bitSecurity"
 expiration: 86400000
 
+
 server:
   port: 8084
 

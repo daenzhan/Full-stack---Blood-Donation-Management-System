@@ -21,7 +21,6 @@
 </nav>
 
 <div class="container mt-5">
-    <!-- Success Message -->
     <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}"></div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
@@ -29,11 +28,11 @@
         <div class="col-12">
             <h1 th:text="'Welcome to ' + ${role} + ' Dashboard'"></h1>
 
-            <!-- Для доноров, у которых еще нет профиля -->
+
             <div th:if="${role == 'DONOR'}" class="mt-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Donor Dashboard</h5>
+                        <h5 class="card-title">Donor </h5>
                         <p class="card-text">Welcome back! You can now:</p>
                         <ul>
                             <li>Complete your donor profile</li>
@@ -42,13 +41,11 @@
                             <li>Track your donation history</li>
                         </ul>
                         <a th:href="@{/donor/complete-profile(token=${token}, userId=${userId}, role=${role}, email=${email})}"
-                           class="btn btn-danger me-2">Complete My Profile</a>
-                        <a th:href="@{/donor/profile(userId=${userId})}" class="btn btn-outline-danger">View My Profile</a>
+                           class="btn btn-danger me-2">View Dashboard</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Для медцентров, у которых еще нет профиля -->
             <div th:if="${role == 'MED_CENTER'}" class="mt-4">
                 <div class="card">
                     <div class="card-body">
