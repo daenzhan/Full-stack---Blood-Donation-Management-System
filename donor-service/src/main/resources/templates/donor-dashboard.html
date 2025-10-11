@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Donor Dashboard - Blood Donation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .dashboard-header { background: linear-gradient(135deg, #dc3545, #e74c3c); color: white; padding: 2rem 0; }
+        .blood-badge { font-size: 1.2rem; padding: 0.4rem 0.8rem; }
+        .stat-card { border-left: 4px solid #dc3545; }
+        .urgent { border-left: 4px solid #dc3545 !important; }
+        .request-card { transition: transform 0.2s; }
+        .request-card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-tint"></i> Blood Donation System
+        </a>
+        <div class="navbar-nav ms-auto">
+            <span class="navbar-text me-3" th:text="'Welcome, ' + ${donor.fullName}"></span>
+            <a th:href="@{'http://localhost:8080/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+               class="btn btn-outline-light btn-sm">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold">Donor Dashboard</h1>
+                <p class="lead mb-0">Help save lives with your blood donations</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <span class="badge bg-light text-danger blood-badge" th:text="${donor.bloodType}"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+        <strong>Success!</strong> <span th:text="${param.success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tint fa-2x text-danger mb-3"></i>
+                    <h5 th:text="${matchingRequests.size()}">0</h5>
+                    <p class="text-muted mb-0">Matching Requests</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-heart fa-2x text-danger mb-3"></i>
+                    <h5>0</h5>
+                    <p class="text-muted mb-0">Donations Made</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar fa-2x text-danger mb-3"></i>
+                    <h5>Eligible</h5>
+                    <p class="text-muted mb-0">Status</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x text-danger mb-3"></i>
+                    <h5>New</h5>
+                    <p class="text-muted mb-0">Donor Level</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-user me-2"></i>My Profile</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> <span th:text="${donor.fullName}"></span></p>
+                    <p><strong>Blood Type:</strong> <span class="badge bg-danger" th:text="${donor.bloodType}"></span></p>
+                    <p><strong>Phone:</strong> <span th:text="${donor.phoneNumber}"></span></p>
+                    <div class="d-grid gap-2">
+                        <a th:href="@{'/donor/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                           class="btn btn-outline-primary">View Full Profile</a>
+                        <a th:href="@{/donor/profile/edit(token=${token}, userId=${userId}, role=${role}, email=${email})}"
+                           class="btn btn-outline-secondary">Edit Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matching Requests -->
+        <div class="col-md-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Matching Blood Requests
+                        <span class="badge bg-light text-danger ms-2" th:text="${matchingRequests.size()}"></span>
+                    </h5>
+                    <a th:href="@{'/donor/request?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                       class="btn btn-light btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${matchingRequests.empty}" class="text-center py-4">
+                        <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                        <h5 class="text-success">No Urgent Requests</h5>
+                        <p class="text-muted">There are currently no blood requests matching your blood type.</p>
+                    </div>
+
+                    <div th:unless="${matchingRequests.empty}">
+                        <div th:each="request : ${matchingRequests}" class="card mb-3 request-card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6 class="card-title" th:text="${request.component_type + ' Needed'}"></h6>
+                                        <p class="card-text mb-1">
+                                            <span class="badge bg-danger"
+                                                  th:text="${request.blood_group + request.rhesus_factor}"></span>
+                                            <span class="ms-2" th:text="'Volume: ' + ${request.volume}"></span>
+                                        </p>
+                                        <p class="card-text mb-1">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Deadline: <span th:text="${#temporals.format(request.deadline, 'dd/MM/yyyy HH:mm')}"></span>
+                                            </small>
+                                        </p>
+                                        <p th:if="${request.comments}" class="card-text mb-0">
+                                            <small th:text="${request.comments}"></small>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <span class="badge bg-warning text-dark">URGENT</span>
+                                        <div class="mt-2">
+                                            <small class="text-muted">Medical Center ID: <span th:text="${request.medcenter_id}"></span></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Features -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-history me-2"></i>Donation History</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Track your blood donation journey and impact.</p>
+                    <a th:href="@{'/donor/donation-history?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                       class="btn btn-success">View History</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-search me-2"></i>Find All Requests</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Search for all blood requests from medical centers.</p>
+                    <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                       class="btn btn-info">Browse All Requests</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
