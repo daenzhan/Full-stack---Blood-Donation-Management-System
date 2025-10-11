@@ -1,15 +1,13 @@
 package org.example.medcenterservice;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class MedCenterService {
-
     private final MedCenterRepository medCenterRepository;
-
     public MedCenterService(MedCenterRepository medCenterRepository) {
         this.medCenterRepository = medCenterRepository;
     }
@@ -43,5 +41,34 @@ public class MedCenterService {
 
     public List<MedCenter> searchByName(String name) {
         return medCenterRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    public MedCenter completeProfile(Long userId, String name, String location, String phone,
+                                     String specialization, String directorName, String email,
+                                     String licenseFilePath) {
+        if (medCenterRepository.existsByUser_id(userId)) {
+            throw new RuntimeException("Medical center profile already exists");
+        }
+
+        MedCenter profile = new MedCenter();
+        profile.setUser_id(userId);
+        profile.setName(name);
+        profile.setLocation(location);
+        profile.setPhone(phone);
+        profile.setSpecialization(specialization);
+        profile.setDirectorName(directorName);
+        profile.setEmail(email);
+        profile.setLicense_file(licenseFilePath);
+
+        return medCenterRepository.save(profile);
+    }
+
+    public MedCenter getProfileByUserId(Long userId) {
+        return medCenterRepository.findByUser_id(userId)
+                .orElseThrow(() -> new RuntimeException("Medical center profile not found"));
+    }
+
+    public boolean existsByUserId(Long userId) {
+        return medCenterRepository.existsByUser_id(userId);
     }
 }

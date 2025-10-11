@@ -2,22 +2,38 @@ package org.example.medcenterservice;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "med_centers")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class MedCenter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "med_center_id")
     private Long med_center_id;
-
+    @Column(name = "name", nullable = false)
     private String name;
+    @Column(name = "location", nullable = false)
     private String location;
+    @Column(name = "phone", nullable = false)
     private String phone;
+    @Column(name = "specialization")
     private String specialization;
+    @Column(name = "user_id", unique = true, nullable = false)
     private Long user_id;
+    @Column(name = "license_file")
     private String license_file;
+    @Column(name = "director_name")
+    private String directorName;
+    @Column(name = "email")
+    private String email;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public MedCenter(Long med_center_id, String name, String location, String phone, String specialization, Long user_id, String license_file) {
+    public MedCenter (){}
+
+    public MedCenter(Long med_center_id, String name, String location, String phone, String specialization, Long user_id, String license_file,String directorName, String email) {
         this.med_center_id = med_center_id;
         this.name = name;
         this.location = location;
@@ -25,9 +41,10 @@ public class MedCenter {
         this.specialization = specialization;
         this.user_id = user_id;
         this.license_file=license_file;
+        this.directorName = directorName;
+        this.email = email;
     }
 
-    public MedCenter (){}
 
     public Long getMed_center_id() {
         return med_center_id;
@@ -84,4 +101,16 @@ public class MedCenter {
     public void setLicense_file(String license_file) {
         this.license_file = license_file;
     }
+
+    public String getDirectorName() {return directorName;}
+
+    public void setDirectorName(String directorName) {this.directorName = directorName;}
+
+    public String getEmail() {return email;}
+
+    public void setEmail(String email) {this.email = email;}
+
+    public LocalDateTime getCreatedAt() {return createdAt;}
+
+    public void setCreatedAt(LocalDateTime createdAt) {this.createdAt = createdAt;}
 }

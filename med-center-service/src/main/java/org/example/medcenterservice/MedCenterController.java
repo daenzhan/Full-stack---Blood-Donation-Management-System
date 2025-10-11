@@ -24,7 +24,6 @@ import java.util.UUID;
 public class MedCenterController {
 
     private final MedCenterService medCenterService;
-
     private final String upload_dir = "uploads/licenses/";
 
     private static final long max_file_size = 5 * 1024 * 1024; // 5MB
@@ -33,6 +32,74 @@ public class MedCenterController {
     public MedCenterController(MedCenterService medCenterService) throws IOException {
         this.medCenterService = medCenterService;
         Files.createDirectories(Paths.get(upload_dir));
+    }
+    @GetMapping("/complete-profile")
+    public String showCompleteProfilePage(@RequestParam String token,
+                                          @RequestParam Long userId,
+                                          @RequestParam String role,
+                                          @RequestParam String email,Model model) {
+        try {
+            MedCenter existingProfile = medCenterService.getProfileByUserId(userId);
+            if (existingProfile != null) {
+                return "redirect:http://localhost:8080/home?token=" + token +
+                        "&userId=" + userId + "&role=" + role + "&email=" + email +
+                        "&info=Profile already completed";
+            }
+        } catch (Exception e) {
+        }
+        model.addAttribute("token", token);
+        model.addAttribute("userId", userId);
+        model.addAttribute("role", role);
+        model.addAttribute("email", email);
+
+        return "med-center-complete-profile";
+    }
+
+    @PostMapping("/complete-profile")
+    public String completeProfile(@RequestParam("name") String name,
+                                  @RequestParam("location") String location,
+                                  @RequestParam("phone") String phone,
+                                  @RequestParam("specialization") String specialization,
+                                  @RequestParam("directorName") String directorName,
+                                  @RequestParam("centerEmail") String centerEmail,
+                                  @RequestParam(value = "licenseFile", required = false) MultipartFile licenseFile,
+                                  @RequestParam("token") String token,
+                                  @RequestParam("userId") Long userId,
+                                  @RequestParam("role") String role,
+                                  @RequestParam("userEmail") String userEmail,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("Completing profile for user: " + userId);
+
+            String license_file = null;
+            if (licenseFile != null && !licenseFile.isEmpty()) {
+                String fileError = determine_error_file(licenseFile);
+                if (fileError != null) {
+                    redirectAttributes.addFlashAttribute("error", fileError);
+                    return "redirect:/med-center/complete-profile?token=" + token +
+                            "&userId=" + userId + "&role=" + role + "&email=" + userEmail;
+                }
+                license_file = save_uploaded_file(licenseFile);
+                System.out.println("License file saved: " + license_file);
+            }
+
+            MedCenter profile = medCenterService.completeProfile(
+                    userId, name, location, phone, specialization,
+                    directorName, centerEmail, license_file
+            );
+
+            System.out.println("Medical center profile created with ID: " + profile.getMed_center_id());
+
+            return "redirect:http://localhost:8080/home?token=" + token +
+                    "&userId=" + userId + "&role=" + role + "&email=" + userEmail +
+                    "&success=Medical center profile completed successfully!";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error completing profile: " + e.getMessage());
+            return "redirect:/med-center/complete-profile?token=" + token +
+                    "&userId=" + userId + "&role=" + role + "&email=" + userEmail;
+        }
     }
 
     @GetMapping
