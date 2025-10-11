@@ -46,7 +46,7 @@ public class MedCenterService {
     public MedCenter completeProfile(Long userId, String name, String location, String phone,
                                      String specialization, String directorName, String email,
                                      String licenseFilePath) {
-        if (medCenterRepository.existsByUser_id(userId)) {
+        if (medCenterRepository.existsByUserId(userId)) {
             throw new RuntimeException("Medical center profile already exists");
         }
 
@@ -64,11 +64,11 @@ public class MedCenterService {
     }
 
     public MedCenter getProfileByUserId(Long userId) {
-        return medCenterRepository.findByUser_id(userId)
+        return medCenterRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Medical center profile not found"));
     }
 
     public boolean existsByUserId(Long userId) {
-        return medCenterRepository.existsByUser_id(userId);
+        return medCenterRepository.existsByUserId(userId);
     }
 }

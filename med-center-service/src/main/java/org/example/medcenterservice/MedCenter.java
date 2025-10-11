@@ -21,7 +21,7 @@ public class MedCenter {
     @Column(name = "specialization")
     private String specialization;
     @Column(name = "user_id", unique = true, nullable = false)
-    private Long user_id;
+    private Long userId;
     @Column(name = "license_file")
     private String license_file;
     @Column(name = "director_name")
@@ -33,13 +33,13 @@ public class MedCenter {
 
     public MedCenter (){}
 
-    public MedCenter(Long med_center_id, String name, String location, String phone, String specialization, Long user_id, String license_file,String directorName, String email) {
+    public MedCenter(Long med_center_id, String name, String location, String phone, String specialization, Long userId, String license_file,String directorName, String email) {
         this.med_center_id = med_center_id;
         this.name = name;
         this.location = location;
         this.phone = phone;
         this.specialization = specialization;
-        this.user_id = user_id;
+        this.userId = userId;
         this.license_file=license_file;
         this.directorName = directorName;
         this.email = email;
@@ -87,11 +87,10 @@ public class MedCenter {
     }
 
     public Long getUser_id() {
-        return user_id;
+        return userId;
     }
-
     public void setUser_id(Long user_id) {
-        this.user_id = user_id;
+        this.userId = user_id;
     }
 
     public String getLicense_file() {

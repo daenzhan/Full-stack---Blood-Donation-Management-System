@@ -33,11 +33,12 @@ public class MedCenterController {
         this.medCenterService = medCenterService;
         Files.createDirectories(Paths.get(upload_dir));
     }
+
     @GetMapping("/complete-profile")
     public String showCompleteProfilePage(@RequestParam String token,
                                           @RequestParam Long userId,
                                           @RequestParam String role,
-                                          @RequestParam String email,Model model) {
+                                          @RequestParam String email, Model model) {
         try {
             MedCenter existingProfile = medCenterService.getProfileByUserId(userId);
             if (existingProfile != null) {
@@ -76,7 +77,7 @@ public class MedCenterController {
                 String fileError = determine_error_file(licenseFile);
                 if (fileError != null) {
                     redirectAttributes.addFlashAttribute("error", fileError);
-                    return "redirect:/med-center/complete-profile?token=" + token +
+                    return "redirect:/medcenters/complete-profile?token=" + token + // ИСПРАВИЛ путь
                             "&userId=" + userId + "&role=" + role + "&email=" + userEmail;
                 }
                 license_file = save_uploaded_file(licenseFile);
@@ -97,7 +98,7 @@ public class MedCenterController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error completing profile: " + e.getMessage());
-            return "redirect:/med-center/complete-profile?token=" + token +
+            return "redirect:/medcenters/complete-profile?token=" + token + // ИСПРАВИЛ путь
                     "&userId=" + userId + "&role=" + role + "&email=" + userEmail;
         }
     }

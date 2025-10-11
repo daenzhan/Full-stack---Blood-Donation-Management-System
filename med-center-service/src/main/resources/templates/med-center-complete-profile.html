@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Medical Center Profile - Blood Donation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .required-label::after {
+            content: " *";
+            color: red;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <strong>Blood Donation System</strong> - Medical Center Registration
+        </a>
+        <div class="navbar-text">
+            Completing Profile - Step 2 of 2
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-center">
+                            <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center"
+                                 style="width: 40px; height: 40px;">1</div>
+                            <div class="small mt-1">Basic Info</div>
+                        </div>
+                        <div class="flex-grow-1 mx-3">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                                 style="width: 40px; height: 40px;">2</div>
+                            <div class="small mt-1">Center Details</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">User Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Email:</strong> <span th:text="${email}">user@example.com</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>User ID:</strong> <span th:text="${userId}">123</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Complete Medical Center Information</h4>
+                    <p class="mb-0 small">Please provide details about your medical center</p>
+                </div>
+                <div class="card-body">
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error!</strong> <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error!</strong> <span th:text="${param.error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Success!</strong> <span th:text="${param.success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <form th:action="@{/medcenters/complete-profile}" method="post" enctype="multipart/form-data" id="medCenterForm">
+
+                        <input type="hidden" name="token" th:value="${token}">
+                        <input type="hidden" name="userId" th:value="${userId}">
+                        <input type="hidden" name="role" th:value="${role}">
+                        <input type="hidden" name="userEmail" th:value="${email}">
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Basic Information</h5>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label required-label">Medical Center Name</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                       placeholder="Enter medical center name" required>
+                                <div class="invalid-feedback">
+                                    Please provide a valid medical center name.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="directorName" class="form-label required-label">Director Name</label>
+                                <input type="text" class="form-control" id="directorName" name="directorName"
+                                       placeholder="Enter director's full name" required>
+                                <div class="invalid-feedback">
+                                    Please provide director's name.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Contact Information</h5>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="centerEmail" class="form-label required-label">Center Email</label>
+                                <input type="email" class="form-control" id="centerEmail" name="centerEmail"
+                                       placeholder="medical.center@example.com" required>
+                                <div class="invalid-feedback">
+                                    Please provide a valid email address.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label required-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                       placeholder="+7 (777) 123-4567" required>
+                                <div class="invalid-feedback">
+                                    Please provide a valid phone number.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Location Information</h5>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="location" class="form-label required-label">Full Address</label>
+                                <textarea class="form-control" id="location" name="location" rows="3"
+                                          placeholder="Enter complete address including street, city, and postal code" required></textarea>
+                                <div class="invalid-feedback">
+                                    Please provide the complete address.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Professional Information</h5>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="specialization" class="form-label">Specialization</label>
+                                <select class="form-select" id="specialization" name="specialization">
+                                    <option value="">Select Specialization</option>
+                                    <option value="GENERAL_HOSPITAL">General Hospital</option>
+                                    <option value="BLOOD_BANK">Blood Bank Center</option>
+                                    <option value="CLINIC">Medical Clinic</option>
+                                    <option value="RESEARCH_CENTER">Research Center</option>
+                                    <option value="DIAGNOSTIC_CENTER">Diagnostic Center</option>
+                                    <option value="SPECIALIZED_CLINIC">Specialized Clinic</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                                <div class="form-text">Select the primary specialization of your center</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="licenseFile" class="form-label">Medical License</label>
+                                <input type="file" class="form-control" id="licenseFile" name="licenseFile"
+                                       accept=".pdf,.jpg,.jpeg,.png">
+                                <div class="form-text">
+                                    Upload medical license document (PDF, JPG, PNG). Max size: 5MB.
+                                    <span class="text-muted">Optional but recommended</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a th:href="@{'http://localhost:8080/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                                       class="btn btn-outline-secondary me-md-2">
+                                        <i class="fas fa-home"></i> Back to Home
+                                    </a>
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-check-circle"></i> Complete Registration
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title text-primary">Need Help?</h6>
+                    <p class="card-text small">
+                        If you need assistance completing this form, please contact our support team at
+                        <strong>support@blooddonation.kz</strong> or call <strong>+7 (777) 123-4567</strong>.
+                    </p>
+                    <p class="card-text small text-muted">
+                        All information provided will be kept confidential and used solely for blood donation management purposes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-white mt-5">
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Blood Donation System</h5>
+                <p class="mb-0">Connecting donors with medical centers to save lives.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="mb-0">&copy; 2024 Blood Donation System. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Form Validation Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('medCenterForm');
+
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+
+            // Required field validation
+            const requiredFields = form.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            const fileInput = document.getElementById('licenseFile');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+
+                if (file.size > maxSize) {
+                    isValid = false;
+                    fileInput.classList.add('is-invalid');
+                    alert('File size must be less than 5MB');
+                } else if (!allowedTypes.includes(file.type)) {
+                    isValid = false;
+                    fileInput.classList.add('is-invalid');
+                    alert('Please upload only JPG, PNG, or PDF files');
+                } else {
+                    fileInput.classList.remove('is-invalid');
+                }
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+                alert('Please fill all required fields correctly.');
+            } else {
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.disabled = true;
+            }
+        });
+
+        const inputs = form.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value.trim()) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface MedCenterRepository extends JpaRepository<MedCenter, Long> {
     List<MedCenter> findByNameContainingIgnoreCase(String name);
-    Optional<MedCenter> findByUser_id(@Param("user_id") Long user_id);
-    boolean existsByUser_id(@Param("user_id") Long user_id);
+    Optional<MedCenter> findByUserId(@Param("userId") Long userId);
+    boolean existsByUserId(@Param("userId") Long userId);
 }
