@@ -3,254 +3,311 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blood Requests - LifeSaver Connect</title>
+  <title>BloodConnect</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    .heartbeat {
-      animation: heartbeat 1.5s ease-in-out infinite;
+    :root {
+      --primary-red: #dc3545;
+      --dark-red: #c82333;
+      --light-red: #fff5f5;
+      --border-color: #e9ecef;
+      --text-muted: #6c757d;
     }
-    @keyframes heartbeat {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+
+    body {
+      background-color: #f8f9fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-    .floating-card {
-      border-radius: 20px;
-      border: none;
-      box-shadow: 0 10px 30px rgba(220, 53, 69, 0.1);
-      transition: all 0.3s ease;
+
+    .navbar {
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .floating-card:hover {
-      box-shadow: 0 15px 40px rgba(220, 53, 69, 0.2);
+
+    .card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      background: white;
     }
-    .gradient-bg {
-      background: linear-gradient(135deg, #dc3545, #ff6b7a);
+
+    .card-header {
+      background: white;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem;
     }
-    .sort-dropdown {
-      border: 2px solid #e9ecef;
-      border-radius: 10px;
-      transition: all 0.3s ease;
+
+    .table th {
+      background: var(--light-red);
+      color: var(--primary-red);
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .sort-dropdown:focus {
-      border-color: #dc3545;
-      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+
+    .table td {
+      border-color: var(--border-color);
+      padding: 1rem 0.75rem;
+      vertical-align: middle;
     }
-    .sort-badge {
-      background: linear-gradient(135deg, #28a745, #20c997);
-      color: white;
-      border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 0.8rem;
+
+    .btn {
+      border-radius: 6px;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .btn-primary {
+      background: var(--primary-red);
+      border: 1px solid var(--primary-red);
+    }
+
+    .btn-primary:hover {
+      background: var(--dark-red);
+      border-color: var(--dark-red);
+    }
+
+    .btn-outline-primary {
+      color: var(--primary-red);
+      border: 1px solid var(--primary-red);
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--primary-red);
+      border-color: var(--primary-red);
+    }
+
+    .form-control, .form-select {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-red);
+      box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.35rem 0.65rem;
+      border-radius: 4px;
+    }
+
+    .alert {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: white;
+    }
+
+    .filter-section {
+      background: var(--light-red);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .empty-state {
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .action-buttons .btn {
+      padding: 0.375rem 0.75rem;
+      margin: 0 2px;
+    }
+
+    .btn, .card {
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
     }
   </style>
 </head>
-<body style="background: linear-gradient(135deg, #f8f9fa, #ffe6e9); min-height: 100vh;">
-<nav class="navbar navbar-expand-lg navbar-dark gradient-bg">
+<body>
+<nav class="navbar navbar-expand-lg navbar-white bg-white">
   <div class="container">
-    <a class="navbar-brand fw-bold heartbeat" href="/">
+    <a class="navbar-brand fw-bold text-danger" href="/">
       <i class="fas fa-heartbeat me-2"></i>
-      LifeSaver Connect
+      BloodConnect
     </a>
-    <div class="navbar-nav ms-auto">
-      <a th:href="@{/requests/new}" class="btn btn-light btn-sm">
-        <i class="fas fa-plus me-1"></i>New Request
-      </a>
-    </div>
   </div>
 </nav>
 
-<div class="container mt-5">
-  <div class="card floating-card">
-    <div class="card-header gradient-bg text-white py-4">
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
       <div class="d-flex justify-content-between align-items-center">
-        <h4 class="card-title mb-0">
-          <i class="fas fa-list me-2"></i>
-          Blood Requests
-        </h4>
-        <a th:href="@{/requests/new}" class="btn btn-light btn-sm">
-          <i class="fas fa-plus me-1"></i>Create New Request
+        <div>
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="fas fa-list me-2 text-danger"></i>
+            Blood Requests
+          </h5>
+          <p class="text-muted mb-0 mt-1 small">Manage and track blood donation requests</p>
+        </div>
+        <a th:href="@{/requests/new}" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i>Create Request
         </a>
       </div>
     </div>
-    <div class="card-body">
-      <!-- Active Filters & Sort Info -->
+
+    <div class="card-body p-4">
       <div th:if="${bloodGroup != null and bloodGroup != '' or
-                         rheusFactor != null and rheusFactor != '' or
-                         componentType != null and componentType != '' or
-                         medcenterName != null and medcenterName != '' or
-                         sort != null and sort != ''}"
-           class="alert alert-info d-flex justify-content-between align-items-center">
+                   rheusFactor != null and rheusFactor != '' or
+                   componentType != null and componentType != '' or
+                   medcenterName != null and medcenterName != '' or
+                   sort != null and sort != ''}"
+           class="alert d-flex justify-content-between align-items-center mb-4">
         <div>
-          <strong>Active filters:</strong>
-          <span th:if="${bloodGroup != null and bloodGroup != ''}" class="badge bg-primary me-1">Blood Group: <span th:text="${bloodGroup}"></span></span>
-          <span th:if="${rheusFactor != null and rheusFactor != ''}" class="badge bg-primary me-1">Rhesus Factor: <span th:text="${rheusFactor}"></span></span>
-          <span th:if="${componentType != null and componentType != ''}" class="badge bg-primary me-1">Component Type: <span th:text="${componentType}"></span></span>
-          <span th:if="${medcenterName != null and medcenterName != ''}" class="badge bg-primary me-1">Medcenter: <span th:text="${medcenterName}"></span></span>
-          <span th:if="${sort != null and sort != ''}" class="sort-badge me-1">
-            <i class="fas fa-sort me-1"></i>
-            <span th:text="${#strings.substringAfter(sortOptions.?[#strings.startsWith(., sort)].![#strings.substringAfter(., ':')], ':')} ?: 'Sorted'"></span>
-          </span>
+          <span class="fw-medium">Active filters:</span>
+          <span th:if="${bloodGroup != null and bloodGroup != ''}" class="badge bg-light text-dark border me-2">Blood: <span th:text="${bloodGroup}"></span></span>
+          <span th:if="${rheusFactor != null and rheusFactor != ''}" class="badge bg-light text-dark border me-2">Rhesus: <span th:text="${rheusFactor}"></span></span>
+          <span th:if="${componentType != null and componentType != ''}" class="badge bg-light text-dark border me-2">Component: <span th:text="${componentType}"></span></span>
+          <span th:if="${medcenterName != null and medcenterName != ''}" class="badge bg-light text-dark border me-2">Medcenter: <span th:text="${medcenterName}"></span></span>
         </div>
-        <a th:href="@{/requests}" class="btn btn-sm btn-outline-info">
-          <i class="fas fa-times me-1"></i>Clear All
+        <a th:href="@{/requests}" class="btn btn-sm btn-outline-primary">
+          Clear All
         </a>
       </div>
 
-      <!-- Filter and Sort Section -->
       <div class="row mb-4">
-        <!-- Filter Form -->
         <div class="col-md-8">
-          <div class="card border-0" style="background: #f8f9fa;">
-            <div class="card-body">
-              <h5 class="card-title mb-3">
-                <i class="fas fa-filter me-2 text-danger"></i>Filter Requests
-              </h5>
-              <form th:action="@{/requests}" method="get" class="row g-3">
-                <input type="hidden" name="sort" th:value="${sort}">
+          <div class="filter-section">
+            <h6 class="fw-bold mb-3 text-dark">
+              <i class="fas fa-filter me-2 text-danger"></i>Filter Requests
+            </h6>
+            <form th:action="@{/requests}" method="get" class="row g-3">
+              <input type="hidden" name="sort" th:value="${sort}">
 
-                <div class="col-md-3">
-                  <label class="form-label fw-bold">Blood Group</label>
-                  <select name="bloodGroup" class="form-select">
-                    <option value="">All</option>
-                    <option value="A" th:selected="${bloodGroup == 'A'}">🅰️ Type A</option>
-                    <option value="B" th:selected="${bloodGroup == 'B'}">🅱️ Type B</option>
-                    <option value="AB" th:selected="${bloodGroup == 'AB'}">🆎 Type AB</option>
-                    <option value="O" th:selected="${bloodGroup == 'O'}">🅾️ Type O</option>
-                  </select>
-                </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-medium">Blood Group</label>
+                <select name="bloodGroup" class="form-select">
+                  <option value="">All</option>
+                  <option value="A" th:selected="${bloodGroup == 'A'}">Type A</option>
+                  <option value="B" th:selected="${bloodGroup == 'B'}">Type B</option>
+                  <option value="AB" th:selected="${bloodGroup == 'AB'}">Type AB</option>
+                  <option value="O" th:selected="${bloodGroup == 'O'}">Type O</option>
+                </select>
+              </div>
 
-                <div class="col-md-3">
-                  <label class="form-label fw-bold">Rhesus Factor</label>
-                  <select name="rheusFactor" class="form-select">
-                    <option value="">All</option>
-                    <option value="+" th:selected="${rheusFactor == '+'}">➕ Positive</option>
-                    <option value="-" th:selected="${rheusFactor == '-'}">➖ Negative</option>
-                  </select>
-                </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-medium">Rhesus Factor</label>
+                <select name="rheusFactor" class="form-select">
+                  <option value="">All</option>
+                  <option value="+" th:selected="${rheusFactor == '+'}">Positive</option>
+                  <option value="-" th:selected="${rheusFactor == '-'}">Negative</option>
+                </select>
+              </div>
 
-                <div class="col-md-3">
-                  <label class="form-label fw-bold">Component Type</label>
-                  <select name="componentType" class="form-select">
-                    <option value="">All</option>
-                    <option value="Whole Blood" th:selected="${componentType == 'Whole Blood'}">💉 Whole Blood</option>
-                    <option value="Plasma" th:selected="${componentType == 'Plasma'}">🩸 Plasma</option>
-                    <option value="Erythrocyte(RBC)" th:selected="${componentType == 'Erythrocyte(RBC)'}">🔴 Erythrocyte</option>
-                    <option value="Leukocytes (WBC)" th:selected="${componentType == 'Leukocytes (WBC)'}">⚪ Leukocytes</option>
-                    <option value="Platelets (PLT)" th:selected="${componentType == 'Platelets (PLT)'}">🟡 Platelets</option>
-                  </select>
-                </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-medium">Component Type</label>
+                <select name="componentType" class="form-select">
+                  <option value="">All</option>
+                  <option value="Whole Blood" th:selected="${componentType == 'Whole Blood'}">Whole Blood</option>
+                  <option value="Plasma" th:selected="${componentType == 'Plasma'}">Plasma</option>
+                  <option value="Erythrocyte(RBC)" th:selected="${componentType == 'Erythrocyte(RBC)'}">Erythrocyte</option>
+                  <option value="Leukocytes (WBC)" th:selected="${componentType == 'Leukocytes (WBC)'}">Leukocytes</option>
+                  <option value="Platelets (PLT)" th:selected="${componentType == 'Platelets (PLT)'}">Platelets</option>
+                </select>
+              </div>
 
-                <div class="col-md-3">
-                  <label class="form-label fw-bold">Med Center</label>
-                  <input type="text" name="medcenterName" class="form-control" th:value="${medcenterName}" placeholder="Search by name...">
-                </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-medium">Med Center</label>
+                <input type="text" name="medcenterName" class="form-control" th:value="${medcenterName}" placeholder="Search...">
+              </div>
 
-                <div class="col-12">
-                  <button type="submit" class="btn btn-danger me-2">
-                    <i class="fas fa-filter me-1"></i>Apply Filters
-                  </button>
-                  <a th:href="@{/requests}" class="btn btn-outline-secondary">
-                    <i class="fas fa-times me-1"></i>Clear All
-                  </a>
-                </div>
-              </form>
-            </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary me-2">
+                  Apply Filters
+                </button>
+                <a th:href="@{/requests}" class="btn btn-outline-primary">
+                  Clear
+                </a>
+              </div>
+            </form>
           </div>
         </div>
 
-        <!-- Sort Section -->
         <div class="col-md-4">
-          <div class="card border-0" style="background: #f8f9fa;">
-            <div class="card-body">
-              <h5 class="card-title mb-3">
-                <i class="fas fa-sort me-2 text-primary"></i>Sort Results
-              </h5>
-              <form th:action="@{/requests}" method="get" class="sort-form">
-                <input type="hidden" name="bloodGroup" th:value="${bloodGroup}">
-                <input type="hidden" name="rheusFactor" th:value="${rheusFactor}">
-                <input type="hidden" name="componentType" th:value="${componentType}">
-                <input type="hidden" name="medcenterName" th:value="${medcenterName}">
+          <div class="filter-section">
+            <h6 class="fw-bold mb-3 text-dark">
+              <i class="fas fa-sort me-2 text-danger"></i>Sort Results
+            </h6>
+            <form th:action="@{/requests}" method="get">
+              <input type="hidden" name="bloodGroup" th:value="${bloodGroup}">
+              <input type="hidden" name="rheusFactor" th:value="${rheusFactor}">
+              <input type="hidden" name="componentType" th:value="${componentType}">
+              <input type="hidden" name="medcenterName" th:value="${medcenterName}">
 
-                <div class="mb-3">
-                  <select name="sort" class="form-select sort-dropdown" onchange="this.form.submit()">
-                    <option value="">Default Sorting</option>
-                    <option value="deadline_asc" th:selected="${sort == 'deadline_asc'}">📅 Deadline (Nearest First)</option>
-                    <option value="deadline_desc" th:selected="${sort == 'deadline_desc'}">📅 Deadline (Farthest First)</option>
-                    <option value="bloodgroup_asc" th:selected="${sort == 'bloodgroup_asc'}">🅰️ Blood Group (A-Z)</option>
-                    <option value="bloodgroup_desc" th:selected="${sort == 'bloodgroup_desc'}">🅱️ Blood Group (Z-A)</option>
-                    <option value="volume_asc" th:selected="${sort == 'volume_asc'}">💧 Volume (Low to High)</option>
-                    <option value="volume_desc" th:selected="${sort == 'volume_desc'}">💧 Volume (High to Low)</option>
-                  </select>
-                </div>
-
-                <div class="form-text">
-                  <i class="fas fa-info-circle me-1"></i>
-                  Sort requests to find what you need faster
-                </div>
-              </form>
-            </div>
+              <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="">Default Sorting</option>
+                <option value="deadline_asc" th:selected="${sort == 'deadline_asc'}">Deadline (Nearest First)</option>
+                <option value="deadline_desc" th:selected="${sort == 'deadline_desc'}">Deadline (Farthest First)</option>
+                <option value="bloodgroup_asc" th:selected="${sort == 'bloodgroup_asc'}">Blood Group (A-Z)</option>
+                <option value="bloodgroup_desc" th:selected="${sort == 'bloodgroup_desc'}">Blood Group (Z-A)</option>
+                <option value="volume_asc" th:selected="${sort == 'volume_asc'}">Volume (Low to High)</option>
+                <option value="volume_desc" th:selected="${sort == 'volume_desc'}">Volume (High to Low)</option>
+              </select>
+            </form>
           </div>
         </div>
       </div>
 
-      <!-- Requests Table -->
       <div th:if="${not requests.empty}">
         <div class="table-responsive">
-          <table class="table table-striped table-hover">
-            <thead class="table-dark">
+          <table class="table table-hover">
+            <thead>
             <tr>
-              <th><i class="fas fa-hashtag me-1"></i>ID</th>
-              <th><i class="fas fa-vial me-1"></i>Component</th>
-              <th><i class="fas fa-tint me-1"></i>Blood Group</th>
-              <th><i class="fas fa-plus-minus me-1"></i>Rhesus</th>
-              <th><i class="fas fa-weight me-1"></i>Volume</th>
-              <th><i class="fas fa-comment me-1"></i>Comment</th>
-              <th><i class="fas fa-clock me-1"></i>Deadline</th>
-              <th><i class="fas fa-hospital me-1"></i>Medcenter</th>
-              <th><i class="fas fa-cogs me-1"></i>Actions</th>
+              <th>ID</th>
+              <th>Component</th>
+              <th>Blood Group</th>
+              <th>Rhesus</th>
+              <th>Volume</th>
+              <th>Comment</th>
+              <th>Deadline</th>
+              <th>Medcenter</th>
+              <th>Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="req : ${requests}">
-              <td th:text="${req.blood_request_id}"></td>
+              <td class="fw-medium" th:text="${req.blood_request_id}"></td>
               <td>
-                <span th:classappend="'badge ' +
-                    ${req.component_type == 'Plasma'} ? 'bg-info' :
-                    (${req.component_type == 'Whole Blood'} ? 'bg-danger' :
-                    (${req.component_type == 'Erythrocyte(RBC)'} ? 'bg-warning' : 'bg-secondary'))">
-                  <span th:text="${req.component_type}"></span>
-                </span>
+                <span class="badge bg-light text-dark border" th:text="${req.component_type}"></span>
+              </td>
+              <td class="fw-medium" th:text="${req.blood_group}"></td>
+              <td th:text="${req.rhesus_factor}"></td>
+              <td>
+                <span class="badge bg-primary text-white" th:text="${req.volume + ' units'}"></span>
               </td>
               <td>
-                <strong th:text="${req.blood_group}"></strong>
-              </td>
-              <td>
-                <span th:text="${req.rhesus_factor}"></span>
-              </td>
-              <td>
-                <span class="badge bg-primary" th:text="${req.volume + ' units'}"></span>
-              </td>
-              <td>
-                <span th:if="${req.comments}" th:text="${#strings.abbreviate(req.comments, 30)}"
+                <span th:if="${req.comments}" th:text="${#strings.abbreviate(req.comments, 25)}"
                       data-bs-toggle="tooltip" th:attr="data-bs-title=${req.comments}"></span>
                 <span th:unless="${req.comments}" class="text-muted">-</span>
               </td>
               <td th:text="${req.deadline}"></td>
               <td>
-                <strong th:text="${medcenterNames[req.medcenter_id] != null ? medcenterNames[req.medcenter_id] : 'Unknown'}"></strong>
-                <br>
-                <small class="text-muted">ID: <span th:text="${req.medcenter_id}"></span></small>
+                <div class="small">
+                  <div class="fw-medium" th:text="${medcenterNames[req.medcenter_id] != null ? medcenterNames[req.medcenter_id] : 'Unknown'}"></div>
+                  <div class="text-muted">ID: <span th:text="${req.medcenter_id}"></span></div>
+                </div>
               </td>
               <td>
-                <div class="btn-group btn-group-sm" role="group">
+                <div class="action-buttons">
                   <a th:href="@{'/requests/' + ${req.blood_request_id}}"
-                     class="btn btn-outline-primary"
+                     class="btn btn-sm btn-outline-primary"
                      data-bs-toggle="tooltip" title="View Details">
                     <i class="fas fa-eye"></i>
                   </a>
                   <a th:href="@{'/requests/' + ${req.blood_request_id} + '/edit'}"
-                     class="btn btn-outline-secondary"
+                     class="btn btn-sm btn-outline-primary"
                      data-bs-toggle="tooltip" title="Edit Request">
                     <i class="fas fa-edit"></i>
                   </a>
@@ -259,7 +316,7 @@
                         style="display:inline"
                         onsubmit="return confirm('Are you sure you want to delete this request?')">
                     <button type="submit"
-                            class="btn btn-outline-danger"
+                            class="btn btn-sm btn-outline-danger"
                             data-bs-toggle="tooltip"
                             title="Delete Request">
                       <i class="fas fa-trash"></i>
@@ -273,41 +330,35 @@
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div th:if="${requests.empty}" class="text-center py-5">
-        <div class="empty-state">
-          <i class="fas fa-search fa-3x text-muted mb-3"></i>
-          <h5 class="text-muted">No requests found</h5>
-          <p class="text-muted">No blood requests match your current filters.</p>
-          <div class="mt-3">
-            <a th:href="@{/requests}" class="btn btn-danger me-2">
-              <i class="fas fa-list me-1"></i>Show All Requests
-            </a>
-            <a th:href="@{/requests/new}" class="btn btn-outline-danger">
-              <i class="fas fa-plus me-1"></i>Create New Request
-            </a>
-          </div>
+      <div th:if="${requests.empty}" class="empty-state text-center">
+        <i class="fas fa-search fa-2x mb-3"></i>
+        <h6 class="text-muted">No requests found</h6>
+        <p class="text-muted small mb-3">No blood requests match your current filters.</p>
+        <div>
+          <a th:href="@{/requests}" class="btn btn-primary me-2">
+            Show All Requests
+          </a>
+          <a th:href="@{/requests/new}" class="btn btn-outline-primary">
+            Create New Request
+          </a>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Motivational Footer -->
-  <div class="text-center mt-5">
-    <div class="p-4 rounded-3 floating-card" style="background: linear-gradient(135deg, #e3f2fd, #f3e5f5);">
-      <i class="fas fa-hands-helping fa-2x text-danger mb-3"></i>
-      <h5 class="text-dark">Together We Save Lives</h5>
-      <p class="text-muted mb-0">
-        Every request fulfilled means more lives saved in our community. Thank you for your dedication!
+  <div class="text-center mt-4 mb-5">
+    <div class="p-4 rounded bg-light">
+      <i class="fas fa-hands-helping fa-lg text-danger mb-3"></i>
+      <h6 class="text-dark mb-2">Together We Save Lives</h6>
+      <p class="text-muted small mb-0">
+        Every request fulfilled means more lives saved in our community.
       </p>
     </div>
   </div>
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Initialize tooltips
   var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
   var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Blood Donation</title>
+    <title>BloodConnect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
     <div class="container">
-        <a class="navbar-brand" href="/">Blood Donation System</a>
+        <a class="navbar-brand" href="/">BloodConnect</a>
         <div class="navbar-nav ms-auto">
                 <span class="navbar-text me-3">
                     Welcome, <span th:text="${email}"></span> |
@@ -57,8 +57,7 @@
                         <ul>
                             <li>Complete your center profile</li>
                             <li>Manage blood donations</li>
-                            <li>Schedule donor appointments</li>
-                            <li>Track blood inventory</li>
+                            <li>Create blood requests</li>
                         </ul>
                         <a th:href="@{/med-center/complete-profile(token=${token}, userId=${userId}, role=${role}, email=${email})}"
                            class="btn btn-danger me-2">Complete Center Profile</a>
@@ -80,15 +79,15 @@
                 </div>
             </div>
 
-            <!-- Исключительные панели только для медцентра -->
+            <!-- ТОЛЬКО ДЛЯ МЕДЦЕНТРА -->
             <div th:if="${role == 'MED_CENTER'}" class="mt-4">
                 <div class="card">
                     <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">Medical Center Exclusive Features</h5>
+                        <h5 class="card-title mb-0">Actions</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <!-- Управление инвентарем крови -->
+                            <!-- Blood Requests -->
                             <div class="col-md-4 mb-3">
                                 <div class="card border-danger">
                                     <div class="card-body text-center">
@@ -104,24 +103,8 @@
                                 </div>
                             </div>
 
-                            <!-- Управление назначениями -->
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-danger">
-                                    <div class="card-body text-center">
-                                        <div class="text-danger mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-calendar-check" viewBox="0 0 16 16">
-                                                <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
-                                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
-                                            </svg>
-                                        </div>
-                                        <h6>Appointment Management</h6>
-                                        <p class="text-muted small">Schedule and manage donor appointments</p>
-                                        <a href="#" class="btn btn-sm btn-danger">Manage Appointments</a>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Управление донорами -->
+                            <!-- Donors -->
                             <div class="col-md-4 mb-3">
                                 <div class="card border-danger">
                                     <div class="card-body text-center">
@@ -132,60 +115,12 @@
                                         </div>
                                         <h6>Donor Management</h6>
                                         <p class="text-muted small">View and manage registered donors</p>
-                                        <a href="#" class="btn btn-sm btn-danger">Manage Donors</a>
+                                        <a th:href="@{/donor}" class="btn btn-sm btn-danger">See</a>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Статистика и отчеты -->
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-danger">
-                                    <div class="card-body text-center">
-                                        <div class="text-danger mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16">
-                                                <path d="M0 0h1v15h15v1H0V0zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07z"/>
-                                            </svg>
-                                        </div>
-                                        <h6>Statistics & Reports</h6>
-                                        <p class="text-muted small">View center performance and analytics</p>
-                                        <a href="#" class="btn btn-sm btn-danger">View Reports</a>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Экстренные потребности -->
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-danger">
-                                    <div class="card-body text-center">
-                                        <div class="text-danger mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
-                                                <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
-                                                <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z"/>
-                                            </svg>
-                                        </div>
-                                        <h6>Urgent Blood Needs</h6>
-                                        <p class="text-muted small">Manage critical blood type requirements</p>
-                                        <a href="#" class="btn btn-sm btn-danger">View Urgent Needs</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Настройки центра -->
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-danger">
-                                    <div class="card-body text-center">
-                                        <div class="text-danger mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
-                                                <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-                                                <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
-                                            </svg>
-                                        </div>
-                                        <h6>Center Settings</h6>
-                                        <p class="text-muted small">Configure center information and preferences</p>
-                                        <a href="#" class="btn btn-sm btn-danger">Center Settings</a>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
