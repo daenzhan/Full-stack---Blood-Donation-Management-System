@@ -215,11 +215,12 @@
             <tr th:each="req : ${requests}">
               <td th:text="${req.blood_request_id}"></td>
               <td>
-                                    <span class="badge" th:classappend="${req.component_type == 'Plasma'} ? 'bg-info' : 
-                                                                       ${req.component_type == 'Whole Blood'} ? 'bg-danger' : 
-                                                                       ${req.component_type == 'Erythrocyte(RBC)'} ? 'bg-warning' : 'bg-secondary'">
-                                        <span th:text="${req.component_type}"></span>
-                                    </span>
+                <span th:classappend="'badge ' +
+                    ${req.component_type == 'Plasma'} ? 'bg-info' :
+                    (${req.component_type == 'Whole Blood'} ? 'bg-danger' :
+                    (${req.component_type == 'Erythrocyte(RBC)'} ? 'bg-warning' : 'bg-secondary'))">
+                  <span th:text="${req.component_type}"></span>
+                </span>
               </td>
               <td>
                 <strong th:text="${req.blood_group}"></strong>
@@ -231,8 +232,8 @@
                 <span class="badge bg-primary" th:text="${req.volume + ' units'}"></span>
               </td>
               <td>
-                                    <span th:if="${req.comments}" th:text="${#strings.abbreviate(req.comments, 30)}"
-                                          data-bs-toggle="tooltip" th:attr="data-bs-title=${req.comments}"></span>
+                <span th:if="${req.comments}" th:text="${#strings.abbreviate(req.comments, 30)}"
+                      data-bs-toggle="tooltip" th:attr="data-bs-title=${req.comments}"></span>
                 <span th:unless="${req.comments}" class="text-muted">-</span>
               </td>
               <td th:text="${req.deadline}"></td>

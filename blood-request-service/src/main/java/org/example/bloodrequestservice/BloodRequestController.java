@@ -29,7 +29,6 @@ public class BloodRequestController {
 
         List<BloodRequest> requests;
 
-        // Проверяем, есть ли хотя бы один непустой параметр фильтрации
         boolean hasActiveFilters = hasActiveFilters(bloodGroup, rheusFactor, componentType, medcenterName);
 
         if (hasActiveFilters) {
@@ -42,7 +41,6 @@ public class BloodRequestController {
             }
         }
 
-        // Создаем Map с названиями медцентров
         Map<Long, String> medcenterNames = new HashMap<>();
         for (BloodRequest req : requests) {
             if (req.getMedcenter_id() != null && !medcenterNames.containsKey(req.getMedcenter_id())) {
@@ -114,14 +112,12 @@ public class BloodRequestController {
 
         BloodRequest existingRequest = opt.get();
 
-        // Обновляем поля существующей заявки
         existingRequest.setComponent_type(bloodRequest.getComponent_type());
         existingRequest.setBlood_group(bloodRequest.getBlood_group());
         existingRequest.setRhesus_factor(bloodRequest.getRhesus_factor());
         existingRequest.setVolume(bloodRequest.getVolume());
         existingRequest.setDeadline(bloodRequest.getDeadline());
         existingRequest.setComments(bloodRequest.getComments());
-        // Medcenter_id не обновляем - он остается прежним
 
         service.save_request(existingRequest);
         return "redirect:/requests";
@@ -161,7 +157,6 @@ public class BloodRequestController {
                     medcenter_id, bloodGroup, rheusFactor, componentType, sort);
         } else {
             if (sort != null && !sort.trim().isEmpty()) {
-                // Для случаев когда есть только сортировка без фильтров
                 requests = service.search_by_medcenter_with_sort(
                         medcenter_id, null, null, null, sort);
             } else {

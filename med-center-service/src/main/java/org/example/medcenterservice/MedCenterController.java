@@ -213,13 +213,12 @@ public class MedCenterController {
                         return "redirect:/medcenters/" + id + "/edit";
                     }
 
-                    // Удаляем старый файл, если он существует
                     if (existing_medCenter.getLicense_file() != null) {
                         delete_file(existing_medCenter.getLicense_file());
                     }
 
                     String file_name = save_uploaded_file(file);
-                    new_medCenter.setLicense_file(file_name); // Исправлено имя переменной
+                    new_medCenter.setLicense_file(file_name);
                 } else {
                     // если вдруг файл не загружен
                     new_medCenter.setLicense_file(existing_medCenter.getLicense_file());
