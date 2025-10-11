@@ -102,7 +102,7 @@ public class UserController {
             if (response.getRole() == Role.DONOR) {
                 return "redirect:http://localhost:8080/donor/complete-profile";
             } else if (response.getRole() == Role.MED_CENTER) {
-                return "redirect:http://localhost:8080/med-center/complete-profile";
+                return "redirect:http://localhost:8080/medcenters/complete-profile";
             } else {
                 // Админы идут сразу на home
                 return "redirect:http://localhost:8080/home";
