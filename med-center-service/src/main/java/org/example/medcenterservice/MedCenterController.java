@@ -112,7 +112,7 @@ public class MedCenterController {
     @GetMapping("/new")
     public String create_page(Model model) {
         model.addAttribute("medCenter", new MedCenter());
-        return "create";
+        return "create-form";
     }
 
     @PostMapping("/save")

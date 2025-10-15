@@ -2,202 +2,251 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Лицензия</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Center License</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
+            background-color: #f8f9fa;
+        }
+        .license-container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .center-info-card {
+            border-left: 5px solid #dc3545;
+            margin-bottom: 25px;
+        }
+        .center-info-card .card-body {
             padding: 20px;
-            background: radial-gradient(circle, #e91e63 0%, #f8bbd0 60%, #ffffff 100%);
+        }
+        .center-info-card h4 {
+            color: #dc3545;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .info-row {
             display: flex;
-            justify-content: center;
+            margin-bottom: 10px;
             align-items: center;
-            min-height: 100vh;
         }
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            padding: 10px 20px;
-            background: #e91e63;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-        .back-link:hover {
-            background: #c2185b;
-        }
-        h1 {
+        .info-label {
+            font-weight: 600;
             color: #333;
-            margin-bottom: 20px;
-            font-size: 28px;
+            min-width: 140px;
         }
-        .file-info {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border-left: 4px solid #e91e63;
-        }
-        .file-info h2 {
-            margin: 0 0 10px 0;
-            color: #e91e63;
-            font-size: 22px;
-        }
-        .file-info p {
-            margin: 5px 0;
-            color: #555;
-        }
-        .file-info strong {
-            color: #333;
-        }
-        .file-container {
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-            background: #f9f9f9;
-        }
-        .file-container h3 {
-            margin-top: 0;
-            color: #333;
-        }
-        .file-view {
-            width: 100%;
-            min-height: 600px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background: white;
-        }
-        .download-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 12px 24px;
-            background: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-        .download-btn:hover {
-            background: #218838;
-        }
-        .no-file {
-            padding: 40px 20px;
-            text-align: center;
+        .info-value {
             color: #666;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border: 2px dashed #ddd;
         }
-        .no-file h3 {
-            color: #999;
-            margin-top: 0;
-        }
-        .image-container {
-            text-align: center;
+        .license-viewer {
             background: white;
-            padding: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .image-container img {
+        .license-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .license-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+        .license-content {
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .file-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 4px;
+        }
+        .image-viewer {
+            text-align: center;
+            padding: 20px;
+        }
+        .image-viewer img {
             max-width: 100%;
             max-height: 600px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .no-license {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .no-license .icon {
+            font-size: 48px;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        .no-license h5 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .no-license p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .unsupported-file {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .unsupported-file .icon {
+            font-size: 48px;
+            color: #ffc107;
+            margin-bottom: 20px;
+        }
+        .unsupported-file h5 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .error-image {
+            color: #dc3545;
+            text-align: center;
+            padding: 40px 20px;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <a th:href="@{/medcenters}" class="back-link">← Назад к списку</a>
-
-    <h1>Лицензия медицинского центра</h1>
-
-    <div class="file-info">
-        <h2 th:text="${medCenter.name}">Название центра</h2>
-        <p><strong>Местоположение:</strong> <span th:text="${medCenter.location}"></span></p>
-        <p><strong>Телефон:</strong> <span th:text="${medCenter.phone}"></span></p>
-        <p><strong>Специализация:</strong> <span th:text="${medCenter.specialization}"></span></p>
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container">
+        <a class="navbar-brand" href="/">BloodConnect</a>
+        <div class="navbar-nav ms-auto">
+            <span class="navbar-text me-3">
+                Welcome, <span th:text="${email}"></span> |
+                Role: <span th:text="${role}"></span>
+            </span>
+            <a class="nav-link" th:href="@{/logout}">Logout</a>
+        </div>
     </div>
+</nav>
 
-    <!-- Если файл существует -->
-    <div th:if="${medCenter.license_file != null and medCenter.license_file != ''}">
-        <div class="file-container">
-            <h3>Просмотр лицензии</h3>
+<div class="container license-container">
+    <a th:href="@{/medcenters}" class="btn btn-outline-danger back-button">
+        <span>←</span> Back to Medical Centers
+    </a>
 
-            <!-- Для PDF файлов -->
-            <div th:if="${medCenter.license_file.toLowerCase().endsWith('.pdf')}">
-                <iframe
-                        th:src="@{'/medcenters/uploads/licenses/' + ${medCenter.license_file}}"
-                        class="file-view"
-                        type="application/pdf">
-                    Ваш браузер не поддерживает отображение PDF.
-                    <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license/download'}">Скачайте файл</a>
-                </iframe>
+    <h1 class="mb-4">Medical Center License</h1>
+
+    <!-- Center Information Card -->
+    <div class="card center-info-card">
+        <div class="card-body">
+            <h4 th:text="${medCenter.name}">Medical Center Name</h4>
+            <div class="info-row">
+                <span class="info-label">📍 Location:</span>
+                <span class="info-value" th:text="${medCenter.location}"></span>
             </div>
-
-            <!-- Для изображений JPG/JPEG/PNG -->
-            <div th:if="${medCenter.license_file.toLowerCase().endsWith('.jpg') or
-                    medCenter.license_file.toLowerCase().endsWith('.jpeg') or
-                    medCenter.license_file.toLowerCase().endsWith('.png')}">
-                <div class="image-container">
-                    <img th:src="@{'/medcenters/uploads/licenses/' + ${medCenter.license_file}}"
-                         th:alt="'Лицензия ' + ${medCenter.name}"
-                         onerror="this.onerror=null; this.style.display='none'; document.getElementById('error-message').style.display='block';">
-                    <div id="error-message" style="display: none; color: red; padding: 20px;">
-                        <p>❌ Ошибка загрузки изображения</p>
-                        <p>Попробуйте скачать файл или обратитесь к администратору</p>
-                    </div>
-                </div>
+            <div class="info-row">
+                <span class="info-label">📞 Phone:</span>
+                <span class="info-value" th:text="${medCenter.phone}"></span>
             </div>
-
-            <!-- Для других типов файлов -->
-            <div th:if="${!medCenter.license_file.toLowerCase().endsWith('.pdf') and
-                    !medCenter.license_file.toLowerCase().endsWith('.jpg') and
-                    !medCenter.license_file.toLowerCase().endsWith('.jpeg') and
-                    !medCenter.license_file.toLowerCase().endsWith('.png')}">
-                <div class="no-file">
-                    <p>📄 Файл не может быть отображен в браузере.</p>
-                    <p>Имя файла: <strong th:text="${medCenter.license_file}"></strong></p>
-                    <p>Используйте кнопку ниже для скачивания.</p>
-                </div>
+            <div class="info-row">
+                <span class="info-label">🏥 Specialization:</span>
+                <span class="info-value" th:text="${medCenter.specialization}"></span>
             </div>
-
-            <!-- Кнопка скачивания -->
-            <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license/download'}"
-               class="download-btn">
-                📥 Скачать файл лицензии
-            </a>
         </div>
     </div>
 
-    <!-- Если файла нет -->
-    <div th:if="${medCenter.license_file == null or medCenter.license_file == ''}">
-        <div class="no-file">
-            <h3>❌ Лицензия не загружена</h3>
-            <p>Для этого медицинского центра не загружен файл лицензии.</p>
-            <p>Отредактируйте запись, чтобы загрузить файл.</p>
+    <!-- License Exists -->
+    <div th:if="${medCenter.license_file != null and medCenter.license_file != ''}">
+        <div class="license-viewer">
+            <div class="license-header">
+                <h5>📄 License Document</h5>
+                <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license/download'}"
+                   class="btn btn-light btn-sm download-button">
+                    <span>📥</span> Download
+                </a>
+            </div>
+
+            <div class="license-content">
+                <!-- PDF Files -->
+                <div th:if="${medCenter.license_file.toLowerCase().endsWith('.pdf')}" style="width: 100%; height: 100%;">
+                    <iframe
+                            th:src="@{'/medcenters/uploads/licenses/' + ${medCenter.license_file}}"
+                            class="file-iframe"
+                            type="application/pdf">
+                        <div class="unsupported-file">
+                            <div class="icon">⚠️</div>
+                            <h5>Browser Error</h5>
+                            <p>Your browser cannot display PDF files.</p>
+                            <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license/download'}"
+                               class="btn btn-danger">Download File Instead</a>
+                        </div>
+                    </iframe>
+                </div>
+
+                <!-- Image Files -->
+                <div th:if="${medCenter.license_file.toLowerCase().endsWith('.jpg') or
+                        medCenter.license_file.toLowerCase().endsWith('.jpeg') or
+                        medCenter.license_file.toLowerCase().endsWith('.png')}"
+                     class="image-viewer" style="width: 100%;">
+                    <img th:src="@{'/medcenters/uploads/licenses/' + ${medCenter.license_file}}"
+                         th:alt="'License for ' + ${medCenter.name}"
+                         onerror="this.style.display='none'; document.getElementById('error-img').style.display='block';">
+                    <div id="error-img" style="display: none;" class="error-image">
+                        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                        <h5>Image Loading Error</h5>
+                        <p class="mb-3">The image could not be loaded.</p>
+                        <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license/download'}"
+                           class="btn btn-danger">Download File Instead</a>
+                    </div>
+                </div>
+
+                <!-- Unsupported File Types -->
+                <div th:if="${!medCenter.license_file.toLowerCase().endsWith('.pdf') and
+                        !medCenter.license_file.toLowerCase().endsWith('.jpg') and
+                        !medCenter.license_file.toLowerCase().endsWith('.jpeg') and
+                        !medCenter.license_file.toLowerCase().endsWith('.png')}"
+                     class="unsupported-file" style="width: 100%;">
+                    <div class="icon">📋</div>
+                    <h5>File Type Not Supported</h5>
+                    <p th:text="'File: ' + ${medCenter.license_file}"></p>
+                    <p class="text-muted small">This file type cannot be displayed in the browser.</p>
+                    <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license/download'}"
+                       class="btn btn-danger">📥 Download File</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- No License -->
+    <div th:if="${medCenter.license_file == null or medCenter.license_file == ''}"
+         class="license-viewer">
+        <div class="no-license">
+            <div class="icon">📭</div>
+            <h5>No License Uploaded</h5>
+            <p>This medical center does not have a license file on record.</p>
             <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/edit'}"
-               class="back-link"
-               style="margin-top: 15px;">
-                Редактировать
+               class="btn btn-danger me-2">
+                ✏️ Edit & Upload License
+            </a>
+            <a th:href="@{/medcenters}" class="btn btn-outline-danger">
+                Back to List
             </a>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
