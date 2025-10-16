@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -132,6 +133,10 @@ public class MedCenterController {
         try {
             System.out.println("Completing profile for user: " + userId);
 
+            // Автоматическое геокодирование адреса
+            System.out.println("Geocoding address: " + location);
+            Map<String, Double> coordinates = medCenterService.geocodeAddress(location);
+
             String license_file = null;
             if (licenseFile != null && !licenseFile.isEmpty()) {
                 String fileError = determine_error_file(licenseFile);
@@ -148,6 +153,16 @@ public class MedCenterController {
                     userId, name, location, phone, specialization,
                     directorName, centerEmail, license_file
             );
+
+            // Если геокодирование успешно, обновляем координаты
+            if (coordinates != null) {
+                profile.setLatitude(coordinates.get("latitude"));
+                profile.setLongitude(coordinates.get("longitude"));
+                medCenterService.save(profile); // Сохраняем с координатами
+                System.out.println("Coordinates set: " + coordinates.get("latitude") + ", " + coordinates.get("longitude"));
+            } else {
+                System.out.println("Geocoding failed for address: " + location);
+            }
 
             System.out.println("Medical center profile created with ID: " + profile.getMed_center_id());
 

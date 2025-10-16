@@ -32,6 +32,35 @@
             transform: translateY(-2px);
             transition: all 0.3s ease;
         }
+        .btn-outline-info {
+            border-color: #0dcaf0;
+            color: #0dcaf0;
+        }
+        .btn-outline-info:hover {
+            background-color: #0dcaf0;
+            color: white;
+        }
+        .coordinates-info {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -113,6 +142,8 @@
                         <input type="hidden" name="userId" th:value="${userId}">
                         <input type="hidden" name="role" th:value="${role}">
                         <input type="hidden" name="userEmail" th:value="${email}">
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
 
                         <div class="row mb-4">
                             <div class="col-12">
@@ -161,6 +192,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="text-primary border-bottom pb-2">Location Information</h5>
@@ -168,10 +200,33 @@
 
                             <div class="col-12 mb-3">
                                 <label for="location" class="form-label required-label">Full Address</label>
-                                <textarea class="form-control" id="location" name="location" rows="3"
-                                          placeholder="Enter complete address including street, city, and postal code" required></textarea>
+                                <div class="input-group">
+                                    <textarea class="form-control" id="location" name="location" rows="3"
+                                              placeholder="Enter complete address including street, city, and postal code" required></textarea>
+                                    <button type="button" class="btn btn-outline-info" id="geocodeBtn" style="height: fit-content; margin-top: auto;">
+                                        <i class="fas fa-map-marker-alt"></i> Find on Map
+                                    </button>
+                                </div>
                                 <div class="invalid-feedback">
                                     Please provide the complete address.
+                                </div>
+
+                                <!-- Блок для отображения координат -->
+                                <div id="coordinatesInfo" class="coordinates-info">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong><i class="fas fa-check-circle text-success"></i> Coordinates found!</strong>
+                                            <div class="small">
+                                                Latitude: <span id="latValue">-</span>,
+                                                Longitude: <span id="lonValue">-</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-close" onclick="hideCoordinates()"></button>
+                                    </div>
+                                </div>
+
+                                <div class="form-text">
+                                    Enter the complete address and click "Find on Map" to automatically determine coordinates for the map.
                                 </div>
                             </div>
                         </div>
@@ -233,7 +288,93 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('medCenterForm');
+        const geocodeBtn = document.getElementById('geocodeBtn');
+        const locationInput = document.getElementById('location');
+        const coordinatesInfo = document.getElementById('coordinatesInfo');
+        const latValue = document.getElementById('latValue');
+        const lonValue = document.getElementById('lonValue');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
 
+        // Функция для геокодирования адреса
+        geocodeBtn.addEventListener('click', function() {
+            const address = locationInput.value.trim();
+
+            if (!address) {
+                alert('Please enter an address first.');
+                locationInput.focus();
+                return;
+            }
+
+            // Показываем загрузку
+            geocodeBtn.innerHTML = '<div class="loading-spinner"></div> Searching...';
+            geocodeBtn.disabled = true;
+
+            // Вызываем API геокодирования
+            fetch('/medcenters/api/geocode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ address: address })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.latitude && data.longitude) {
+                        // Сохраняем координаты в скрытые поля
+                        latitudeInput.value = data.latitude;
+                        longitudeInput.value = data.longitude;
+
+                        // Показываем информацию о координатах
+                        latValue.textContent = data.latitude.toFixed(6);
+                        lonValue.textContent = data.longitude.toFixed(6);
+                        coordinatesInfo.style.display = 'block';
+
+                        // Показываем успешное сообщение
+                        showToast('✅ Coordinates found successfully! Your center will appear on the map.', 'success');
+                    } else {
+                        showToast('❌ Could not find coordinates for this address. Please check the address and try again.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Geocoding error:', error);
+                    showToast('❌ Error searching for coordinates. Please try again.', 'error');
+                })
+                .finally(() => {
+                    // Восстанавливаем кнопку
+                    geocodeBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Find on Map';
+                    geocodeBtn.disabled = false;
+                });
+        });
+
+        // Функция для скрытия блока с координатами
+        window.hideCoordinates = function() {
+            coordinatesInfo.style.display = 'none';
+            latitudeInput.value = '';
+            longitudeInput.value = '';
+        };
+
+        // Функция для показа уведомлений
+        function showToast(message, type) {
+            // Создаем временное уведомление
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(toast);
+
+            // Автоматически удаляем через 5 секунд
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
+
+        // Валидация формы
         form.addEventListener('submit', function(event) {
             let isValid = true;
 
@@ -247,6 +388,7 @@
                 }
             });
 
+            // Проверяем файл
             const fileInput = document.getElementById('licenseFile');
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
@@ -256,11 +398,11 @@
                 if (file.size > maxSize) {
                     isValid = false;
                     fileInput.classList.add('is-invalid');
-                    alert('File size must be less than 5MB');
+                    showToast('File size must be less than 5MB', 'error');
                 } else if (!allowedTypes.includes(file.type)) {
                     isValid = false;
                     fileInput.classList.add('is-invalid');
-                    alert('Please upload only JPG, PNG, or PDF files');
+                    showToast('Please upload only JPG, PNG, or PDF files', 'error');
                 } else {
                     fileInput.classList.remove('is-invalid');
                 }
@@ -268,15 +410,25 @@
 
             if (!isValid) {
                 event.preventDefault();
-                alert('Please fill all required fields correctly.');
+                showToast('Please fill all required fields correctly.', 'error');
             } else {
-                // Show loading state
+                // Показываем загрузку
                 const submitBtn = form.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.innerHTML = '<div class="loading-spinner"></div> Processing...';
                 submitBtn.disabled = true;
+
+                // Если координаты не найдены, предупреждаем пользователя
+                if (!latitudeInput.value || !longitudeInput.value) {
+                    if (!confirm('Coordinates not found for this address. Your center may not appear on the map. Continue anyway?')) {
+                        event.preventDefault();
+                        submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Complete Registration';
+                        submitBtn.disabled = false;
+                    }
+                }
             }
         });
 
+        // Валидация полей при вводе
         const inputs = form.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
             input.addEventListener('blur', function() {
@@ -292,6 +444,14 @@
                     this.classList.remove('is-invalid');
                 }
             });
+        });
+
+        // Автоматическое геокодирование при потере фокуса с адреса (опционально)
+        locationInput.addEventListener('blur', function() {
+            if (this.value.trim() && !latitudeInput.value) {
+                // Можно автоматически запустить геокодирование
+                // geocodeBtn.click();
+            }
         });
     });
 </script>
