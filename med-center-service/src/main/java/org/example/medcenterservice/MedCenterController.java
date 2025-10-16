@@ -34,6 +34,66 @@ public class MedCenterController {
         Files.createDirectories(Paths.get(upload_dir));
     }
 
+    // ========== КАРТЫ И ГЕОЛОКАЦИЯ ==========
+
+    /**
+     * Страница с картой всех центров
+     */
+    @GetMapping("/map")
+    public String showMapPage(Model model) {
+        List<MedCenter> centers = medCenterService.getAllCentersWithCoordinates();
+        model.addAttribute("centers", centers);
+        model.addAttribute("yandexApiKey", "92fb74a1-4389-4f41-8801-8e9d93e4548c"); // Замените на ваш ключ
+        return "map-page";
+    }
+
+    /**
+     * API для получения центров с координатами (для AJAX)
+     */
+    @GetMapping("/api/centers-with-coordinates")
+    @ResponseBody
+    public List<MedCenter> getCentersWithCoordinates() {
+        return medCenterService.getAllCentersWithCoordinates();
+    }
+
+    /**
+     * API для геокодирования адреса
+     */
+    @PostMapping("/api/geocode")
+    @ResponseBody
+    public ResponseEntity<?> geocodeAddress(@RequestBody GeocodeRequest request) {
+        try {
+            var coordinates = medCenterService.geocodeAddress(request.getAddress());
+            if (coordinates != null) {
+                return ResponseEntity.ok(coordinates);
+            } else {
+                return ResponseEntity.badRequest().body("Адрес не найден");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ошибка геокодирования: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Обновление координат для существующего центра
+     */
+    @GetMapping("/{id}/update-coordinates")
+    public String updateCoordinates(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            MedCenter updated = medCenterService.updateCenterCoordinates(id);
+            if (updated != null) {
+                redirectAttributes.addFlashAttribute("success", "Координаты успешно обновлены");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Не удалось обновить координаты");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Ошибка: " + e.getMessage());
+        }
+        return "redirect:/medcenters/" + id;
+    }
+
+    // ========== СУЩЕСТВУЮЩИЕ МЕТОДЫ (без изменений) ==========
+
     @GetMapping("/complete-profile")
     public String showCompleteProfilePage(@RequestParam String token,
                                           @RequestParam Long userId,
@@ -77,7 +137,7 @@ public class MedCenterController {
                 String fileError = determine_error_file(licenseFile);
                 if (fileError != null) {
                     redirectAttributes.addFlashAttribute("error", fileError);
-                    return "redirect:/medcenters/complete-profile?token=" + token + // ИСПРАВИЛ путь
+                    return "redirect:/medcenters/complete-profile?token=" + token +
                             "&userId=" + userId + "&role=" + role + "&email=" + userEmail;
                 }
                 license_file = save_uploaded_file(licenseFile);
@@ -98,7 +158,7 @@ public class MedCenterController {
         } catch (Exception e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error completing profile: " + e.getMessage());
-            return "redirect:/medcenters/complete-profile?token=" + token + // ИСПРАВИЛ путь
+            return "redirect:/medcenters/complete-profile?token=" + token +
                     "&userId=" + userId + "&role=" + role + "&email=" + userEmail;
         }
     }
@@ -361,6 +421,19 @@ public class MedCenterController {
             Files.deleteIfExists(path);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    // DTO для геокодирования
+    public static class GeocodeRequest {
+        private String address;
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
         }
     }
 }

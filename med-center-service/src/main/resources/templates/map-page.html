@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Карта центров донорства</title>
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=92fb74a1-4389-4f41-8801-8e9d93e4548c&lang=ru_RU" type="text/javascript"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .location-btn {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .location-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6);
+    }
+
+    .location-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status.loading {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+      display: block;
+    }
+
+    .status.success {
+      background: #d1edff;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    #map {
+      width: 100%;
+      height: 600px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .legend {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .user-color {
+      background: #1e88e5;
+    }
+
+    .center-color {
+      background: #e53935;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🗺️ Карта центров донорства крови</h1>
+    <p>Все медицинские центры на одной карте с вашим местоположением</p>
+  </div>
+
+  <div class="controls">
+    <button id="locationButton" class="location-btn">
+      <span class="btn-text">📍 Показать мое местоположение</span>
+    </button>
+
+    <div id="status" class="status">
+      <span id="statusText"></span>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="legend">
+    <h3>Обозначения:</h3>
+    <div class="legend-item">
+      <div class="legend-color user-color"></div>
+      <span>Ваше местоположение</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color center-color"></div>
+      <span>Медицинские центры</span>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const centers = /*[[${centers}]]*/ [];
+  let map;
+  let userPlacemark;
+
+  // Инициализация карты
+  ymaps.ready(initMap);
+
+  function initMap() {
+    map = new ymaps.Map('map', {
+      center: [55.76, 37.64],
+      zoom: 10
+    });
+
+    // Добавляем все центры на карту (красные метки)
+    centers.forEach(function(center) {
+      if (center.latitude && center.longitude) {
+        const placemark = new ymaps.Placemark(
+                [center.latitude, center.longitude],
+                {
+                  hintContent: center.name,
+                  balloonContent: createBalloonContent(center)
+                },
+                {
+                  preset: 'islands#redMedicalIcon',
+                  iconColor: '#e53935'
+                }
+        );
+        map.geoObjects.add(placemark);
+      }
+    });
+
+    // Если есть центры, подстраиваем карту
+    if (centers.length > 0) {
+      map.setBounds(map.geoObjects.getBounds(), { checkZoomRange: true });
+    }
+  }
+
+  // Обработчик кнопки определения местоположения
+  document.getElementById('locationButton').addEventListener('click', getUserLocation);
+
+  function getUserLocation() {
+    const button = document.getElementById('locationButton');
+    const status = document.getElementById('status');
+    const statusText = document.getElementById('statusText');
+
+    // Блокируем кнопку и показываем загрузку
+    button.disabled = true;
+    button.innerHTML = '<div class="loading-spinner"></div> Определяем местоположение...';
+    status.className = 'status loading';
+    statusText.textContent = 'Запрашиваем доступ к вашему местоположению...';
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+              // Успех
+              function(position) {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+
+                statusText.textContent = '✅ Ваше местоположение определено!';
+                status.className = 'status success';
+
+                // Сохраняем координаты на сервере
+                saveUserLocation(userLat, userLon);
+
+                // Показываем пользователя на карте
+                showUserOnMap(userLat, userLon);
+
+                // Восстанавливаем кнопку
+                setTimeout(() => {
+                  button.disabled = false;
+                  button.innerHTML = '<span class="btn-text">🔄 Обновить местоположение</span>';
+                }, 2000);
+              },
+              // Ошибка
+              function(error) {
+                let errorMessage = 'Не удалось определить ваше местоположение. ';
+
+                switch(error.code) {
+                  case error.PERMISSION_DENIED:
+                    errorMessage += 'Вы отказали в доступе к геолокации.';
+                    break;
+                  case error.POSITION_UNAVAILABLE:
+                    errorMessage += 'Информация о местоположении недоступна.';
+                    break;
+                  case error.TIMEOUT:
+                    errorMessage += 'Время запроса истекло.';
+                    break;
+                  default:
+                    errorMessage += 'Произошла неизвестная ошибка.';
+                }
+
+                statusText.textContent = errorMessage;
+                status.className = 'status error';
+
+                button.disabled = false;
+                button.innerHTML = '<span class="btn-text">📍 Попробовать снова</span>';
+              },
+              // Опции
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+              }
+      );
+    } else {
+      statusText.textContent = 'Ваш браузер не поддерживает геолокацию.';
+      status.className = 'status error';
+      button.disabled = false;
+      button.innerHTML = '<span class="btn-text">📍 Показать местоположение</span>';
+    }
+  }
+
+  function showUserOnMap(userLat, userLon) {
+    // Удаляем старую метку пользователя если есть
+    if (userPlacemark) {
+      map.geoObjects.remove(userPlacemark);
+    }
+
+    // Добавляем новую метку пользователя (синий цвет)
+    userPlacemark = new ymaps.Placemark(
+            [userLat, userLon],
+            {
+              hintContent: 'Ваше местоположение',
+              balloonContent: `
+                        <div style="padding: 10px;">
+                            <h3>📍 Вы здесь!</h3>
+                            <p><strong>Широта:</strong> ${userLat.toFixed(6)}</p>
+                            <p><strong>Долгота:</strong> ${userLon.toFixed(6)}</p>
+                        </div>
+                    `
+            },
+            {
+              preset: 'islands#blueCircleDotIcon',
+              iconColor: '#1e88e5'
+            }
+    );
+
+    map.geoObjects.add(userPlacemark);
+
+    // Центрируем карту на пользователе
+    map.setCenter([userLat, userLon], 13);
+
+    // Рассчитываем расстояния до центров и обновляем балуны
+    updateCenterDistances(userLat, userLon);
+  }
+
+  function updateCenterDistances(userLat, userLon) {
+    // Обновляем балуны центров с расстояниями
+    map.geoObjects.each(function(geoObject) {
+      if (geoObject !== userPlacemark) {
+        const centerCoords = geoObject.geometry.getCoordinates();
+        const distance = calculateDistance(userLat, userLon, centerCoords[0], centerCoords[1]);
+
+        const center = centers.find(c =>
+                c.latitude === centerCoords[0] && c.longitude === centerCoords[1]
+        );
+
+        if (center) {
+          geoObject.properties.set('balloonContent', createBalloonContent(center, distance));
+        }
+      }
+    });
+  }
+
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return (R * c).toFixed(1);
+  }
+
+  function createBalloonContent(center, distance = null) {
+    let distanceHtml = '';
+    if (distance !== null) {
+      distanceHtml = `<p><strong>📏 Расстояние от вас:</strong> ${distance} км</p>`;
+    }
+
+    return `
+                <div style="max-width: 300px; padding: 10px;">
+                    <h3 style="margin-bottom: 10px; color: #e53935;">${center.name}</h3>
+                    <p><strong>📍 Адрес:</strong> ${center.location}</p>
+                    <p><strong>📞 Телефон:</strong> ${center.phone}</p>
+                    <p><strong>🎯 Специализация:</strong> ${center.specialization || 'Не указана'}</p>
+                    ${distanceHtml}
+                    <div style="margin-top: 15px;">
+                        <a href="/medcenters/${center.med_center_id}"
+                           style="display: inline-block; padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            `;
+  }
+
+  function saveUserLocation(latitude, longitude) {
+    // Отправляем координаты на сервер
+    fetch('/medcenters/api/save-user-location', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `latitude=${latitude}&longitude=${longitude}`
+    })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Местоположение сохранено:', data);
+            })
+            .catch(error => {
+              console.error('Ошибка сохранения местоположения:', error);
+            });
+  }
+  /*]]>*/
+</script>
+</body>
+</html>
