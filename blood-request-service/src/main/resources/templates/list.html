@@ -81,6 +81,16 @@
       border-color: var(--primary-red);
     }
 
+    .btn-success {
+      background: #28a745;
+      border: 1px solid #28a745;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+      border-color: #1e7e34;
+    }
+
     .form-control, .form-select {
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -129,6 +139,17 @@
     .btn:hover {
       transform: translateY(-1px);
     }
+
+    .donation-conditions {
+      max-width: 500px;
+    }
+
+    .user-info {
+      background: var(--light-red);
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
   </style>
 </head>
 <body>
@@ -152,7 +173,8 @@
           </h5>
           <p class="text-muted mb-0 mt-1 small">Manage and track blood donation requests</p>
         </div>
-        <a th:href="@{/requests/new}" class="btn btn-primary">
+
+        <a th:if="${role != 'DONOR'}" th:href="@{/requests/new}" class="btn btn-primary">
           <i class="fas fa-plus me-1"></i>Create Request
         </a>
       </div>
@@ -185,6 +207,9 @@
             </h6>
             <form th:action="@{/requests}" method="get" class="row g-3">
               <input type="hidden" name="sort" th:value="${sort}">
+              <!-- Сохраняем user_id и role в скрытых полях -->
+              <input type="hidden" name="user_id" th:value="${user_id}">
+              <input type="hidden" name="role" th:value="${role}">
 
               <div class="col-md-3">
                 <label class="form-label small fw-medium">Blood Group</label>
@@ -227,7 +252,7 @@
                 <button type="submit" class="btn btn-primary me-2">
                   Apply Filters
                 </button>
-                <a th:href="@{/requests}" class="btn btn-outline-primary">
+                <a th:href="@{/requests(user_id=${user_id}, role=${role})}" class="btn btn-outline-primary">
                   Clear
                 </a>
               </div>
@@ -245,6 +270,8 @@
               <input type="hidden" name="rheusFactor" th:value="${rheusFactor}">
               <input type="hidden" name="componentType" th:value="${componentType}">
               <input type="hidden" name="medcenterName" th:value="${medcenterName}">
+              <input type="hidden" name="user_id" th:value="${user_id}">
+              <input type="hidden" name="role" th:value="${role}">
 
               <select name="sort" class="form-select" onchange="this.form.submit()">
                 <option value="">Default Sorting</option>
@@ -301,20 +328,28 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <a th:href="@{'/requests/' + ${req.blood_request_id}}"
+                  <a th:href="@{'/requests/' + ${req.blood_request_id}(user_id=${user_id}, role=${role})}"
                      class="btn btn-sm btn-outline-primary"
                      data-bs-toggle="tooltip" title="View Details">
                     <i class="fas fa-eye"></i>
                   </a>
-                  <a th:href="@{'/requests/' + ${req.blood_request_id} + '/edit'}"
+
+                  <!-- Кнопки редактирования и удаления - только для НЕ-DONOR ролей -->
+                  <a th:if="${role != 'DONOR'}"
+                     th:href="@{'/requests/' + ${req.blood_request_id} + '/edit'(user_id=${user_id}, role=${role})}"
                      class="btn btn-sm btn-outline-primary"
                      data-bs-toggle="tooltip" title="Edit Request">
                     <i class="fas fa-edit"></i>
                   </a>
-                  <form th:action="@{'/requests/' + ${req.blood_request_id} + '/delete'}"
+
+                  <form th:if="${role != 'DONOR'}"
+                        th:action="@{'/requests/' + ${req.blood_request_id} + '/delete'}"
                         method="post"
                         style="display:inline"
                         onsubmit="return confirm('Are you sure you want to delete this request?')">
+                    <!-- Добавляем скрытые поля для сохранения user_id и role -->
+                    <input type="hidden" name="user_id" th:value="${user_id}">
+                    <input type="hidden" name="role" th:value="${role}">
                     <button type="submit"
                             class="btn btn-sm btn-outline-danger"
                             data-bs-toggle="tooltip"
@@ -322,6 +357,15 @@
                       <i class="fas fa-trash"></i>
                     </button>
                   </form>
+
+                  <button th:if="${role == 'DONOR'}"
+                          class="btn btn-sm btn-success"
+                          data-bs-toggle="modal"
+                          data-bs-target="#donationConditionsModal"
+                          data-bs-tooltip="tooltip"
+                          title="Join Donation">
+                    <i class="fas fa-hand-holding-heart"></i> Join
+                  </button>
                 </div>
               </td>
             </tr>
@@ -335,12 +379,81 @@
         <h6 class="text-muted">No requests found</h6>
         <p class="text-muted small mb-3">No blood requests match your current filters.</p>
         <div>
-          <a th:href="@{/requests}" class="btn btn-primary me-2">
+          <a th:href="@{/requests(user_id=${user_id}, role=${role})}" class="btn btn-primary me-2">
             Show All Requests
           </a>
-          <a th:href="@{/requests/new}" class="btn btn-outline-primary">
+          <a th:if="${role != 'DONOR'}" th:href="@{/requests/new(user_id=${user_id}, role=${role})}" class="btn btn-outline-primary">
             Create New Request
           </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="donationConditionsModal" tabindex="-1" aria-labelledby="donationConditionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="donationConditionsModalLabel">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            Donation Conditions
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="donation-conditions">
+            <h6 class="fw-bold mb-3">Before you donate blood, please ensure:</h6>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-check-circle me-2"></i>Basic Requirements</h6>
+              <ul class="small">
+                <li>You are between 18 and 65 years old</li>
+                <li>Your weight is at least 50 kg (110 lbs)</li>
+                <li>You are in good general health</li>
+                <li>You have valid identification</li>
+              </ul>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-notes-medical me-2"></i>Health Conditions</h6>
+              <ul class="small">
+                <li>No fever, cold, or flu symptoms</li>
+                <li>No recent surgeries (within 6 months)</li>
+                <li>No new tattoos or piercings (within 4 months)</li>
+                <li>Not pregnant or breastfeeding</li>
+              </ul>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-utensils me-2"></i>Preparation</h6>
+              <ul class="small">
+                <li>Have a good meal 2-3 hours before donation</li>
+                <li>Drink plenty of fluids</li>
+                <li>Avoid fatty foods before donation</li>
+                <li>Get adequate sleep the night before</li>
+              </ul>
+            </div>
+
+            <div class="mb-3">
+              <h6 class="text-primary"><i class="fas fa-clock me-2"></i>Time Between Donations</h6>
+              <ul class="small">
+                <li>Whole blood: 56 days (8 weeks)</li>
+                <li>Plasma: 28 days (4 weeks)</li>
+                <li>Platelets: 7 days (1 week)</li>
+              </ul>
+            </div>
+
+            <div class="alert alert-info small">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>Important:</strong> Please consult with medical staff if you have any questions about your eligibility to donate.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="proceedWithDonation()">
+            <i class="fas fa-check me-1"></i>I Understand & Proceed
+          </button>
         </div>
       </div>
     </div>
@@ -363,6 +476,22 @@
   var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl)
   })
+
+  function proceedWithDonation() {
+    var modal = bootstrap.Modal.getInstance(document.getElementById('donationConditionsModal'));
+    modal.hide();
+
+    alert('Thank you for your willingness to donate! A medical center representative will contact you soon to schedule your donation.');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var donationModal = document.getElementById('donationConditionsModal');
+    if (donationModal) {
+      donationModal.addEventListener('show.bs.modal', function (event) {
+        console.log('Donation conditions modal opened');
+      });
+    }
+  });
 </script>
 </body>
 </html>

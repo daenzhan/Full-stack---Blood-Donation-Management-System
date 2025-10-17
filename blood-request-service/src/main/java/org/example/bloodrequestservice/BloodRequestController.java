@@ -25,6 +25,8 @@ public class BloodRequestController {
             @RequestParam(required = false) String componentType,
             @RequestParam(required = false) String medcenterName,
             @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String user_id,
+            @RequestParam(required = false) String role,
             Model model) {
 
         List<BloodRequest> requests;
@@ -55,6 +57,8 @@ public class BloodRequestController {
         model.addAttribute("componentType", componentType);
         model.addAttribute("medcenterName", medcenterName);
         model.addAttribute("sort", sort);
+        model.addAttribute("user_id", user_id);
+        model.addAttribute("role", role);
         model.addAttribute("sortOptions", List.of(
                 "deadline_asc: По сроку (сначала ближайшие)",
                 "deadline_desc: По сроку (сначала дальние)",
