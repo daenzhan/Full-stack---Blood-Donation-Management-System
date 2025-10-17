@@ -64,6 +64,10 @@
                         <p class="card-text">System administration panel</p>
                         <a th:href="@{/medcenters}" class="btn btn-danger me-2">All Medcenters</a>
                         <a th:href="@{/requests}" class="btn btn-sm btn-danger">All Requests</a>
+                        <a th:href="@{/requests/statistics(user_id=${user_id}, role=${role}, email=${email})}"
+                           class="btn btn-sm btn-danger">
+                            Statistic
+                        </a>
                     </div>
                 </div>
             </div>

@@ -5,9 +5,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/requests")
@@ -223,6 +225,94 @@ public class BloodRequestController {
                 "volume_desc: По объему (по убыванию)"
         ));
         return "list-by-medcenter";
+    }
+
+
+    @GetMapping("/statistics")
+    public String getStatistics(
+            @RequestParam(required = false) String user_id,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String email,
+            Model model) {
+
+        List<BloodRequest> allRequests = service.get_all_requests();
+
+        // Статистика по группам крови
+        Map<String, Long> bloodGroupStats = allRequests.stream()
+                .collect(Collectors.groupingBy(
+                        BloodRequest::getBlood_group,
+                        Collectors.counting()
+                ));
+
+        // Статистика по резус-фактору
+        Map<String, Long> rhesusStats = allRequests.stream()
+                .collect(Collectors.groupingBy(
+                        BloodRequest::getRhesus_factor,
+                        Collectors.counting()
+                ));
+
+        // Статистика по компонентам
+        Map<String, Long> componentStats = allRequests.stream()
+                .collect(Collectors.groupingBy(
+                        BloodRequest::getComponent_type,
+                        Collectors.counting()
+                ));
+
+        // Статистика по медцентрам
+        Map<String, Long> medcenterStats = allRequests.stream()
+                .collect(Collectors.groupingBy(
+                        req -> service.getMedCenterName(req.getMedcenter_id()),
+                        Collectors.counting()
+                ));
+
+        // Общее количество запросов
+        long totalRequests = allRequests.size();
+
+        // Количество активных запросов (с дедлайном в будущем)
+        long activeRequests = allRequests.stream()
+                .filter(req -> req.getDeadline() != null && req.getDeadline().isAfter(LocalDateTime.now()))
+                .count();
+
+        // Количество срочных запросов (дедлайн в ближайшие 3 дня)
+        long urgentRequests = allRequests.stream()
+                .filter(req -> req.getDeadline() != null &&
+                        req.getDeadline().isAfter(LocalDateTime.now()) &&
+                        req.getDeadline().isBefore(LocalDateTime.now().plusDays(3)))
+                .count();
+
+        // Самые популярные группы крови (топ-3)
+        List<Map.Entry<String, Long>> topBloodGroups = bloodGroupStats.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(3)
+                .collect(Collectors.toList());
+
+        // Средний объем запроса
+        double averageVolume = allRequests.stream()
+                .filter(req -> req.getVolume() != null && !req.getVolume().trim().isEmpty())
+                .mapToDouble(req -> {
+                    try {
+                        return Double.parseDouble(req.getVolume().replaceAll("[^0-9.]", ""));
+                    } catch (NumberFormatException e) {
+                        return 0.0;
+                    }
+                })
+                .average()
+                .orElse(0.0);
+
+        model.addAttribute("bloodGroupStats", bloodGroupStats);
+        model.addAttribute("rhesusStats", rhesusStats);
+        model.addAttribute("componentStats", componentStats);
+        model.addAttribute("medcenterStats", medcenterStats);
+        model.addAttribute("totalRequests", totalRequests);
+        model.addAttribute("activeRequests", activeRequests);
+        model.addAttribute("urgentRequests", urgentRequests);
+        model.addAttribute("topBloodGroups", topBloodGroups);
+        model.addAttribute("averageVolume", String.format("%.2f", averageVolume));
+        model.addAttribute("user_id", user_id);
+        model.addAttribute("role", role);
+        model.addAttribute("email", email);
+
+        return "stat";
     }
 
 }
