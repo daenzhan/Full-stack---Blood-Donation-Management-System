@@ -133,7 +133,6 @@ public class MedCenterController {
         try {
             System.out.println("Completing profile for user: " + userId);
 
-            // Автоматическое геокодирование адреса
             System.out.println("Geocoding address: " + location);
             Map<String, Double> coordinates = medCenterService.geocodeAddress(location);
 

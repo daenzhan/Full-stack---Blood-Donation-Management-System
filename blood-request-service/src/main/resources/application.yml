@@ -14,6 +14,17 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: storio.tommy@gmail.com
+    password: swdouiftrxprfxzg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 server:
   port: 8083
@@ -22,3 +33,32 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
+
+# ========== НАСТРОЙКИ ЛОГИРОВАНИЯ ==========
+logging:
+  level:
+    # Наше приложение
+    org.example.bloodrequestservice: DEBUG
+    # Spring
+    org.springframework: INFO
+    org.springframework.web: DEBUG
+    org.springframework.mail: DEBUG
+    org.springframework.cloud: INFO
+    # База данных
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    # Eureka
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+    # Feign
+    org.springframework.cloud.openfeign: DEBUG
+    feign: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/blood-request-service.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30

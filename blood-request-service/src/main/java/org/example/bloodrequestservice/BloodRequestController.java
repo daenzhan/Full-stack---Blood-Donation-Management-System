@@ -3,6 +3,7 @@ package org.example.bloodrequestservice;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +14,13 @@ import java.util.Map;
 public class BloodRequestController {
 
     private final BloodRequestService service;
+    private final EmailService emailService;
+    private final BloodRequestRepository repository;
 
-    public BloodRequestController(BloodRequestService service) {
+    public BloodRequestController(BloodRequestService service, EmailService emailService, BloodRequestRepository repository) {
         this.service = service;
+        this.emailService = emailService;
+        this.repository = repository;
     }
 
     @GetMapping
@@ -27,6 +32,7 @@ public class BloodRequestController {
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String user_id,
             @RequestParam(required = false) String role,
+            @RequestParam(required = false) String email,
             Model model) {
 
         List<BloodRequest> requests;
@@ -59,6 +65,7 @@ public class BloodRequestController {
         model.addAttribute("sort", sort);
         model.addAttribute("user_id", user_id);
         model.addAttribute("role", role);
+        model.addAttribute("email", email);
         model.addAttribute("sortOptions", List.of(
                 "deadline_asc: По сроку (сначала ближайшие)",
                 "deadline_desc: По сроку (сначала дальние)",
@@ -70,7 +77,39 @@ public class BloodRequestController {
         return "list";
     }
 
-    // Вспомогательный метод для проверки активных фильтров
+    @PostMapping("/{id}/join-donation")
+    public String joinDonation(
+            @PathVariable("id") Long id,
+            @RequestParam String user_id,
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam String requestId,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            System.out.println("Received join donation request for ID: " + id);
+            System.out.println("RequestId from form: " + requestId);
+
+            Long effectiveId = (id != null) ? id : Long.valueOf(requestId);
+
+            BloodRequest request = service.get_request_by_id(effectiveId)
+                    .orElseThrow(() -> new RuntimeException("Request not found with id: " + effectiveId));
+
+            emailService.sendDonationConfirmation(email, request);
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "You have successfully joined the donation! Confirmation email has been sent.");
+
+        } catch (Exception e) {
+            System.err.println("Error joining donation: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Failed to join donation. Please try again.");
+        }
+
+        return "redirect:/requests?user_id=" + user_id + "&role=" + role + "&email=" + email;
+    }
+
     private boolean hasActiveFilters(String bloodGroup, String rheusFactor,
                                      String componentType, String medcenterName) {
         return (bloodGroup != null && !bloodGroup.trim().isEmpty()) ||
