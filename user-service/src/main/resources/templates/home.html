@@ -24,27 +24,23 @@
     <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}"></div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
-    <div class="row">
-        <div class="col-12">
-            <h1 th:text="'Welcome to ' + ${role} + ' Dashboard'"></h1>
-
-
-            <div th:if="${role == 'DONOR'}" class="mt-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Donor </h5>
-                        <p class="card-text">Welcome back! You can now:</p>
-                        <ul>
-                            <li>Complete your donor profile</li>
-                            <li>Find nearby blood donation centers</li>
-                            <li>Schedule donation appointments</li>
-                            <li>Track your donation history</li>
-                        </ul>
-                        <a th:href="@{/donor/complete-profile(token=${token}, userId=${userId}, role=${role}, email=${email})}"
-                           class="btn btn-danger me-2">View Dashboard</a>
-                    </div>
-                </div>
+    <!-- Для доноров, у которых еще нет профиля -->
+    <div th:if="${role == 'DONOR'}" class="mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Donor</h5>
+                <p class="card-text">Welcome back! You can now:</p>
+                <ul>
+                    <li>Complete your donor profile</li>
+                    <li>Find nearby blood donation centers</li>
+                    <li>Schedule donation appointments</li>
+                    <li>Track your donation history</li>
+                </ul>
+                <a th:href="@{/donor/complete-profile(token=${token}, userId=${userId}, role=${role}, email=${email})}"
+                   class="btn btn-danger me-2">View Dashboard</a>
             </div>
+        </div>
+    </div>
 
             <div th:if="${role == 'MED_CENTER'}" class="mt-4">
                 <div class="card">
