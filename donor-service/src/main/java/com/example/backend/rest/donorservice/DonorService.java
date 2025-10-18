@@ -3,6 +3,9 @@ package com.example.backend.rest.donorservice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class DonorService {
@@ -11,7 +14,13 @@ public class DonorService {
 
     public Donor completeProfile(Long userId, DonorRequest request) {
         if (donorRepository.existsByUserId(userId)) {
-            throw new RuntimeException("Profile already completed");
+            throw new RuntimeException("Profile already exists");
+        }
+
+        LocalDate minDate = LocalDate.now().minusYears(65);
+        LocalDate maxDate = LocalDate.now().minusYears(18);
+        if (request.getDateOfBirth().isAfter(maxDate) || request.getDateOfBirth().isBefore(minDate)) {
+            throw new RuntimeException("Donor must be between 18 and 65 years old");
         }
 
         Donor profile = new Donor();
@@ -22,6 +31,7 @@ public class DonorService {
         profile.setPhoneNumber(request.getPhoneNumber());
         profile.setAddress(request.getAddress());
         profile.setGender(request.getGender());
+        profile.setCreatedAt(LocalDateTime.now());
 
         return donorRepository.save(profile);
     }
@@ -30,6 +40,7 @@ public class DonorService {
         return donorRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
     }
+
     public void deleteProfile(Long userId) {
         Donor donor = getProfileByUserId(userId);
         donorRepository.delete(donor);
@@ -43,8 +54,6 @@ public class DonorService {
 
     public void updateDonorProfile(String userId, Donor updatedDonor) {
         Donor existingDonor = findByUserId(userId);
-
-        // Обновляем только разрешенные поля
         existingDonor.setFullName(updatedDonor.getFullName());
         existingDonor.setDateOfBirth(updatedDonor.getDateOfBirth());
         existingDonor.setGender(updatedDonor.getGender());
