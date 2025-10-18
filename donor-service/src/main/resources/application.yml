@@ -19,6 +19,20 @@ jwt:
 secret: "mySuperSecureJWTSecretKeyForBloodDonationSystem2024WithMoreThan64CharactersToEnsure512bitSecurity"
 expiration: 86400000
 
+services:
+  blood-request:
+    url: http://localhost:8083
+  med-center:
+    url: http://localhost:8082
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+
 
 server:
   port: 8084
