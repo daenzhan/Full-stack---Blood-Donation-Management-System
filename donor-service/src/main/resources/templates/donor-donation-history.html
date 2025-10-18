@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Donor Dashboard - BloodConnect</title>
+    <title>Donation History - BloodConnect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -24,13 +24,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .dashboard-header {
-            background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
-            color: white;
-            padding: 2.5rem 0;
-            margin-bottom: 2rem;
-        }
-
         .card {
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -48,35 +41,6 @@
             background: white;
             border-bottom: 1px solid var(--border-color);
             padding: 1.25rem;
-        }
-
-        .stat-card {
-            border-left: 4px solid var(--primary-red);
-            text-align: center;
-            padding: 1.5rem 1rem;
-        }
-
-        .stat-card i {
-            color: var(--primary-red);
-            margin-bottom: 1rem;
-        }
-
-        .stat-card h5 {
-            color: var(--primary-red);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .request-card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
-        }
-
-        .request-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .btn {
@@ -112,17 +76,6 @@
             color: white;
         }
 
-        .btn-success {
-            background: #28a745;
-            border: 1px solid #28a745;
-        }
-
-        .btn-light {
-            background: white;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-        }
-
         .badge {
             font-size: 0.75rem;
             font-weight: 500;
@@ -130,25 +83,38 @@
             border-radius: 4px;
         }
 
-        .blood-badge {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
-            background: white;
+        .table th {
+            background: var(--light-red);
             color: var(--primary-red);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            border-color: var(--border-color);
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        .alert {
             border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
         }
 
         .empty-state {
-            padding: 2rem 1rem;
+            padding: 3rem 1rem;
             color: var(--text-muted);
             text-align: center;
         }
 
-        .urgent-badge {
-            background: #ffc107;
-            color: #000;
-            font-size: 0.7rem;
-            padding: 0.25rem 0.5rem;
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .profile-icon {
@@ -169,10 +135,27 @@
             transform: scale(1.05);
         }
 
-        .nav-buttons {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .stat-card {
+            border-left: 4px solid var(--primary-red);
+            text-align: center;
+            padding: 1.5rem 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-card i {
+            color: var(--primary-red);
+            margin-bottom: 1rem;
+        }
+
+        .stat-card h5 {
+            color: var(--primary-red);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
         }
         .sidebar {
             position: fixed;
@@ -276,6 +259,12 @@
     </div>
     <ul class="sidebar-menu">
         <li>
+            <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-exclamation-triangle"></i>
+                Matching Blood Requests
+            </a>
+        </li>
+        <li>
             <a th:href="@{'/donor/donation-history?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
                 <i class="fas fa-history"></i>
                 Donation History
@@ -302,9 +291,9 @@
                 <button class="menu-toggle me-2" onclick="openSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
-                <a th:href="@{'http://localhost:8080/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                <a th:href="@{'/donor/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
                    class="btn btn-outline-primary btn-sm me-2">
-                    <i class="fas fa-home me-1"></i> Home
+                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
                 </a>
                 <a th:href="@{'/donor/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
                    class="profile-icon"
@@ -317,126 +306,113 @@
     </div>
 </nav>
 
-<div class="dashboard-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-5 fw-bold">Donor Dashboard</h1>
-                <p class="lead mb-0">Help save lives with your blood donations</p>
-            </div>
-            <div class="col-md-4 text-end">
-                <span class="badge blood-badge fw-bold" th:text="${donor.bloodType}"></span>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="fas fa-history me-2 text-danger"></i>
+                        My Donation History
+                    </h5>
+                    <p class="text-muted mb-0 mt-1 small">Track your blood donation journey and impact</p>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+        <div class="card-body p-4">
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-2"></i>
                     <div>
-                        <h5 class="card-title mb-0 fw-bold text-dark">
-                            <i class="fas fa-exclamation-triangle me-2 text-danger"></i>
-                            Current Matching Requests
-                            <span class="badge bg-danger ms-2" th:text="${matchingRequests != null ? matchingRequests.size() : 0}"></span>
-                        </h5>
-                        <p class="text-muted mb-0 mt-1 small">Urgent requests matching your blood type</p>
+                        <strong>Success!</strong> <span th:text="${param.success}"></span>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div th:if="${matchingRequests == null || matchingRequests.empty}" class="empty-state">
-                        <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
-                        <h6 class="text-success">No Urgent Requests</h6>
-                        <p class="text-muted small">There are currently no blood requests matching your blood type.</p>
-                        <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
-                           class="btn btn-primary btn-sm mt-2">
-                            Browse All Requests
-                        </a>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <div>
+                        <strong>Error!</strong> <span th:text="${param.error}"></span>
                     </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
 
-                    <div th:if="${matchingRequests != null && !matchingRequests.empty}">
-                        <div th:each="request : ${matchingRequests}" class="card request-card">
+            <div th:if="${donationHistory != null and not donationHistory.empty}">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Blood Type</th>
+                            <th>Component</th>
+                            <th>Volume</th>
+                            <th>Medical Center</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="history : ${donationHistory}">
+                            <td th:text="${#temporals.format(history.donationDate, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td>
+                                <span class="badge bg-danger" th:text="${history.bloodType}"></span>
+                            </td>
+                            <td th:text="${history.componentType}"></td>
+                            <td th:text="${history.volume + ' units'}"></td>
+                            <td th:text="${history.medcenterName != null ? history.medcenterName : 'Medical Center ' + history.medcenterId}"></td>
+                            <td>
+                                <span class="badge bg-success" th:text="${history.status}"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card h-100">
                             <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h6 class="fw-bold mb-1" th:text="${request.component_type + ' Needed'}"></h6>
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="badge bg-danger me-2"
-                                                  th:text="${request.blood_group + request.rhesus_factor}"></span>
-                                            <span class="text-muted small" th:text="'Volume: ' + ${request.volume}"></span>
-                                        </div>
-                                        <p class="text-muted small mb-1">
-                                            <i class="fas fa-clock me-1"></i>
-                                            Deadline: <span th:text="${#temporals.format(request.deadline, 'dd/MM/yyyy HH:mm')}"></span>
-                                        </p>
-                                        <p th:if="${request.comments}" class="text-muted small mb-0">
-                                            <i class="fas fa-comment me-1"></i>
-                                            <span th:text="${#strings.abbreviate(request.comments, 50)}"></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <span class="badge urgent-badge mb-2">URGENT</span>
-                                        <form th:action="@{'/donor/requests/' + ${request.blood_request_id} + '/accept'}"
-                                              method="post">
-                                            <input type="hidden" name="token" th:value="${token}">
-                                            <input type="hidden" name="userId" th:value="${userId}">
-                                            <input type="hidden" name="role" th:value="${role}">
-                                            <input type="hidden" name="email" th:value="${email}">
-                                            <button type="submit" class="btn btn-success btn-sm w-100">
-                                                <i class="fas fa-check me-1"></i> Accept Request
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
+                                <i class="fas fa-heart fa-2x mb-3"></i>
+                                <h5 th:text="${donationHistory.size()}">0</h5>
+                                <p class="text-muted small">Total Donations</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-tint fa-2x mb-3"></i>
+                                <h5 th:text="${donor.bloodType}"></h5>
+                                <p class="text-muted small">Your Blood Type</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-calendar fa-2x mb-3"></i>
+                                <h5 th:if="${not donationHistory.empty}"
+                                    th:text="${#temporals.format(donationHistory[0].donationDate, 'dd/MM/yyyy')}">
+                                </h5>
+                                <h5 th:if="${donationHistory.empty}">-</h5>
+                                <p class="text-muted small">Last Donation</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stat-card h-100">
+                            <div class="card-body">
+                                <i class="fas fa-award fa-2x mb-3"></i>
+                                <h5 th:text="${donationHistory.size() == 0 ? 'New' : donationHistory.size() < 5 ? 'Regular' : 'Hero'}"></h5>
+                                <p class="text-muted small">Donor Level</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row mb-4">
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-heart fa-2x mb-3"></i>
-                    <h5 th:text="${donationHistory != null ? donationHistory.size() : 0}">0</h5>
-                    <p class="text-muted mb-0 small">Donations Made</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-tint fa-2x mb-3"></i>
-                    <h5 th:text="${matchingRequests != null ? matchingRequests.size() : 0}">0</h5>
-                    <p class="text-muted mb-0 small">Matching Requests</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-calendar fa-2x mb-3"></i>
-                    <h5>Eligible</h5>
-                    <p class="text-muted mb-0 small">Status</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-star fa-2x mb-3"></i>
-                    <h5 th:text="${donationHistory != null && donationHistory.size() >= 5 ? 'Hero' : donationHistory != null && donationHistory.size() >= 2 ? 'Regular' : 'New'}">New</h5>
-                    <p class="text-muted mb-0 small">Donor Level</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
 
 <div class="text-center mt-4 mb-5">
     <div class="p-4 rounded bg-light">
@@ -454,12 +430,12 @@
         document.getElementById('sidebar').classList.add('open');
         document.getElementById('sidebarOverlay').classList.add('open');
     }
-
     function closeSidebar() {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
     document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)

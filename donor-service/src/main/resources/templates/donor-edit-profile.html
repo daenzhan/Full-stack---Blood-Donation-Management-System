@@ -3,91 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактирование профиля донора</title>
+    <title>Edit Profile - BloodConnect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-red: #dc3545;
+            --dark-red: #c82333;
+            --light-red: #fff5f5;
+            --border-color: #e9ecef;
+            --text-muted: #6c757d;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .navbar {
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
         .profile-container {
             max-width: 600px;
             margin: 2rem auto;
-            padding: 2rem;
+            padding: 2.5rem;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
+
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
-        .btn-custom {
-            background-color: #dc3545;
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+        }
+
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--primary-red);
+            border: 1px solid var(--primary-red);
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-red);
+            border-color: var(--dark-red);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-red);
+            border: 1px solid var(--primary-red);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
             color: white;
-            border: none;
         }
-        .btn-custom:hover {
-            background-color: #c82333;
+
+        .alert {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-red);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .profile-icon:hover {
+            background: var(--dark-red);
+            transform: scale(1.05);
+        }
+
+        .required-field::after {
+            content: " *";
+            color: var(--primary-red);
+        }
+
+        .delete-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu a:hover {
+            background: var(--light-red);
+            color: var(--primary-red);
+        }
+
+        .sidebar-menu a i {
+            width: 20px;
+            margin-right: 0.75rem;
+            color: var(--primary-red);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--primary-red);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .menu-toggle:hover {
+            background: var(--light-red);
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Донорская служба</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link"
-                   th:href="@{/donor/dashboard(token=${token}, userId=${userId}, role=${role}, email=${email})}">
-                    Дашборд
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h5 class="mb-0 fw-bold text-danger">
+            <i class="fas fa-heartbeat me-2"></i>
+            Menu
+        </h5>
+        <button class="menu-toggle" onclick="closeSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <ul class="sidebar-menu">
+        <li>
+            <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-exclamation-triangle"></i>
+                Matching Blood Requests
+            </a>
+        </li>
+        <li>
+            <a th:href="@{'/donor/donation-history?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-history"></i>
+                Donation History
+            </a>
+        </li>
+        <li>
+            <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-search"></i>
+                Find All Requests
+            </a>
+        </li>
+    </ul>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-white bg-white">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-danger" href="/">
+            <i class="fas fa-heartbeat me-2"></i>
+            BloodConnect
+        </a>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-buttons">
+                <span class="navbar-text me-3 text-dark fw-medium" th:text="'Welcome, ' + ${donor.fullName}"></span>
+                <button class="menu-toggle me-2" onclick="openSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a th:href="@{'/donor/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-outline-primary btn-sm me-2">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Profile
                 </a>
-                <a class="nav-link"
-                   th:href="@{/donor/profile(token=${token}, userId=${userId}, role=${role}, email=${email})}">
-                    Профиль
-                </a>
-                <a class="nav-link"
-                   th:href="@{/donor/requests(token=${token}, userId=${userId}, role=${role}, email=${email})}">
-                    Заявки на кровь
+                <a th:href="@{'/donor/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="profile-icon"
+                   data-bs-toggle="tooltip"
+                   title="My Profile">
+                    <i class="fas fa-user"></i>
                 </a>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
+<div class="container">
     <div class="profile-container">
-        <h2 class="text-center mb-4">Редактирование профиля донора</h2>
-
-        <!-- Сообщения об ошибках/успехе -->
-        <div th:if="${param.success}" class="alert alert-success" role="alert">
-            Профиль успешно обновлен!
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark mb-2">
+                <i class="fas fa-user-edit me-2 text-danger"></i>Edit Donor Profile
+            </h2>
+            <p class="text-muted">Update your personal information and preferences</p>
         </div>
-        <div th:if="${param.error}" class="alert alert-danger" role="alert">
-            <span th:text="${param.error}">Ошибка при обновлении профиля</span>
+
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <div>
+                    <strong>Success!</strong> <span th:text="${param.success}"></span>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <div>
+                    <strong>Error!</strong> <span th:text="${param.error}"></span>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
         <form th:action="@{/donor/profile/update}" method="post">
-            <!-- Скрытые параметры -->
+
             <input type="hidden" name="token" th:value="${token}">
             <input type="hidden" name="userId" th:value="${userId}">
             <input type="hidden" name="role" th:value="${role}">
             <input type="hidden" name="email" th:value="${email}">
 
-            <!-- Полное имя -->
             <div class="form-group">
-                <label for="fullName" class="form-label">Полное имя *</label>
+                <label for="fullName" class="form-label required-field">Full Name</label>
                 <input type="text" class="form-control" id="fullName" name="fullName"
                        th:value="${donor.fullName}" required>
             </div>
 
-            <!-- Дата рождения -->
             <div class="form-group">
-                <label for="dateOfBirth" class="form-label">Дата рождения *</label>
+                <label for="dateOfBirth" class="form-label required-field">Date of Birth</label>
                 <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth"
                        th:value="${#temporals.format(donor.dateOfBirth, 'yyyy-MM-dd')}"
                        th:min="${minDate}" th:max="${maxDate}" required>
-                <small class="form-text text-muted">Возраст должен быть от 18 до 65 лет</small>
+                <small class="form-text text-muted">Age must be between 18 and 65 years</small>
             </div>
 
-            <!-- Пол -->
             <div class="form-group">
-                <label for="gender" class="form-label">Пол *</label>
-                <select class="form-control" id="gender" name="gender" required>
-                    <option value="">Выберите пол</option>
+                <label for="gender" class="form-label required-field">Gender</label>
+                <select class="form-select" id="gender" name="gender" required>
+                    <option value="">Select Gender</option>
                     <option th:each="gender : ${genders}"
                             th:value="${gender}"
                             th:text="${gender}"
@@ -95,11 +340,10 @@
                 </select>
             </div>
 
-            <!-- Группа крови -->
             <div class="form-group">
-                <label for="bloodType" class="form-label">Группа крови *</label>
-                <select class="form-control" id="bloodType" name="bloodType" required>
-                    <option value="">Выберите группу крови</option>
+                <label for="bloodType" class="form-label required-field">Blood Type</label>
+                <select class="form-select" id="bloodType" name="bloodType" required>
+                    <option value="">Select Blood Type</option>
                     <option th:each="bloodType : ${bloodTypes}"
                             th:value="${bloodType}"
                             th:text="${bloodType}"
@@ -107,50 +351,105 @@
                 </select>
             </div>
 
-            <!-- Номер телефона -->
             <div class="form-group">
-                <label for="phoneNumber" class="form-label">Номер телефона</label>
+                <label for="phoneNumber" class="form-label">Phone Number</label>
                 <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
                        th:value="${donor.phoneNumber}"
-                       placeholder="+7 (999) 999-99-99">
+                       placeholder="+7 (777) 777-7777">
             </div>
 
-            <!-- Адрес -->
             <div class="form-group">
-                <label for="address" class="form-label">Адрес</label>
+                <label for="address" class="form-label">Address</label>
                 <textarea class="form-control" id="address" name="address"
-                          rows="3" placeholder="Введите ваш адрес"
+                          rows="3" placeholder="Enter your full address"
                           th:text="${donor.address}"></textarea>
             </div>
 
-            <!-- Кнопки -->
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a th:href="@{/donor/profile(token=${token}, userId=${userId}, role=${role}, email=${email})}"
-                   class="btn btn-secondary me-md-2">
-                    Отмена
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                <a th:href="@{'/donor/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-outline-primary me-md-2">
+                    <i class="fas fa-times me-1"></i>Cancel
                 </a>
-                <button type="submit" class="btn btn-custom">
-                    Сохранить изменения
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Save Changes
                 </button>
             </div>
         </form>
 
-        <!-- Кнопка удаления профиля -->
-        <div class="mt-4 pt-3 border-top">
+        <div class="delete-section">
+            <h6 class="text-dark fw-bold mb-3">
+                <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Danger Zone
+            </h6>
+            <p class="text-muted small mb-3">
+                Once you delete your profile, there is no going back. Please be certain.
+            </p>
             <form th:action="@{/donor/profile/delete}" method="post"
-                  onsubmit="return confirm('Вы уверены, что хотите удалить профиль? Это действие нельзя отменить.');">
+                  onsubmit="return confirm('Are you sure you want to delete your profile? This action cannot be undone.');">
                 <input type="hidden" name="token" th:value="${token}">
                 <input type="hidden" name="userId" th:value="${userId}">
                 <input type="hidden" name="role" th:value="${role}">
                 <input type="hidden" name="email" th:value="${email}">
                 <button type="submit" class="btn btn-outline-danger btn-sm">
-                    Удалить профиль
+                    <i class="fas fa-trash me-1"></i>Delete Profile
                 </button>
             </form>
         </div>
     </div>
 </div>
 
+<div class="text-center mt-4 mb-5">
+    <div class="p-4 rounded bg-light">
+        <i class="fas fa-hands-helping fa-lg text-danger mb-3"></i>
+        <h6 class="text-dark mb-2">Together We Save Lives</h6>
+        <p class="text-muted small mb-0">
+            Your profile helps us match you with those in need of blood donations.
+        </p>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('open');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            const firstInvalid = this.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+</script>
 </body>
 </html>
