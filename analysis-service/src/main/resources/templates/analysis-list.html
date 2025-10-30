@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>BloodConnect</title>
+</head>
+<body>
+<h1>Blood Analysis Management</h1>
+
+
+<h2>All Blood Analyses</h2>
+<div th:if="${analyses.empty}">
+  <p>no analyses found</p>
+</div>
+
+<table border="1" style="width: 100%; border-collapse: collapse;" th:unless="${analyses.empty}">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Donor ID</th>
+    <th>Donation ID</th>
+    <th>HIV</th>
+    <th>Hepatitis B</th>
+    <th>Hepatitis C</th>
+    <th>Syphilis</th>
+    <th>Brucellosis</th>
+    <th>ALT</th>
+    <th>Hemoglobin</th>
+    <th>Blood Group</th>
+    <th>Rhesus</th>
+    <th>Analysis Date</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="analysis : ${analyses}">
+    <td th:text="${analysis.analysis_id}"></td>
+    <td th:text="${analysis.donor_id}"></td>
+    <td th:text="${analysis.donation_id}"></td>
+    <td>
+      <span th:if="${analysis.hiv == 'POSITIVE'}" style="color: red;">POSITIVE</span>
+      <span th:if="${analysis.hiv == 'NEGATIVE'}" style="color: green;">NEGATIVE</span>
+      <span th:if="${analysis.hiv == null or analysis.hiv == ''}">-</span>
+      <span th:if="${analysis.hiv != null and analysis.hiv != '' and analysis.hiv != 'POSITIVE' and analysis.hiv != 'NEGATIVE'}" th:text="${analysis.hiv}"></span>
+    </td>
+    <td>
+      <span th:if="${analysis.hepatitisB == 'POSITIVE'}" style="color: red;">POSITIVE</span>
+      <span th:if="${analysis.hepatitisB == 'NEGATIVE'}" style="color: green;">NEGATIVE</span>
+      <span th:if="${analysis.hepatitisB == null or analysis.hepatitisB == ''}">-</span>
+      <span th:if="${analysis.hepatitisB != null and analysis.hepatitisB != '' and analysis.hepatitisB != 'POSITIVE' and analysis.hepatitisB != 'NEGATIVE'}" th:text="${analysis.hepatitisB}"></span>
+    </td>
+    <td>
+      <span th:if="${analysis.hepatitisC == 'POSITIVE'}" style="color: red;">POSITIVE</span>
+      <span th:if="${analysis.hepatitisC == 'NEGATIVE'}" style="color: green;">NEGATIVE</span>
+      <span th:if="${analysis.hepatitisC == null or analysis.hepatitisC == ''}">-</span>
+      <span th:if="${analysis.hepatitisC != null and analysis.hepatitisC != '' and analysis.hepatitisC != 'POSITIVE' and analysis.hepatitisC != 'NEGATIVE'}" th:text="${analysis.hepatitisC}"></span>
+    </td>
+    <td>
+      <span th:if="${analysis.syphilis == 'POSITIVE'}" style="color: red;">POSITIVE</span>
+      <span th:if="${analysis.syphilis == 'NEGATIVE'}" style="color: green;">NEGATIVE</span>
+      <span th:if="${analysis.syphilis == null or analysis.syphilis == ''}">-</span>
+      <span th:if="${analysis.syphilis != null and analysis.syphilis != '' and analysis.syphilis != 'POSITIVE' and analysis.syphilis != 'NEGATIVE'}" th:text="${analysis.syphilis}"></span>
+    </td>
+    <td>
+      <span th:if="${analysis.brucellosis == 'POSITIVE'}" style="color: red;">POSITIVE</span>
+      <span th:if="${analysis.brucellosis == 'NEGATIVE'}" style="color: green;">NEGATIVE</span>
+      <span th:if="${analysis.brucellosis == null or analysis.brucellosis == ''}">-</span>
+      <span th:if="${analysis.brucellosis != null and analysis.brucellosis != '' and analysis.brucellosis != 'POSITIVE' and analysis.brucellosis != 'NEGATIVE'}" th:text="${analysis.brucellosis}"></span>
+    </td>
+    <td th:text="${analysis.alt_level} ?: '-'"></td>
+    <td th:text="${analysis.hemoglobin} ?: '-'"></td>
+    <td th:text="${analysis.blood_group} ?: '-'"></td>
+    <td th:text="${analysis.rhesus_factor} ?: '-'"></td>
+    <td th:text="${#temporals.format(analysis.analysis_date, 'dd.MM.yyyy HH:mm')}"></td>
+    <td>
+      <a th:href="@{/analysis/{id}(id=${analysis.analysis_id})}">View</a> |
+      <a th:href="@{/analysis/edit/{id}(id=${analysis.analysis_id})}">Edit</a> |
+      <a th:href="@{/analysis/delete/{id}(id=${analysis.analysis_id})}"
+         onclick="return confirm('Delete this analysis?')">Delete</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

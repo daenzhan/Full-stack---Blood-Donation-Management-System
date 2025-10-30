@@ -1,6 +1,6 @@
 spring:
   application:
-    name: donation-history-service
+    name: analysis-service
   datasource:
     url: jdbc:postgresql://localhost:5432/db_blood_donation
     username: postgres
@@ -16,7 +16,7 @@ spring:
         format_sql: true
 
 server:
-  port: 8085
+  port: 8086
 
 eureka:
   client:

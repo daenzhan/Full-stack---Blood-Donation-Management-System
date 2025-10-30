@@ -3,6 +3,7 @@ package org.example.analysisservice;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AnalysisService {
@@ -16,7 +17,7 @@ public class AnalysisService {
         return analysisRepository.findAll();
     }
 
-    public Analysis get_by_id (Long analysis_id){
+    public Optional<Analysis> get_by_id (Long analysis_id){
         return analysisRepository.findById(analysis_id);
     }
 

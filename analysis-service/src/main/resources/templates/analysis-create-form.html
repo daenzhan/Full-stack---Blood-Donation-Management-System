@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>BloodConnect</title>
+</head>
+<body>
+<h1>Create New Blood Analysis</h1>
+
+<form th:action="@{/analysis}" th:object="${analysis}" method="post">
+    <table>
+        <tr>
+            <td>Donor ID:</td>
+            <td><input type="number" th:field="*{donor_id}" required></td>
+        </tr>
+        <tr>
+            <td>Donation ID:</td>
+            <td><input type="number" th:field="*{donation_id}" required></td>
+        </tr>
+        <tr>
+            <td>HIV:</td>
+            <td>
+                <select th:field="*{hiv}">
+                    <option value="">not tested</option>
+                    <option value="NEGATIVE">NEGATIVE</option>
+                    <option value="POSITIVE">POSITIVE</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Hepatitis B:</td>
+            <td>
+                <select th:field="*{hepatitisB}">
+                    <option value="">not tested</option>
+                    <option value="NEGATIVE">NEGATIVE</option>
+                    <option value="POSITIVE">POSITIVE</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Hepatitis C:</td>
+            <td>
+                <select th:field="*{hepatitisC}">
+                    <option value="">Not Tested</option>
+                    <option value="NEGATIVE">NEGATIVE</option>
+                    <option value="POSITIVE">POSITIVE</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Syphilis:</td>
+            <td>
+                <select th:field="*{syphilis}">
+                    <option value="">not tested</option>
+                    <option value="NEGATIVE">NEGATIVE</option>
+                    <option value="POSITIVE">POSITIVE</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Brucellosis:</td>
+            <td>
+                <select th:field="*{brucellosis}">
+                    <option value="">not tested</option>
+                    <option value="NEGATIVE">NEGATIVE</option>
+                    <option value="POSITIVE">POSITIVE</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>ALT Level:</td>
+            <td><input type="number" step="0.1" th:field="*{alt_level}"></td>
+        </tr>
+        <tr>
+            <td>Hemoglobin:</td>
+            <td><input type="number" step="0.1" th:field="*{hemoglobin}"></td>
+        </tr>
+        <tr>
+            <td>Blood Group:</td>
+            <td>
+                <select th:field="*{blood_group}">
+                    <option value="">Select Blood Group</option>
+                    <option th:each="group : ${blood_groups}"
+                            th:value="${group}"
+                            th:text="${group}"></option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Rhesus Factor:</td>
+            <td>
+                <select th:field="*{rhesus_factor}">
+                    <option value="">Select Rhesus Factor</option>
+                    <option th:each="factor : ${rhesus_factors}"
+                            th:value="${factor}"
+                            th:text="${factor}"></option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Technician Notes:</td>
+            <td><textarea th:field="*{technician_notes}" rows="4" cols="50"></textarea></td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <button type="submit">Create Analysis</button>
+        <a th:href="@{/analysis}" style="margin-left: 10px;">Cancel</a>
+    </div>
+</form>
+</body>
+</html>

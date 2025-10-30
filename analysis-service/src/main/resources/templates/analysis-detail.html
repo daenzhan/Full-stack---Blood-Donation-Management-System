@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>BloodConnect</title>
+</head>
+<body>
+<h1>Analysis Details</h1>
+
+<table border="1" style="border-collapse: collapse;">
+    <tr>
+        <th>Donor ID</th>
+        <td th:text="${analysis.donor_id}"></td>
+    </tr>
+    <tr>
+        <th>Donation ID</th>
+        <td th:text="${analysis.donation_id}"></td>
+    </tr>
+    <tr>
+        <th>HIV</th>
+        <td>
+            <span th:if="${analysis.hiv == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
+            <span th:if="${analysis.hiv == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
+            <span th:if="${analysis.hiv == 'PENDING'}" style="color: orange;">PENDING</span>
+            <span th:if="${analysis.hiv == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
+            <span th:if="${analysis.hiv == null or analysis.hiv == '' or analysis.hiv == 'not tested'}">not tested</span>
+        </td>
+    </tr>
+    <tr>
+        <th>Hepatitis B</th>
+        <td>
+            <span th:if="${analysis.hepatitisB == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
+            <span th:if="${analysis.hepatitisB == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
+            <span th:if="${analysis.hepatitisB == 'PENDING'}" style="color: orange;">PENDING</span>
+            <span th:if="${analysis.hepatitisB == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
+            <span th:if="${analysis.hepatitisB == null or analysis.hepatitisB == '' or analysis.hepatitisB == 'not tested'}">not tested</span>
+        </td>
+    </tr>
+    <tr>
+        <th>Hepatitis C</th>
+        <td>
+            <span th:if="${analysis.hepatitisC == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
+            <span th:if="${analysis.hepatitisC == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
+            <span th:if="${analysis.hepatitisC == 'PENDING'}" style="color: orange;">PENDING</span>
+            <span th:if="${analysis.hepatitisC == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
+            <span th:if="${analysis.hepatitisC == null or analysis.hepatitisC == '' or analysis.hepatitisC == 'not tested'}">not tested</span>
+        </td>
+    </tr>
+    <tr>
+        <th>Syphilis</th>
+        <td>
+            <span th:if="${analysis.syphilis == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
+            <span th:if="${analysis.syphilis == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
+            <span th:if="${analysis.syphilis == 'PENDING'}" style="color: orange;">PENDING</span>
+            <span th:if="${analysis.syphilis == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
+            <span th:if="${analysis.syphilis == null or analysis.syphilis == '' or analysis.syphilis == 'not tested'}">not tested</span>
+        </td>
+    </tr>
+    <tr>
+        <th>Brucellosis</th>
+        <td>
+            <span th:if="${analysis.brucellosis == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
+            <span th:if="${analysis.brucellosis == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
+            <span th:if="${analysis.brucellosis == 'PENDING'}" style="color: orange;">PENDING</span>
+            <span th:if="${analysis.brucellosis == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
+            <span th:if="${analysis.brucellosis == null or analysis.brucellosis == '' or analysis.brucellosis == 'not tested'}">not tested</span>
+        </td>
+    </tr>
+    <tr>
+        <th>ALT Level</th>
+        <td th:text="${analysis.alt_level} ?: 'not specified'"></td>
+    </tr>
+    <tr>
+        <th>Hemoglobin</th>
+        <td th:text="${analysis.hemoglobin} ?: 'not specified'"></td>
+    </tr>
+    <tr>
+        <th>Blood Group</th>
+        <td th:text="${analysis.blood_group} ?: 'not specified'"></td>
+    </tr>
+    <tr>
+        <th>Rhesus Factor</th>
+        <td th:text="${analysis.rhesus_factor} ?: 'not specified'"></td>
+    </tr>
+    <tr>
+        <th>Analysis Date</th>
+        <td th:text="${#temporals.format(analysis.analysis_date, 'dd.MM.yyyy HH:mm')}"></td>
+    </tr>
+    <tr>
+        <th>Technician Notes</th>
+        <td th:text="${analysis.technician_notes} ?: 'no notes'"></td>
+    </tr>
+</table>
+
+<div style="margin-top: 20px;">
+    <a th:href="@{/analysis/edit/{id}(id=${analysis.analysis_id})}">Edit</a> |
+    <a th:href="@{/analysis}">Back to List</a>
+</div>
+</body>
+</html>

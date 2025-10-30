@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/db_blood_donation
     username: postgres
-    password: Qt4076042
+    password: 888
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -18,11 +18,10 @@ spring:
 server:
   port: 8082
 
-# ДОБАВЬТЕ ЭТИ НАСТРОЙКИ ДЛЯ YANDEX MAPS API
 yandex:
   maps:
     api:
-      key: "92fb74a1-4389-4f41-8801-8e9d93e4548c"  # Замените на ваш реальный ключ
+      key: "92fb74a1-4389-4f41-8801-8e9d93e4548c"
 
 jwt:
   secret: "mySuperSecureJWTSecretKeyForBloodDonationSystem2024WithMoreThan64CharactersToEnsure512bitSecurity"

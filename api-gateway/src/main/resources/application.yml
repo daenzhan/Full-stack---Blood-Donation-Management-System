@@ -31,6 +31,10 @@ spring:
           uri: http://localhost:8085
           predicates:
             - Path=/donation-history/**
+        - id: analysis-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/analysis/**
 eureka:
   client:
     register-with-eureka: true

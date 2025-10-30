@@ -1,9 +1,11 @@
 package org.example.analysisservice;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "analysis")
 public class Analysis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,25 +13,32 @@ public class Analysis {
 
     private Long donation_id;
     private Long donor_id;
-    private Boolean  hepatitisB;
-    private Boolean  hepatitisB;
-    private Boolean syphilis;
+
+    private String hiv; // ВИЧ
+    private String brucellosis;
+    private String  hepatitisB;
+    private String  hepatitisC;
+    private String syphilis;
     private Double alt_level;
     private String blood_group;
     private String rhesus_factor;
+    private Double hemoglobin;
     private LocalDateTime analysis_date;
     private String technician_notes;
 
-    public Analysis(Long analysis_id, Long donation_id, Long donor_id, Boolean hepatitisB, Boolean hepatitisB1, Boolean syphilis, Double alt_level, String blood_group, String rhesus_factor, LocalDateTime analysis_date, String technician_notes) {
+    public Analysis(Long analysis_id, Long donation_id, Long donor_id, String hiv, String brucellosis, String hepatitisB, String hepatitisC, String syphilis, Double alt_level, String blood_group, String rhesus_factor, Double hemoglobin, LocalDateTime analysis_date, String technician_notes) {
         this.analysis_id = analysis_id;
         this.donation_id = donation_id;
         this.donor_id = donor_id;
+        this.hiv = hiv;
+        this.brucellosis = brucellosis;
         this.hepatitisB = hepatitisB;
-        this.hepatitisB = hepatitisB1;
+        this.hepatitisC = hepatitisC;
         this.syphilis = syphilis;
         this.alt_level = alt_level;
         this.blood_group = blood_group;
         this.rhesus_factor = rhesus_factor;
+        this.hemoglobin = hemoglobin;
         this.analysis_date = analysis_date;
         this.technician_notes = technician_notes;
     }
@@ -60,19 +69,43 @@ public class Analysis {
         this.donor_id = donor_id;
     }
 
-    public Boolean getHepatitisB() {
+    public String getHiv() {
+        return hiv;
+    }
+
+    public void setHiv(String hiv) {
+        this.hiv = hiv;
+    }
+
+    public String getBrucellosis() {
+        return brucellosis;
+    }
+
+    public void setBrucellosis(String brucellosis) {
+        this.brucellosis = brucellosis;
+    }
+
+    public String getHepatitisB() {
         return hepatitisB;
     }
 
-    public void setHepatitisB(Boolean hepatitisB) {
+    public void setHepatitisB(String hepatitisB) {
         this.hepatitisB = hepatitisB;
     }
 
-    public Boolean getSyphilis() {
+    public String getHepatitisC() {
+        return hepatitisC;
+    }
+
+    public void setHepatitisC(String hepatitisC) {
+        this.hepatitisC = hepatitisC;
+    }
+
+    public String getSyphilis() {
         return syphilis;
     }
 
-    public void setSyphilis(Boolean syphilis) {
+    public void setSyphilis(String syphilis) {
         this.syphilis = syphilis;
     }
 
@@ -98,6 +131,14 @@ public class Analysis {
 
     public void setRhesus_factor(String rhesus_factor) {
         this.rhesus_factor = rhesus_factor;
+    }
+
+    public Double getHemoglobin() {
+        return hemoglobin;
+    }
+
+    public void setHemoglobin(Double hemoglobin) {
+        this.hemoglobin = hemoglobin;
     }
 
     public LocalDateTime getAnalysis_date() {
