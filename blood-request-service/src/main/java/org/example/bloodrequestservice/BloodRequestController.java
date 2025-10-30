@@ -1,5 +1,6 @@
 package org.example.bloodrequestservice;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,16 +14,20 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/requests")
+@Slf4j
 public class BloodRequestController {
 
     private final BloodRequestService service;
     private final EmailService emailService;
     private final BloodRequestRepository repository;
+    private final MedCenterFeignClient medCenterFeignClient;
 
-    public BloodRequestController(BloodRequestService service, EmailService emailService, BloodRequestRepository repository) {
+    public BloodRequestController(BloodRequestService service, EmailService emailService, BloodRequestRepository repository, MedCenterFeignClient medCenterFeignClient) {
         this.service = service;
         this.emailService = emailService;
         this.repository = repository;
+        this.medCenterFeignClient = medCenterFeignClient;
+
     }
 
     @GetMapping
@@ -194,6 +199,10 @@ public class BloodRequestController {
             @RequestParam(required = false) String rheusFactor,
             @RequestParam(required = false) String componentType,
             @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String token,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String email,
             Model model) {
 
         List<BloodRequest> requests;
@@ -210,13 +219,30 @@ public class BloodRequestController {
             }
         }
 
+        // Получаем данные медицинского центра
+        MedCenterDto medCenter = null;
+        try {
+            medCenter = medCenterFeignClient.get_medcenter_by_id(medcenter_id);
+        } catch (Exception e) {
+            log.warn("Could not fetch medical center details for id: {}", medcenter_id, e);
+            // Создаем временный объект если не удалось получить данные
+            medCenter = new MedCenterDto();
+            medCenter.setMed_center_id(medcenter_id);
+            medCenter.setName("Medical Center " + medcenter_id);
+        }
+
         model.addAttribute("requests", requests);
         model.addAttribute("medcenter_id", medcenter_id);
         model.addAttribute("medcenterName", service.getMedCenterName(medcenter_id));
+        model.addAttribute("medCenter", medCenter); // ← ДОБАВЬТЕ ЭТУ СТРОКУ
         model.addAttribute("bloodGroup", bloodGroup);
         model.addAttribute("rheusFactor", rheusFactor);
         model.addAttribute("componentType", componentType);
         model.addAttribute("sort", sort);
+        model.addAttribute("token", token);
+        model.addAttribute("userId", userId);
+        model.addAttribute("role", role);
+        model.addAttribute("email", email);
         model.addAttribute("sortOptions", List.of(
                 "deadline_asc: По сроку (сначала ближайшие)",
                 "deadline_desc: По сроку (сначала дальние)",

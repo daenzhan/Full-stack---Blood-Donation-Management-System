@@ -1,27 +1,76 @@
-2025-10-18 00:00:00 [http-nio-8083-exec-6] DEBUG o.s.web.servlet.DispatcherServlet - GET "/requests/11?user_id=14&role=DONOR&email=aru.nur.2019@gmail.com", parameters={masked}
-2025-10-18 00:00:00 [http-nio-8083-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to org.example.bloodrequestservice.BloodRequestController#view_details(Long, Model)
-2025-10-18 00:00:00 [http-nio-8083-exec-6] DEBUG org.hibernate.SQL - 
-    select
-        br1_0.blood_request_id,
-        br1_0.blood_group,
-        br1_0.comments,
-        br1_0.component_type,
-        br1_0.deadline,
-        br1_0.medcenter_id,
-        br1_0.rhesus_factor,
-        br1_0.volume 
-    from
-        blood_requests br1_0 
-    where
-        br1_0.blood_request_id=?
-2025-10-18 00:00:00 [http-nio-8083-exec-6] DEBUG feign.template.Template - Explicit slash decoding specified, decoding all slashes in uri
-2025-10-18 00:00:00 [http-nio-8083-exec-6] DEBUG o.s.w.c.HttpMessageConverterExtractor - Reading to [org.example.bloodrequestservice.MedCenterDto]
-2025-10-18 00:00:00 [http-nio-8083-exec-6] DEBUG o.s.w.s.v.ContentNegotiatingViewResolver - Selected 'text/html' given [text/html, application/xhtml+xml, image/avif, image/webp, image/apng, application/xml;q=0.9, */*;q=0.8, application/signed-exchange;v=b3;q=0.7]
-2025-10-18 00:00:00 [http-nio-8083-exec-6] DEBUG o.s.web.servlet.DispatcherServlet - Completed 200 OK
-2025-10-18 00:00:21 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - HTTP GET http://localhost:8761/eureka/apps/delta
-2025-10-18 00:00:21 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - Accept=[application/json, application/*+json]
-2025-10-18 00:00:21 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - Response 200 OK
-2025-10-18 00:00:21 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - Reading to [org.springframework.cloud.netflix.eureka.http.EurekaApplications]
-2025-10-18 00:00:21 [DiscoveryClient-HeartbeatExecutor-%d] DEBUG o.s.web.client.RestTemplate - HTTP PUT http://localhost:8761/eureka/apps/BLOOD-REQUEST-SERVICE/DESKTOP-S0GM5NP:blood-request-service:8083?status=UP&lastDirtyTimestamp=1760727471463
-2025-10-18 00:00:21 [DiscoveryClient-HeartbeatExecutor-%d] DEBUG o.s.web.client.RestTemplate - Accept=[application/json, application/*+json]
-2025-10-18 00:00:21 [DiscoveryClient-HeartbeatExecutor-%d] DEBUG o.s.web.client.RestTemplate - Response 200 OK
+2025-10-30 15:19:50 [main] INFO  o.e.b.BloodRequestServiceApplication - Starting BloodRequestServiceApplication using Java 21.0.7 with PID 20576 (C:\Users\tamar\OneDrive\Desktop\Full-stack---Blood-Donation-Management-System\Full-stack---Blood-Donation-Management-System\blood-request-service\build\classes\java\main started by tamar in C:\Users\tamar\OneDrive\Desktop\Full-stack---Blood-Donation-Management-System\Full-stack---Blood-Donation-Management-System)
+2025-10-30 15:19:50 [main] DEBUG o.e.b.BloodRequestServiceApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-10-30 15:19:50 [main] INFO  o.e.b.BloodRequestServiceApplication - No active profile set, falling back to 1 default profile: "default"
+2025-10-30 15:19:50 [main] DEBUG o.s.c.o.FeignClientsRegistrar$1 - Identified candidate component class: file [C:\Users\tamar\OneDrive\Desktop\Full-stack---Blood-Donation-Management-System\Full-stack---Blood-Donation-Management-System\blood-request-service\build\classes\java\main\org\example\bloodrequestservice\MedCenterFeignClient.class]
+2025-10-30 15:19:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-30 15:19:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 112 ms. Found 1 JPA repository interface.
+2025-10-30 15:19:51 [main] INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=83a03821-113f-384c-8f63-a08b762f25cf
+2025-10-30 15:19:51 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8083 (http)
+2025-10-30 15:19:51 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-10-30 15:19:51 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-10-30 15:19:51 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-10-30 15:19:51 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1241 ms
+2025-10-30 15:19:51 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-10-30 15:19:51 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-10-30 15:19:51 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-10-30 15:19:51 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-10-30 15:19:51 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-10-30 15:19:52 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2fd4312a
+2025-10-30 15:19:52 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-10-30 15:19:52 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-10-30 15:19:52 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.2
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-10-30 15:19:52 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-10-30 15:19:52 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-10-30 15:19:53 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-10-30 15:19:53 [main] DEBUG o.s.c.o.FeignClientFactoryBean - Creating a FeignClientFactoryBean.
+2025-10-30 15:19:53 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-10-30 15:19:53 [main] INFO  o.s.c.o.FeignClientFactoryBean - For 'med-center-service' URL not provided. Will try picking an instance via load-balancing.
+2025-10-30 15:19:54 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 16 mappings in 'requestMappingHandlerMapping'
+2025-10-30 15:19:54 [main] DEBUG o.s.w.s.h.SimpleUrlHandlerMapping - Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-10-30 15:19:54 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-10-30 15:19:54 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-10-30 15:19:54 [main] INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses RestTemplate.
+2025-10-30 15:19:54 [main] WARN  o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-10-30 15:19:54 [main] INFO  o.s.c.n.eureka.InstanceInfoFactory - Setting initial instance status as: STARTING
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Initializing Eureka in region us-east-1
+2025-10-30 15:19:54 [main] INFO  c.n.d.s.r.aws.ConfigClusterResolver - Resolving eureka endpoints via configuration
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Disable delta property : false
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Single vip registry refresh property : null
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Force full registry fetch : false
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Application is null : false
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Registered Applications size is zero : true
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Application version is -1: true
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Getting all instance registry info from the eureka server
+2025-10-30 15:19:54 [main] DEBUG o.s.web.client.RestTemplate - HTTP GET http://localhost:8761/eureka/apps/
+2025-10-30 15:19:54 [main] DEBUG o.s.web.client.RestTemplate - Accept=[application/json, application/*+json]
+2025-10-30 15:19:54 [main] DEBUG o.s.web.client.RestTemplate - Response 200 OK
+2025-10-30 15:19:54 [main] DEBUG o.s.web.client.RestTemplate - Reading to [org.springframework.cloud.netflix.eureka.http.EurekaApplications]
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - The response status is 200
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Starting heartbeat executor: renew interval is: 30
+2025-10-30 15:19:54 [main] INFO  c.n.discovery.InstanceInfoReplicator - InstanceInfoReplicator onDemand update allowed rate per min is 4
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Discovery Client initialized at timestamp 1761819594854 with initial instances count: 1
+2025-10-30 15:19:54 [main] INFO  o.s.c.n.e.s.EurekaServiceRegistry - Registering application BLOOD-REQUEST-SERVICE with eureka with status UP
+2025-10-30 15:19:54 [main] INFO  c.netflix.discovery.DiscoveryClient - Saw local status change event StatusChangeEvent [timestamp=1761819594859, current=UP, previous=STARTING]
+2025-10-30 15:19:54 [DiscoveryClient-InstanceInfoReplicator-%d] INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_BLOOD-REQUEST-SERVICE/Tamara:blood-request-service:8083: registering service...
+2025-10-30 15:19:54 [DiscoveryClient-InstanceInfoReplicator-%d] DEBUG o.s.web.client.RestTemplate - HTTP POST http://localhost:8761/eureka/apps/BLOOD-REQUEST-SERVICE
+2025-10-30 15:19:54 [DiscoveryClient-InstanceInfoReplicator-%d] DEBUG o.s.web.client.RestTemplate - Accept=[application/json, application/*+json]
+2025-10-30 15:19:54 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8083 (http) with context path '/'
+2025-10-30 15:19:54 [main] INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 8083
+2025-10-30 15:19:54 [DiscoveryClient-InstanceInfoReplicator-%d] DEBUG o.s.web.client.RestTemplate - Writing [InstanceInfo [instanceId = Tamara:blood-request-service:8083, appName = BLOOD-REQUEST-SERVICE, hostName = Tamara, status = UP, ipAddr = 192.168.8.100, port = 8083, securePort = 443, dataCenterInfo = com.netflix.appinfo.MyDataCenterInfo@7101fb1c] as "application/json"
+2025-10-30 15:19:54 [main] INFO  o.e.b.BloodRequestServiceApplication - Started BloodRequestServiceApplication in 5.348 seconds (process running for 6.072)
+2025-10-30 15:19:54 [DiscoveryClient-InstanceInfoReplicator-%d] DEBUG o.s.web.client.RestTemplate - Response 204 NO_CONTENT
+2025-10-30 15:19:54 [DiscoveryClient-InstanceInfoReplicator-%d] INFO  c.netflix.discovery.DiscoveryClient - DiscoveryClient_BLOOD-REQUEST-SERVICE/Tamara:blood-request-service:8083 - registration status: 204
+2025-10-30 15:20:24 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - HTTP GET http://localhost:8761/eureka/apps/delta
+2025-10-30 15:20:24 [DiscoveryClient-HeartbeatExecutor-%d] DEBUG o.s.web.client.RestTemplate - HTTP PUT http://localhost:8761/eureka/apps/BLOOD-REQUEST-SERVICE/Tamara:blood-request-service:8083?status=UP&lastDirtyTimestamp=1761819594858
+2025-10-30 15:20:24 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - Accept=[application/json, application/*+json]
+2025-10-30 15:20:24 [DiscoveryClient-HeartbeatExecutor-%d] DEBUG o.s.web.client.RestTemplate - Accept=[application/json, application/*+json]
+2025-10-30 15:20:24 [DiscoveryClient-HeartbeatExecutor-%d] DEBUG o.s.web.client.RestTemplate - Response 200 OK
+2025-10-30 15:20:24 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - Response 200 OK
+2025-10-30 15:20:24 [DiscoveryClient-CacheRefreshExecutor-%d] DEBUG o.s.web.client.RestTemplate - Reading to [org.springframework.cloud.netflix.eureka.http.EurekaApplications]

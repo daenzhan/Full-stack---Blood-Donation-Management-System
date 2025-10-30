@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Center Profile - BloodConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #dc3545;
+            --dark-red: #c82333;
+            --light-red: #fff5f5;
+            --border-color: #e9ecef;
+            --text-muted: #6c757d;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .navbar {
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+            color: white;
+            padding: 2.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem;
+        }
+
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--primary-red);
+            border: 1px solid var(--primary-red);
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-red);
+            border-color: var(--dark-red);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-red);
+            border: 1px solid var(--primary-red);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+            color: white;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35rem 0.65rem;
+            border-radius: 4px;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-red);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .profile-icon:hover {
+            background: var(--dark-red);
+            transform: scale(1.05);
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu a:hover {
+            background: var(--light-red);
+            color: var(--primary-red);
+        }
+
+        .sidebar-menu a i {
+            width: 20px;
+            margin-right: 0.75rem;
+            color: var(--primary-red);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--primary-red);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .menu-toggle:hover {
+            background: var(--light-red);
+        }
+
+        .info-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .stat-card {
+            border-left: 4px solid var(--primary-red);
+            text-align: center;
+            padding: 1.5rem 1rem;
+        }
+
+        .stat-card i {
+            color: var(--primary-red);
+            margin-bottom: 1rem;
+        }
+
+        .stat-card h5 {
+            color: var(--primary-red);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Обновленные стили для соответствия примеру */
+        .blood-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            color: var(--primary-red);
+            border: 1px solid var(--border-color);
+        }
+
+        .urgent-badge {
+            background: #ffc107;
+            color: #000;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .request-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h5 class="mb-0 fw-bold text-danger">
+            <i class="fas fa-heartbeat me-2"></i>
+            Menu
+        </h5>
+        <button class="menu-toggle" onclick="closeSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <ul class="sidebar-menu">
+        <li>
+            <a th:href="@{'/medcenters/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+        </li>
+        <li>
+            <a th:href="@{'/requests'}">
+                <i class="fas fa-tint"></i>
+                All Blood Requests
+            </a>
+        </li>
+        <li>
+            <a th:href="@{'/requests/medcenter/' + ${medCenter.med_center_id}}">
+                <i class="fas fa-list-alt"></i>
+                My Requests
+            </a>
+        </li>
+        <li>
+            <a th:href="@{'/requests/new'}">
+                <i class="fas fa-plus-circle"></i>
+                New Request
+            </a>
+        </li>
+        <li>
+            <a th:href="@{'/medcenters/map'}">
+                <i class="fas fa-map-marker-alt"></i>
+                Centers Map
+            </a>
+        </li>
+    </ul>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-white bg-white">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-danger" href="/">
+            <i class="fas fa-heartbeat me-2"></i>
+            BloodConnect
+        </a>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-buttons">
+                <span class="navbar-text me-3 text-dark fw-medium" th:text="'Welcome, ' + ${medCenter.name}"></span>
+                <button class="menu-toggle me-2" onclick="openSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a th:href="@{'http://localhost:8080/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-outline-primary btn-sm me-2">
+                    <i class="fas fa-home me-1"></i> Home
+                </a>
+                <a th:href="@{'/medcenters/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold">Medical Center Profile</h1>
+                <p class="lead mb-0">Complete information about your healthcare facility</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <span class="badge blood-badge fw-bold" th:text="${medCenter.name}"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Profile Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0 fw-bold text-dark">
+                            <i class="fas fa-id-card me-2"></i>
+                            <span th:text="${medCenter.name}"></span>
+                        </h3>
+                        <span class="status-badge bg-light text-primary">
+                            <i class="fas fa-check-circle me-1"></i>Verified Partner
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-danger border-bottom pb-2 mb-4 fw-bold">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Basic Information
+                            </h5>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-hospital me-2"></i>Center Name
+                            </strong>
+                            <span th:text="${medCenter.name}"></span>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-user-md me-2"></i>Director Name
+                            </strong>
+                            <span th:text="${medCenter.directorName} ?: 'Not specified'"></span>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-map-marker-alt me-2"></i>Location
+                            </strong>
+                            <span th:text="${medCenter.location}"></span>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-stethoscope me-2"></i>Specialization
+                            </strong>
+                            <span th:text="${medCenter.specialization} ?: 'Not specified'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-danger border-bottom pb-2 mb-4 fw-bold">
+                                <i class="fas fa-address-book me-2"></i>
+                                Contact Information
+                            </h5>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-phone me-2"></i>Phone Number
+                            </strong>
+                            <span th:text="${medCenter.phone}"></span>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </strong>
+                            <span th:text="${medCenter.email} ?: 'Not specified'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-danger border-bottom pb-2 mb-4 fw-bold">
+                                <i class="fas fa-cogs me-2"></i>
+                                Additional Information
+                            </h5>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-id-badge me-2"></i>Center ID
+                            </strong>
+                            <span th:text="${medCenter.med_center_id}"></span>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-user me-2"></i>User ID
+                            </strong>
+                            <span th:text="${medCenter.user_id}"></span>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-calendar me-2"></i>Registration Date
+                            </strong>
+                            <span th:text="${#temporals.format(medCenter.createdAt, 'dd MMMM yyyy')}"></span>
+                        </div>
+
+                        <div class="col-md-6 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-map-pin me-2"></i>Coordinates
+                            </strong>
+                            <span th:if="${medCenter.latitude != null and medCenter.longitude != null}"
+                                  th:text="${'Lat: ' + medCenter.latitude + ', Lng: ' + medCenter.longitude}">
+            </span>
+                            <span th:if="${medCenter.latitude == null or medCenter.longitude == null}"
+                                  class="text-muted">Not set</span>
+                        </div>
+                    </div>
+
+                    <!-- License Information -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-danger border-bottom pb-2 mb-4 fw-bold">
+                                <i class="fas fa-file-contract me-2"></i>
+                                License Information
+                            </h5>
+                        </div>
+
+                        <div class="col-12 info-item">
+                            <strong class="text-danger d-block mb-1">
+                                <i class="fas fa-file-medical me-2"></i>License Status
+                            </strong>
+                            <div th:if="${medCenter.license_file != null}">
+                <span class="status-badge bg-danger text-white me-2">
+                    <i class="fas fa-check me-1"></i>Uploaded
+                </span>
+                                <span th:text="${medCenter.license_file}"></span>
+                                <div class="mt-2">
+                                    <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license'}"
+                                       class="btn btn-outline-danger btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i>View License
+                                    </a>
+                                    <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/license/download'}"
+                                       class="btn btn-danger btn-sm">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </a>
+                                </div>
+                            </div>
+                            <div th:if="${medCenter.license_file == null}">
+                <span class="status-badge bg-warning text-dark">
+                    <i class="fas fa-exclamation-triangle me-1"></i>Not Uploaded
+                </span>
+                                <p class="text-muted mt-2 mb-0">No license file has been uploaded yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light border-0 py-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                Last updated: <span th:text="${#temporals.format(medCenter.createdAt, 'dd MMMM yyyy HH:mm')}"></span>
+                            </small>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a th:href="@{'/medcenters/' + ${medCenter.med_center_id} + '/edit'}"
+                               class="btn btn-danger">
+                                <i class="fas fa-edit me-1"></i>Edit Profile
+                            </a>
+                            <a th:href="@{'/medcenters/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                               class="btn btn-outline-danger">
+                                <i class="fas fa-tachometer-alt me-1"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('open');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>

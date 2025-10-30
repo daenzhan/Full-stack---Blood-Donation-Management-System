@@ -450,4 +450,56 @@ public class MedCenterController {
             this.address = address;
         }
     }
+
+    @GetMapping("/dashboard")
+    public String showDashboard(
+            @RequestParam String token,
+            @RequestParam Long userId,
+            @RequestParam String role,
+            @RequestParam String email,
+            Model model) {
+
+        try {
+            // Получаем профиль медцентра
+            MedCenter medCenter = medCenterService.getProfileByUserId(userId);
+
+
+            model.addAttribute("medCenter", medCenter);
+            model.addAttribute("token", token);
+            model.addAttribute("userId", userId);
+            model.addAttribute("role", role);
+            model.addAttribute("email", email);
+
+        } catch (Exception e) {
+            // Если профиль не найден, перенаправляем на заполнение
+            return "redirect:/medcenters/complete-profile?token=" + token +
+                    "&userId=" + userId + "&role=" + role + "&email=" + email;
+        }
+
+        return "med-center-dashboard";
+    }
+
+    @GetMapping("/profile")
+    public String showProfile(
+            @RequestParam String token,
+            @RequestParam Long userId,
+            @RequestParam String role,
+            @RequestParam String email,
+            Model model) {
+
+        try {
+            MedCenter medCenter = medCenterService.getProfileByUserId(userId);
+            model.addAttribute("medCenter", medCenter);
+            model.addAttribute("token", token);
+            model.addAttribute("userId", userId);
+            model.addAttribute("role", role);
+            model.addAttribute("email", email);
+
+        } catch (Exception e) {
+            return "redirect:/medcenters/complete-profile?token=" + token +
+                    "&userId=" + userId + "&role=" + role + "&email=" + email;
+        }
+
+        return "med-center-profile";
+    }
 }

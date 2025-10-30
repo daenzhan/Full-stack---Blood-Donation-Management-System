@@ -42,19 +42,24 @@
         </div>
     </div>
 
-            <div th:if="${role == 'MED_CENTER'}" class="mt-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Medical Center Dashboard</h5>
-                        <p class="card-text">Welcome back! You can now:</p>
-                        <ul>
-                            <li>Complete your center profile</li>
-                            <li>Manage blood donations</li>
-                            <li>Create blood requests</li>
-                        </ul>
-                    </div>
-                </div>
+    <div th:if="${role == 'MED_CENTER'}" class="mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Medical Center Dashboard</h5>
+                <p class="card-text">Welcome back! You can now:</p>
+                <ul>
+                    <li>Complete your center profile</li>
+                    <li>Manage blood donations</li>
+                    <li>Create blood requests</li>
+                    <li>View statistics and analytics</li>
+                </ul>
+                <a th:href="@{'/medcenters/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-danger me-2">View Dashboard</a>
+                <a th:href="@{'/medcenters/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-outline-danger">View Profile</a>
             </div>
+        </div>
+    </div>
 
             <!-- Для админов -->
             <div th:if="${role == 'ADMIN'}" class="mt-4">
@@ -72,52 +77,6 @@
                 </div>
             </div>
 
-            <!-- ТОЛЬКО ДЛЯ МЕДЦЕНТРА -->
-            <div th:if="${role == 'MED_CENTER'}" class="mt-4">
-                <div class="card">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">Actions</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- Blood Requests -->
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-danger">
-                                    <div class="card-body text-center">
-                                        <div class="text-danger mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-droplet" viewBox="0 0 16 16">
-                                                <path fill-rule="evenodd" d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6zM6.646 4.646l.708.708c-.29.29-.864.808-1.51 1.519C4.838 7.487 4 8.745 4 10a4 4 0 0 0 8 0c0-1.255-.837-2.513-1.844-3.127-.646-.71-1.22-1.228-1.51-1.519l.708-.708c.23.23.59.537 1.003.93C11.152 6.396 12 7.734 12 10a4 4 0 0 1-8 0c0-2.266.848-3.604 1.643-4.424.414-.393.773-.7 1.003-.93z"/>
-                                            </svg>
-                                        </div>
-                                        <h6>Blood Requests</h6>
-                                        <p class="text-muted small">Manage all blood requests</p>
-                                        <a th:href="@{/requests}" class="btn btn-sm btn-danger">See</a>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <!-- Donors -->
-                            <div class="col-md-4 mb-3">
-                                <div class="card border-danger">
-                                    <div class="card-body text-center">
-                                        <div class="text-danger mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
-                                                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                                            </svg>
-                                        </div>
-                                        <h6>Donor Management</h6>
-                                        <p class="text-muted small">View and manage registered donors</p>
-                                        <a th:href="@{/donor}" class="btn btn-sm btn-danger">See</a>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                        </div>
-                    </div>
-                </div>
-            </div>
 
         <div th:if="${role == 'DONOR'}" class="mt-4">
             <div class="card">

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Full Stack - Blood Donation Management system.iml" filepath="$PROJECT_DIR$/Full Stack - Blood Donation Management system.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/blood-request-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/blood-request-service.main.iml" />
     </modules>
   </component>
 </project>
