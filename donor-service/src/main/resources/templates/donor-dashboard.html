@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donor Dashboard - BloodConnect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -10,181 +11,253 @@
             --primary-red: #dc3545;
             --dark-red: #c82333;
             --light-red: #fff5f5;
-            --border-color: #e9ecef;
-            --text-muted: #6c757d;
+            --accent-red: #ff6b7a;
+            --gradient-red: linear-gradient(135deg, #dc3545, #ff6b7a);
+            --gradient-dark: linear-gradient(135deg, #c82333, #dc3545);
+            --shadow-soft: 0 4px 20px rgba(220, 53, 69, 0.08);
+            --shadow-hover: 0 8px 30px rgba(220, 53, 69, 0.12);
+            --border-light: #ffe6e8;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #fefafa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            background-color: #f8f9fa;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fefafa 0%, #fff5f5 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            color: var(--text-dark);
         }
 
         .navbar {
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: 0 2px 20px rgba(220, 53, 69, 0.05);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .dashboard-header {
-            background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+            background: var(--gradient-red);
             color: white;
-            padding: 2.5rem 0;
+            padding: 2rem 0;
             margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path fill="white" d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z"/></svg>') repeat;
+            background-size: 80px;
         }
 
         .card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
             background: white;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-hover);
         }
 
         .card-header {
             background: white;
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            padding: 1.5rem;
+            font-weight: 600;
         }
 
         .stat-card {
-            border-left: 4px solid var(--primary-red);
-            text-align: center;
+            background: white;
+            border-radius: 16px;
             padding: 1.5rem 1rem;
+            text-align: center;
+            position: relative;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-red);
+            border-radius: 16px 16px 0 0;
         }
 
         .stat-card i {
-            color: var(--primary-red);
+            font-size: 2rem;
             margin-bottom: 1rem;
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .stat-card h5 {
-            color: var(--primary-red);
-            font-weight: 600;
+            font-size: 1.75rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            color: var(--text-dark);
         }
 
         .request-card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            transition: all 0.2s ease;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .request-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .request-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-red);
+        }
+
+        .request-card.matching::before {
+            background: #28a745;
         }
 
         .btn {
-            border-radius: 6px;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
         }
 
         .btn-primary {
-            background: var(--primary-red);
-            border: 1px solid var(--primary-red);
+            background: var(--gradient-red);
+            color: white;
         }
 
         .btn-primary:hover {
-            background: var(--dark-red);
-            border-color: var(--dark-red);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
         }
 
         .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--primary-red);
             color: var(--primary-red);
-            border: 1px solid var(--primary-red);
         }
 
         .btn-outline-primary:hover {
             background: var(--primary-red);
-            border-color: var(--primary-red);
             color: white;
         }
 
         .btn-success {
-            background: #28a745;
-            border: 1px solid #28a745;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
         }
 
-        .btn-light {
-            background: white;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
 
         .badge {
             font-size: 0.75rem;
-            font-weight: 500;
-            padding: 0.35rem 0.65rem;
-            border-radius: 4px;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
         }
 
         .blood-badge {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
+            font-size: 1.1rem;
+            padding: 0.75rem 1.5rem;
             background: white;
             color: var(--primary-red);
-            border: 1px solid var(--border-color);
-        }
-
-        .empty-state {
-            padding: 2rem 1rem;
-            color: var(--text-muted);
-            text-align: center;
+            border: 2px solid var(--border-light);
+            border-radius: 25px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.1);
         }
 
         .urgent-badge {
-            background: #ffc107;
-            color: #000;
+            background: linear-gradient(135deg, #ffc107, #ff6b00);
+            color: white;
             font-size: 0.7rem;
-            padding: 0.25rem 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
         }
 
         .profile-icon {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: var(--primary-red);
+            background: var(--gradient-red);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
         }
 
         .profile-icon:hover {
-            background: var(--dark-red);
             transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
         }
 
         .nav-buttons {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
         }
+
         .sidebar {
             position: fixed;
             top: 0;
-            left: -300px;
-            width: 300px;
+            left: -320px;
+            width: 320px;
             height: 100vh;
             background: white;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 4px 0 30px rgba(220, 53, 69, 0.1);
             transition: left 0.3s ease;
             z-index: 1000;
             padding: 2rem 1.5rem;
+            border-right: 1px solid var(--border-light);
         }
 
         .sidebar.open {
@@ -211,8 +284,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .sidebar-menu {
@@ -228,11 +301,12 @@
         .sidebar-menu a {
             display: flex;
             align-items: center;
-            padding: 0.75rem 1rem;
-            color: #333;
+            padding: 1rem 1.25rem;
+            color: var(--text-dark);
             text-decoration: none;
-            border-radius: 6px;
-            transition: all 0.2s ease;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .sidebar-menu a:hover {
@@ -241,9 +315,10 @@
         }
 
         .sidebar-menu a i {
-            width: 20px;
-            margin-right: 0.75rem;
+            width: 24px;
+            margin-right: 1rem;
             color: var(--primary-red);
+            font-size: 1.1rem;
         }
 
         .menu-toggle {
@@ -252,13 +327,484 @@
             font-size: 1.25rem;
             color: var(--primary-red);
             cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: all 0.2s ease;
+            padding: 0.75rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: var(--light-red);
         }
 
         .menu-toggle:hover {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 24px;
+            background: var(--gradient-red);
+            border-radius: 2px;
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .floating-action .btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff6b00;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
             background: var(--light-red);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-red);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-red);
+        }
+
+        /* Responsive design improvements */
+        @media (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-header {
+                padding: 1.5rem 0;
+            }
+
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem 0.75rem;
+            }
+
+            .stat-card h5 {
+                font-size: 1.5rem;
+            }
+
+            .stat-card i {
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .dashboard-header {
+                padding: 1rem 0;
+                margin-bottom: 1rem;
+            }
+
+            .dashboard-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .blood-badge {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+
+            .nav-buttons .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .profile-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .sidebar {
+                width: 280px;
+            }
+
+            .floating-action {
+                bottom: 0.75rem;
+                right: 0.75rem;
+            }
+
+            .floating-action .btn {
+                width: 45px;
+                height: 45px;
+                font-size: 0.9rem;
+            }
+
+            .card-header {
+                padding: 1rem;
+            }
+
+            .modal-container {
+                width: 95%;
+                max-height: 85%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-header .lead {
+                font-size: 0.9rem;
+            }
+
+            .stat-card {
+                padding: 1rem 0.5rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .stat-card h5 {
+                font-size: 1.25rem;
+            }
+
+            .stat-card i {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-card p {
+                font-size: 0.8rem;
+            }
+
+            .nav-buttons .navbar-text {
+                display: none;
+            }
+
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .action-card {
+                padding: 1.25rem;
+            }
+
+            .action-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.25rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1.25rem;
+                font-size: 0.85rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+                max-height: 60vh;
+            }
+
+            .modal-header {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .sidebar {
+                width: 100%;
+            }
+
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            .menu-toggle {
+                padding: 0.5rem;
+            }
+
+            .floating-action {
+                bottom: 0.5rem;
+                right: 0.5rem;
+            }
+
+            .floating-action .btn {
+                width: 40px;
+                height: 40px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Improved grid system for statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* New styles for improved design */
+        .bg-light-red {
+            background: linear-gradient(135deg, #fff5f5, #ffe6e8) !important;
+        }
+
+        .bg-purple {
+            background: linear-gradient(135deg, #6f42c1, #8b5cf6) !important;
+        }
+
+        .bg-orange {
+            background: linear-gradient(135deg, #fd7e14, #ff922b) !important;
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #6f42c1, #8b5cf6);
+            color: white;
+            border: none;
+        }
+
+        .btn-orange {
+            background: linear-gradient(135deg, #fd7e14, #ff922b);
+            color: white;
+            border: none;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #ffd54f);
+            color: #000;
+            border: none;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #39c0d6);
+            color: white;
+            border: none;
+        }
+
+        .rounded-circle {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .guidelines-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .guideline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+        }
+
+        .guideline-icon {
+            background: var(--gradient-red);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-light);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.25rem;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1050;
+            display: none;
+        }
+
+        .modal-overlay.open {
+            display: block;
+        }
+
+        .modal-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1060;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80%;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .modal-container.open {
+            display: block;
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-red);
+        }
+
+        /* Improved responsive tables */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -268,7 +814,7 @@
     <div class="sidebar-header">
         <h5 class="mb-0 fw-bold text-danger">
             <i class="fas fa-heartbeat me-2"></i>
-            Menu
+            BloodConnect
         </h5>
         <button class="menu-toggle" onclick="closeSidebar()">
             <i class="fas fa-times"></i>
@@ -282,28 +828,260 @@
             </a>
         </li>
         <li>
-            <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+            <a th:href="@{/requests(user_id=${userId}, role=${role}, email=${email})}">
                 <i class="fas fa-search"></i>
                 Find All Requests
+            </a>
+        </li>
+        <li>
+            <a th:href="@{'/donor/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-user"></i>
+                My Profile
             </a>
         </li>
     </ul>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-white bg-white">
+<!-- Modal Overlays -->
+<div class="modal-overlay" id="matchingRequestsOverlay"></div>
+<div class="modal-overlay" id="guidelinesOverlay"></div>
+
+<!-- Matching Requests Modal -->
+<div class="modal-container" id="matchingRequestsModal">
+    <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+            <i class="fas fa-exclamation-triangle me-2 text-danger"></i>
+            Current Matching Requests
+            <span class="badge bg-danger ms-2" th:text="${matchingRequests != null ? matchingRequests.size() : 0}">0</span>
+        </h5>
+        <button class="modal-close" onclick="closeMatchingRequests()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div th:if="${matchingRequests == null || matchingRequests.empty}" class="empty-state">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h6 class="text-success mb-2">No Urgent Requests</h6>
+            <p class="text-muted mb-3">There are currently no blood requests matching your blood type.</p>
+            <a th:href="@{/requests(user_id=${userId}, role=${role}, email=${email})}"
+               class="btn btn-primary">
+                <i class="fas fa-search me-1"></i> Browse All Requests
+            </a>
+        </div>
+
+        <div th:if="${matchingRequests != null && !matchingRequests.empty}">
+            <div class="row">
+                <div th:each="request : ${matchingRequests}" class="col-12 col-md-6 mb-3">
+                    <div class="card request-card h-100"
+                         th:classappend="${donor.bloodType == request.blood_group + request.rhesus_factor} ? 'matching' : ''">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="fw-bold mb-0" th:text="${request.component_type + ' Needed'}"></h6>
+                                <span th:if="${donor.bloodType == request.blood_group + request.rhesus_factor}"
+                                      class="badge bg-success">
+                                    <i class="fas fa-heart me-1"></i> Compatible
+                                </span>
+                                <span th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}"
+                                      class="badge bg-secondary">
+                                    <i class="fas fa-times me-1"></i> Incompatible
+                                </span>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Blood Type</small>
+                                    <span class="badge bg-danger mt-1"
+                                          th:text="${request.blood_group + request.rhesus_factor}"></span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Volume</small>
+                                    <strong th:text="${request.volume}"></strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Medical Center</small>
+                                <strong>Centers#<span th:text="${request.medcenter_id}"></span></strong>
+                            </div>
+
+                            <div class="mb-2">
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-clock me-1"></i> Deadline
+                                </small>
+                                <strong class="text-danger" th:text="${#temporals.format(request.deadline, 'dd/MM/yyyy HH:mm')}"></strong>
+                            </div>
+
+                            <div th:if="${request.comments}" class="mb-2">
+                                <small class="text-muted d-block">Comments</small>
+                                <p class="mb-0 small text-muted" th:text="${#strings.abbreviate(request.comments, 80)}"></p>
+                            </div>
+
+                            <!-- Availability Information -->
+                            <div th:if="${donationInfo.daysUntilNextDonation != null and donationInfo.daysUntilNextDonation > 0}"
+                                 class="alert alert-warning small p-2 mb-2">
+                                <i class="fas fa-clock me-1"></i>
+                                You can donate in <strong th:text="${donationInfo.daysUntilNextDonation}"></strong> days
+                            </div>
+
+                            <div th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}"
+                                 class="alert alert-danger small p-2 mb-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Your blood type (<span th:text="${donor.bloodType}"></span>) is not compatible
+                            </div>
+
+                            <div class="d-grid">
+                                <form th:action="@{'/donor/requests/' + ${request.blood_request_id} + '/accept'}" method="post">
+                                    <input type="hidden" name="token" th:value="${token}">
+                                    <input type="hidden" name="userId" th:value="${userId}">
+                                    <input type="hidden" name="role" th:value="${role}">
+                                    <input type="hidden" name="email" th:value="${email}">
+                                    <button type="submit"
+                                            class="btn w-100"
+                                            th:classappend="${donor.bloodType == request.blood_group + request.rhesus_factor and (donationInfo.daysUntilNextDonation == null or donationInfo.daysUntilNextDonation == 0)} ? 'btn-success' : 'btn-secondary'"
+                                            th:disabled="${donor.bloodType != request.blood_group + request.rhesus_factor or (donationInfo.daysUntilNextDonation != null and donationInfo.daysUntilNextDonation > 0)}">
+                                        <i class="fas fa-check me-1"></i>
+                                        <span th:if="${donor.bloodType == request.blood_group + request.rhesus_factor and (donationInfo.daysUntilNextDonation == null or donationInfo.daysUntilNextDonation == 0)}">
+                                            Accept Request
+                                        </span>
+                                        <span th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}">
+                                            Not Compatible
+                                        </span>
+                                        <span th:if="${donationInfo.daysUntilNextDonation != null and donationInfo.daysUntilNextDonation > 0}">
+                                            Wait <span th:text="${donationInfo.daysUntilNextDonation}"></span> days
+                                        </span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Guidelines Modal -->
+<div class="modal-container" id="guidelinesModal">
+    <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+            <i class="fas fa-info-circle me-2 text-warning"></i>
+            Donation Guidelines & Safety
+        </h5>
+        <button class="modal-close" onclick="closeGuidelines()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-12 col-md-6 mb-3">
+                <div class="d-flex align-items-start mb-2">
+                    <div class="flex-shrink-0">
+                        <div class="bg-danger rounded-circle p-2 text-white me-3">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold text-dark mb-2">Blood Type Compatibility</h6>
+                        <p class="small text-muted mb-2">
+                            Your blood type: <strong class="text-danger" th:text="${donor.bloodType}"></strong>
+                        </p>
+                        <div class="small">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-success me-2"><i class="fas fa-check"></i></span>
+                                <span class="text-muted">Compatible - You can accept these requests</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2"><i class="fas fa-times"></i></span>
+                                <span class="text-muted">Incompatible - Blood type doesn't match</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 mb-3">
+                <div class="d-flex align-items-start mb-2">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary rounded-circle p-2 text-white me-3">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold text-dark mb-2">Donation Frequency</h6>
+                        <p class="small text-muted mb-2">
+                            Minimum 60 days between donations for donor safety and recovery.
+                        </p>
+                        <div class="small">
+                            <div th:if="${donationInfo.daysUntilNextDonation != null and donationInfo.daysUntilNextDonation > 0}"
+                                 class="text-warning fw-bold">
+                                <i class="fas fa-clock me-1"></i>
+                                Next donation in <span th:text="${donationInfo.daysUntilNextDonation}"></span> days
+                            </div>
+                            <div th:if="${donationInfo.daysUntilNextDonation == null or donationInfo.daysUntilNextDonation == 0}"
+                                 class="text-success fw-bold">
+                                <i class="fas fa-check me-1"></i>
+                                Ready to donate now
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 mb-3">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info rounded-circle p-2 text-white me-3">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold text-dark mb-2">Health Requirements</h6>
+                        <ul class="small text-muted mb-0">
+                            <li>Be in good general health</li>
+                            <li>Weigh at least 50 kg (110 lbs)</li>
+                            <li>Be at least 18 years old</li>
+                            <li>No recent illnesses or infections</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 mb-3">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success rounded-circle p-2 text-white me-3">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold text-dark mb-2">Preparation Tips</h6>
+                        <ul class="small text-muted mb-0">
+                            <li>Eat a healthy meal before donating</li>
+                            <li>Drink plenty of water</li>
+                            <li>Avoid fatty foods</li>
+                            <li>Get a good night's sleep</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-white">
     <div class="container">
-        <a class="navbar-brand fw-bold text-danger" href="/">
+        <a class="navbar-brand" href="/">
             <i class="fas fa-heartbeat me-2"></i>
             BloodConnect
         </a>
         <div class="navbar-nav ms-auto">
             <div class="nav-buttons">
-                <span class="navbar-text me-3 text-dark fw-medium" th:text="'Welcome, ' + ${donor.fullName}"></span>
+                <span class="navbar-text me-2 me-md-3 fw-medium text-dark d-none d-sm-block" th:text="'Welcome, ' + ${donor.fullName}"></span>
                 <button class="menu-toggle me-2" onclick="openSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
                 <a th:href="@{'http://localhost:8080/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
-                   class="btn btn-outline-primary btn-sm me-2">
+                   class="btn btn-outline-primary btn-sm d-none d-md-inline-block">
                     <i class="fas fa-home me-1"></i> Home
                 </a>
                 <a th:href="@{'/donor/profile?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
@@ -320,75 +1098,197 @@
 <div class="dashboard-header">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-5 fw-bold">Donor Dashboard</h1>
-                <p class="lead mb-0">Help save lives with your blood donations</p>
+            <div class="col-12 col-md-8">
+                <h1 class="display-6 fw-bold mb-2">Donor Dashboard</h1>
+                <p class="lead mb-0 opacity-90">Your generosity helps save lives every day</p>
             </div>
-            <div class="col-md-4 text-end">
-                <span class="badge blood-badge fw-bold" th:text="${donor.bloodType}"></span>
+            <div class="col-12 col-md-4 text-md-end text-center mt-3 mt-md-0">
+                <span class="badge blood-badge" th:text="${donor.bloodType}"></span>
             </div>
         </div>
     </div>
 </div>
 
 <div class="container mt-4">
+    <!-- Statistics Section -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-heart"></i>
+            <h5 th:text="${donationHistory != null ? donationHistory.size() : 0}">0</h5>
+            <p class="text-muted mb-0">Total Donations</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-tint"></i>
+            <h5 th:text="${matchingRequests != null ? matchingRequests.size() : 0}">0</h5>
+            <p class="text-muted mb-0">Matching Requests</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-clock"></i>
+            <h5 th:if="${donationInfo.daysUntilNextDonation != null and donationInfo.daysUntilNextDonation > 0}"
+                th:text="${donationInfo.daysUntilNextDonation}">0</h5>
+            <h5 th:if="${donationInfo.daysUntilNextDonation == null or donationInfo.daysUntilNextDonation == 0}"
+                class="text-success">Ready</h5>
+            <p class="text-muted mb-0"
+               th:if="${donationInfo.daysUntilNextDonation != null and donationInfo.daysUntilNextDonation > 0}">
+                Days Until Next
+            </p>
+            <p class="text-muted mb-0"
+               th:if="${donationInfo.daysUntilNextDonation == null or donationInfo.daysUntilNextDonation == 0}">
+                Ready to Donate
+            </p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-star"></i>
+            <h5 th:text="${donationHistory != null && donationHistory.size() >= 5 ? 'Hero' : donationHistory != null && donationHistory.size() >= 2 ? 'Regular' : 'New'}">New</h5>
+            <p class="text-muted mb-0">Donor Level</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
     <div class="row">
-        <div class="col-md-12 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title mb-0 fw-bold text-dark">
-                            <i class="fas fa-exclamation-triangle me-2 text-danger"></i>
-                            Current Matching Requests
-                            <span class="badge bg-danger ms-2" th:text="${matchingRequests != null ? matchingRequests.size() : 0}"></span>
-                        </h5>
-                        <p class="text-muted mb-0 mt-1 small">Urgent requests matching your blood type</p>
-                    </div>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div th:if="${matchingRequests == null || matchingRequests.empty}" class="empty-state">
-                        <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
-                        <h6 class="text-success">No Urgent Requests</h6>
-                        <p class="text-muted small">There are currently no blood requests matching your blood type.</p>
-                        <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
-                           class="btn btn-primary btn-sm mt-2">
-                            Browse All Requests
-                        </a>
-                    </div>
+                    <div class="quick-actions-grid">
+                        <!-- Medical Centers Map -->
+                        <div class="action-card">
+                            <div>
+                                <div class="action-icon bg-success text-white">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Find Centers</h6>
+                                <p class="text-muted small mb-3">Locate nearby medical centers and donation facilities</p>
+                            </div>
+                            <a th:href="@{'/medcenters/map?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                               class="btn btn-success btn-sm">
+                                <i class="fas fa-map me-1"></i> View Map
+                            </a>
+                        </div>
 
-                    <div th:if="${matchingRequests != null && !matchingRequests.empty}">
-                        <div th:each="request : ${matchingRequests}" class="card request-card">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <h6 class="fw-bold mb-1" th:text="${request.component_type + ' Needed'}"></h6>
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="badge bg-danger me-2"
-                                                  th:text="${request.blood_group + request.rhesus_factor}"></span>
-                                            <span class="text-muted small" th:text="'Volume: ' + ${request.volume}"></span>
-                                        </div>
-                                        <p class="text-muted small mb-1">
-                                            <i class="fas fa-clock me-1"></i>
-                                            Deadline: <span th:text="${#temporals.format(request.deadline, 'dd/MM/yyyy HH:mm')}"></span>
-                                        </p>
-                                        <p th:if="${request.comments}" class="text-muted small mb-0">
-                                            <i class="fas fa-comment me-1"></i>
-                                            <span th:text="${#strings.abbreviate(request.comments, 50)}"></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <span class="badge urgent-badge mb-2">URGENT</span>
-                                        <form th:action="@{'/donor/requests/' + ${request.blood_request_id} + '/accept'}"
-                                              method="post">
-                                            <input type="hidden" name="token" th:value="${token}">
-                                            <input type="hidden" name="userId" th:value="${userId}">
-                                            <input type="hidden" name="role" th:value="${role}">
-                                            <input type="hidden" name="email" th:value="${email}">
-                                            <button type="submit" class="btn btn-success btn-sm w-100">
-                                                <i class="fas fa-check me-1"></i> Accept Request
-                                            </button>
-                                        </form>
-                                    </div>
+                        <!-- Emergency Contacts -->
+                        <div class="action-card">
+                            <div>
+                                <div class="action-icon bg-purple text-white">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Emergency Contacts</h6>
+                                <p class="text-muted small mb-3">Important contact information for urgent situations</p>
+                            </div>
+                            <button class="btn btn-purple btn-sm" data-bs-toggle="modal" data-bs-target="#contactsModal">
+                                <i class="fas fa-phone me-1"></i> View Contacts
+                            </button>
+                        </div>
+
+                        <!-- Donation Tips -->
+                        <div class="action-card">
+                            <div>
+                                <div class="action-icon bg-orange text-white">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Donation Tips</h6>
+                                <p class="text-muted small mb-3">Learn how to prepare for a successful donation experience</p>
+                            </div>
+                            <button class="btn btn-orange btn-sm" data-bs-toggle="modal" data-bs-target="#tipsModal">
+                                <i class="fas fa-info me-1"></i> Read Tips
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Contacts Modal -->
+    <div class="modal fade" id="contactsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-phone-alt me-2"></i>
+                        Emergency Contacts
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Emergency Medical Services</h6>
+                                <small class="text-muted">24/7 Emergency Line</small>
+                            </div>
+                            <span class="badge bg-danger">112</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Blood Bank Hotline</h6>
+                                <small class="text-muted">Central Blood Bank</small>
+                            </div>
+                            <span class="text-primary">+7 (777) 777-HELP</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Donor Support</h6>
+                                <small class="text-muted">Questions & Assistance</small>
+                            </div>
+                            <span class="text-primary">+7 (777) 777-CARE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Donation Tips Modal -->
+    <div class="modal fade" id="tipsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Donation Preparation Tips
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check text-success me-2 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">Before Donation</h6>
+                                    <small class="text-muted">Eat iron-rich foods, stay hydrated, get good rest</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check text-success me-2 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">During Donation</h6>
+                                    <small class="text-muted">Relax, breathe deeply, stay comfortable</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check text-success me-2 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">After Donation</h6>
+                                    <small class="text-muted">Rest, hydrate, avoid strenuous activity</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check text-success me-2 mt-1"></i>
+                                <div>
+                                    <h6 class="mb-1">Recovery</h6>
+                                    <small class="text-muted">Eat well, drink fluids, listen to your body</small>
                                 </div>
                             </div>
                         </div>
@@ -397,118 +1297,87 @@
             </div>
         </div>
     </div>
-    <div class="row mb-4">
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-heart fa-2x mb-3"></i>
-                    <h5 th:text="${donationHistory != null ? donationHistory.size() : 0}">0</h5>
-                    <p class="text-muted mb-0 small">Donations Made</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-tint fa-2x mb-3"></i>
-                    <h5 th:text="${matchingRequests != null ? matchingRequests.size() : 0}">0</h5>
-                    <p class="text-muted mb-0 small">Matching Requests</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-calendar fa-2x mb-3"></i>
-                    <h5>Eligible</h5>
-                    <p class="text-muted mb-0 small">Status</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <i class="fas fa-star fa-2x mb-3"></i>
-                    <h5 th:text="${donationHistory != null && donationHistory.size() >= 5 ? 'Hero' : donationHistory != null && donationHistory.size() >= 2 ? 'Regular' : 'New'}">New</h5>
-                    <p class="text-muted mb-0 small">Donor Level</p>
-                </div>
-            </div>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-action">
+        <button class="btn btn-primary"
+                onclick="openMatchingRequests()"
+                data-bs-toggle="tooltip"
+                title="Matching Requests">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="notification-badge" th:if="${matchingRequests != null and matchingRequests.size() > 0}"
+                 th:text="${matchingRequests.size()}"></div>
+        </button>
+        <button class="btn btn-warning"
+                onclick="openGuidelines()"
+                data-bs-toggle="tooltip"
+                title="Donation Guidelines">
+            <i class="fas fa-info"></i>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-5 mb-5">
+        <div class="p-4 rounded bg-light">
+            <i class="fas fa-hands-helping fa-2x text-danger mb-3"></i>
+            <h6 class="text-dark mb-2 fw-bold">Together We Save Lives</h6>
+            <p class="text-muted mb-0">
+                Every donation means more lives saved in our community.
+            </p>
         </div>
     </div>
 
-    <div th:if="${role == 'DONOR'}" class="mt-4">
-        <div class="card">
-            <div class="card-header bg-danger text-white">
-                <h5 class="card-title mb-0">Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Blood Requests -->
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-danger">
-                            <div class="card-body text-center">
-                                <div class="text-danger mb-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-droplet" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6zM6.646 4.646l.708.708c-.29.29-.864.808-1.51 1.519C4.838 7.487 4 8.745 4 10a4 4 0 0 0 8 0c0-1.255-.837-2.513-1.844-3.127-.646-.71-1.22-1.228-1.51-1.519l.708-.708c.23.23.59.537 1.003.93C11.152 6.396 12 7.734 12 10a4 4 0 0 1-8 0c0-2.266.848-3.604 1.643-4.424.414-.393.773-.7 1.003-.93z"/>
-                                    </svg>
-                                </div>
-                                <h6>Blood Requests</h6>
-                                <p class="text-muted small">Manage all blood requests</p>
-                                <a th:href="@{/requests(user_id=${userId}, role=${role}, email=${email})}" class="btn btn-sm btn-danger">See</a>
-                            </div>
-                        </div>
-                    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('sidebarOverlay').classList.add('open');
+        }
 
-                    <!-- Map -->
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-danger">
-                            <div class="card-body text-center">
-                                <div class="text-danger mb-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-droplet" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6zM6.646 4.646l.708.708c-.29.29-.864.808-1.51 1.519C4.838 7.487 4 8.745 4 10a4 4 0 0 0 8 0c0-1.255-.837-2.513-1.844-3.127-.646-.71-1.22-1.228-1.51-1.519l.708-.708c.23.23.59.537 1.003.93C11.152 6.396 12 7.734 12 10a4 4 0 0 1-8 0c0-2.266.848-3.604 1.643-4.424.414-.393.773-.7 1.003-.93z"/>
-                                    </svg>
-                                </div>
-                                <h6>Map</h6>
-                                <p class="text-muted small">Map</p>
-                                <a th:href="@{/medcenters/map}" class="btn btn-sm btn-success">See</a>
-                            </div>
-                        </div>
-                    </div>
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('open');
+        }
 
+        function openMatchingRequests() {
+            document.getElementById('matchingRequestsModal').classList.add('open');
+            document.getElementById('matchingRequestsOverlay').classList.add('open');
+        }
 
-                </div>
-            </div>
-        </div>
-    </div>
+        function closeMatchingRequests() {
+            document.getElementById('matchingRequestsModal').classList.remove('open');
+            document.getElementById('matchingRequestsOverlay').classList.remove('open');
+        }
 
-</div>
+        function openGuidelines() {
+            document.getElementById('guidelinesModal').classList.add('open');
+            document.getElementById('guidelinesOverlay').classList.add('open');
+        }
 
-<div class="text-center mt-4 mb-5">
-    <div class="p-4 rounded bg-light">
-        <i class="fas fa-hands-helping fa-lg text-danger mb-3"></i>
-        <h6 class="text-dark mb-2">Together We Save Lives</h6>
-        <p class="text-muted small mb-0">
-            Every donation means more lives saved in our community.
-        </p>
-    </div>
-</div>
+        function closeGuidelines() {
+            document.getElementById('guidelinesModal').classList.remove('open');
+            document.getElementById('guidelinesOverlay').classList.remove('open');
+        }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    function openSidebar() {
-        document.getElementById('sidebar').classList.add('open');
-        document.getElementById('sidebarOverlay').classList.add('open');
-    }
+        // Close modals when clicking on overlay
+        document.getElementById('matchingRequestsOverlay').addEventListener('click', closeMatchingRequests);
+        document.getElementById('guidelinesOverlay').addEventListener('click', closeGuidelines);
 
-    function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-</script>
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMatchingRequests();
+                closeGuidelines();
+            }
+        });
+
+        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    </script>
 </body>
 </html>

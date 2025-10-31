@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Рекомендации для донора</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-left: 5px solid #dc3545;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .eligible {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .temporarily-deferred {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        .permanently-deferred {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .recommendation-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .recommendation-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+            position: relative;
+            padding-left: 25px;
+        }
+        .recommendation-list li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+            top: 10px;
+        }
+        .rejection-list li:before {
+            content: "⚠️";
+        }
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 15px;
+        }
+        .eligible-badge {
+            background: #28a745;
+            color: white;
+        }
+        .temporarily-badge {
+            background: #ffc107;
+            color: #212529;
+        }
+        .permanently-badge {
+            background: #dc3545;
+            color: white;
+        }
+        .blood-group {
+            font-size: 24px;
+            font-weight: bold;
+            color: #dc3545;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .next-donation {
+            background: #e7f3ff;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .analysis-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🧬 Рекомендации для донора</h1>
+        <p>На основе лабораторного анализа крови</p>
+    </div>
+
+    <!-- Информация об анализе -->
+    <div class="analysis-info">
+        <p><strong>ID анализа:</strong> <span th:text="${analysis.analysis_id}"></span></p>
+        <p><strong>ID донора:</strong> <span th:text="${analysis.donor_id}"></span></p>
+        <p><strong>Дата анализа:</strong> <span th:text="${#temporals.format(analysis.analysis_date, 'dd.MM.yyyy HH:mm')}"></span></p>
+    </div>
+
+    <!-- Статус донорства -->
+    <div th:classappend="${recommendations.eligibilityStatus == T(com.bloodconnect.EligibilityStatus).ELIGIBLE} ? 'section eligible' :
+                             ${recommendations.eligibilityStatus == T(com.bloodconnect.EligibilityStatus).TEMPORARILY_DEFERRED} ? 'section temporarily-deferred' :
+                             'section permanently-deferred'">
+        <h2>Статус донорства
+            <span th:if="${recommendations.eligibilityStatus == T(com.bloodconnect.EligibilityStatus).ELIGIBLE}"
+                  class="status-badge eligible-badge">ГОДЕН</span>
+            <span th:if="${recommendations.eligibilityStatus == T(com.bloodconnect.EligibilityStatus).TEMPORARILY_DEFERRED}"
+                  class="status-badge temporarily-badge">ВРЕМЕННЫЙ ОТВОД</span>
+            <span th:if="${recommendations.eligibilityStatus == T(com.bloodconnect.EligibilityStatus).PERMANENTLY_DEFERRED}"
+                  class="status-badge permanently-badge">ПОСТОЯННЫЙ ОТВОД</span>
+        </h2>
+        <p th:text="${recommendations.eligibilityStatus.description}"></p>
+
+        <!-- Дата следующей донации -->
+        <div th:if="${recommendations.nextDonationDate != null}" class="next-donation">
+            <h3>🗓️ Рекомендуемая дата следующей донации:</h3>
+            <p style="font-size: 18px; font-weight: bold; color: #007bff;">
+                <span th:text="${#temporals.format(recommendations.nextDonationDate, 'dd.MM.yyyy')}"></span>
+            </p>
+        </div>
+
+        <!-- Причины отвода -->
+        <div th:if="${!recommendations.rejectionReasons.empty}">
+            <h3>Причины отвода от донорства:</h3>
+            <ul class="recommendation-list rejection-list">
+                <li th:each="reason : ${recommendations.rejectionReasons}" th:text="${reason}"></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Группа крови -->
+    <div th:if="${recommendations.bloodGroupInfo != null}" class="section">
+        <h2>🩸 Группа крови</h2>
+        <div class="blood-group" th:text="${recommendations.bloodGroupInfo}"></div>
+    </div>
+
+    <!-- Медицинские рекомендации -->
+    <div th:if="${!recommendations.healthRecommendations.empty}" class="section">
+        <h2>🏥 Медицинские рекомендации</h2>
+        <ul class="recommendation-list">
+            <li th:each="recommendation : ${recommendations.healthRecommendations}" th:text="${recommendation}"></li>
+        </ul>
+    </div>
+
+    <!-- Диетические рекомендации -->
+    <div th:if="${!recommendations.dietaryRecommendations.empty}" class="section">
+        <h2>🍎 Диетические рекомендации</h2>
+        <ul class="recommendation-list">
+            <li th:each="recommendation : ${recommendations.dietaryRecommendations}" th:text="${recommendation}"></li>
+        </ul>
+    </div>
+
+    <!-- Кнопки навигации -->
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #dee2e6; padding-top: 20px;">
+        <a th:href="@{/analysis/{id}(id=${analysis.analysis_id})}" class="btn btn-secondary">
+            ← Назад к анализу
+        </a>
+        <a th:href="@{/analysis/donor/{donorId}(donorId=${analysis.donor_id})}" class="btn">
+            📊 История анализов донора
+        </a>
+        <a th:href="@{/analysis}" class="btn btn-secondary">
+            К списку анализов
+        </a>
+    </div>
+</div>
+</body>
+</html>

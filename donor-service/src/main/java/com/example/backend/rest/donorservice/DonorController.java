@@ -10,10 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/donor")
@@ -40,11 +37,12 @@ public class DonorController {
 
             Donor donor = donorOpt.get();
             List<BloodRequestDto> matchingRequests = donorBloodRequestService.getMatchingBloodRequests(donor.getBloodType());
-            List<DonationHistoryDto> donationHistory = getDonationHistory(donor.getUserId());
-
+            Map<String, Object> donationInfo = donorBloodRequestService.getNextDonationInfo(donor.getUserId());
+            List<DonationHistoryDto> donationHistory = getDonationHistoryForDonor(donor.getUserId());
             model.addAttribute("donor", donor);
             model.addAttribute("matchingRequests", matchingRequests);
             model.addAttribute("donationHistory", donationHistory);
+            model.addAttribute("donationInfo", donationInfo);
             model.addAttribute("token", token);
             model.addAttribute("userId", userId);
             model.addAttribute("role", role);
@@ -58,13 +56,14 @@ public class DonorController {
         }
     }
 
-    private List<DonationHistoryDto> getDonationHistory(Long donorId) {
+    private List<DonationHistoryDto> getDonationHistoryForDonor(Long donorId) {
         try {
             ResponseEntity<List<DonationHistoryDto>> historyResponse =
                     donationHistoryFeignClient.getDonationHistoryByDonorId(donorId);
 
             if (historyResponse.getStatusCode().is2xxSuccessful() && historyResponse.getBody() != null) {
                 List<DonationHistoryDto> donationHistory = historyResponse.getBody();
+                // Добавляем имена медцентров к истории донаций
                 for (DonationHistoryDto history : donationHistory) {
                     String medcenterName = donorBloodRequestService.getMedCenterName(history.getMedcenterId());
                     history.setMedcenterName(medcenterName);
@@ -76,6 +75,7 @@ public class DonorController {
         }
         return new ArrayList<>();
     }
+
 
     @GetMapping("/requests")
     public String viewBloodRequests(@RequestParam String token,
@@ -109,6 +109,7 @@ public class DonorController {
 
         return "donor-blood-requests";
     }
+
     @PostMapping("/requests/{requestId}/accept")
     public String acceptBloodRequest(@PathVariable Long requestId,
                                      @RequestParam String token,
@@ -123,19 +124,23 @@ public class DonorController {
             }
 
             Donor donor = donorOpt.get();
-            boolean success = donorBloodRequestService.acceptBloodRequest(requestId, donor.getUserId());
+
+            Map<String, Object> result = donorBloodRequestService.acceptBloodRequest(requestId, donor.getUserId());
+
+            boolean success = (Boolean) result.getOrDefault("success", false);
+            String message = (String) result.getOrDefault("message", "");
 
             if (success) {
-                redirectAttributes.addFlashAttribute("success", "Blood request accepted successfully!");
+                redirectAttributes.addFlashAttribute("success", message);
             } else {
-                redirectAttributes.addFlashAttribute("error", "Failed to accept blood request. It may have been already accepted.");
+                redirectAttributes.addFlashAttribute("error", message);
             }
 
-            return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
+            return "redirect:/donor/donation-history?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error accepting request: " + e.getMessage());
-            return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
+            return "redirect:/donor/donation-history?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
     }
 
@@ -328,7 +333,7 @@ public class DonorController {
         }
 
         Donor donor = donorOpt.get();
-        List<DonationHistoryDto> donationHistory = getDonationHistory(donor.getUserId());
+        List<DonationHistoryDto> donationHistory = getDonationHistoryForDonor(donor.getUserId());
 
         model.addAttribute("donor", donor);
         model.addAttribute("donationHistory", donationHistory);

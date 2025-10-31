@@ -408,18 +408,24 @@
                     </div>
                 </div>
             </div>
+            <!-- ЗАМЕНИТЕ ЭТУ СЕКЦИЮ (начиная с <div th:if="${not requests.empty}">): -->
             <div th:if="${not requests.empty}">
                 <div class="row">
                     <div th:each="request : ${requests}" class="col-md-6 mb-3">
                         <div class="card request-card h-100"
-                             th:classappend="${donor.bloodType == request.blood_group + request.rhesus_factor} ? 'matching' : ''">
+                             th:classappend="${donor.bloodType == request.blood_group + request.rhesus_factor} ? 'matching' : 'incompatible'">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <h6 class="card-title fw-bold" th:text="${request.component_type + ' Needed'}"></h6>
+                                    <!-- ИНДИКАТОР СОВМЕСТИМОСТИ -->
                                     <span th:if="${donor.bloodType == request.blood_group + request.rhesus_factor}"
                                           class="badge bg-success">
-                                        <i class="fas fa-heart me-1"></i>Matches Your Type
-                                    </span>
+                            <i class="fas fa-check me-1"></i>Compatible
+                        </span>
+                                    <span th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}"
+                                          class="badge bg-secondary">
+                            <i class="fas fa-times me-1"></i>Incompatible
+                        </span>
                                 </div>
 
                                 <div class="row mb-2">
@@ -454,14 +460,41 @@
                                     <p class="mb-0 text-muted small" th:text="${request.comments}"></p>
                                 </div>
 
+                                <!-- ИНФОРМАЦИЯ О ДОСТУПНОСТИ -->
+                                <div th:if="${donationInfo != null and donationInfo.daysUntilNextDonation > 0}"
+                                     class="alert alert-warning small p-2 mb-3">
+                                    <i class="fas fa-clock me-1"></i>
+                                    You can donate again in <strong th:text="${donationInfo.daysUntilNextDonation}"></strong> days
+                                    <small class="d-block text-muted mt-1">60-day interval required between donations</small>
+                                </div>
+
+                                <div th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}"
+                                     class="alert alert-danger small p-2 mb-3">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Your blood type (<span th:text="${donor.bloodType}"></span>) is not compatible
+                                </div>
+
                                 <div class="d-grid">
                                     <form th:action="@{'/donor/requests/' + ${request.blood_request_id} + '/accept'}" method="post">
                                         <input type="hidden" name="token" th:value="${token}">
                                         <input type="hidden" name="userId" th:value="${userId}">
                                         <input type="hidden" name="role" th:value="${role}">
                                         <input type="hidden" name="email" th:value="${email}">
-                                        <button type="submit" class="btn btn-success w-100">
-                                            <i class="fas fa-check me-1"></i> Accept Request
+                                        <!-- УМНАЯ КНОПКА С ПРОВЕРКОЙ ОГРАНИЧЕНИЙ -->
+                                        <button type="submit"
+                                                class="btn w-100"
+                                                th:classappend="${donor.bloodType == request.blood_group + request.rhesus_factor and (donationInfo == null or donationInfo.daysUntilNextDonation == 0)} ? 'btn-success' : 'btn-secondary'"
+                                                th:disabled="${donor.bloodType != request.blood_group + request.rhesus_factor or (donationInfo != null and donationInfo.daysUntilNextDonation > 0)}">
+                                            <i class="fas fa-check me-1"></i>
+                                            <span th:if="${donor.bloodType == request.blood_group + request.rhesus_factor and (donationInfo == null or donationInfo.daysUntilNextDonation == 0)}">
+                                    Accept Request
+                                </span>
+                                            <span th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}">
+                                    Not Compatible
+                                </span>
+                                            <span th:if="${donationInfo != null and donationInfo.daysUntilNextDonation > 0}">
+                                    Wait <span th:text="${donationInfo.daysUntilNextDonation}"></span> days
+                                </span>
                                         </button>
                                     </form>
                                 </div>

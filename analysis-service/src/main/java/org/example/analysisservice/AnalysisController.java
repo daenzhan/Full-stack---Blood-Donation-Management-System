@@ -77,4 +77,21 @@ public class AnalysisController {
         service.delete_by_id(id);
         return "redirect:/analysis";
     }
+
+    @GetMapping("/{id}/recommendations")
+    public String showRecommendations(@PathVariable Long id, Model model) {
+        try {
+            Analysis analysis = service.get_by_id(id)
+                    .orElseThrow(() -> new RuntimeException("Analysis not found"));
+
+            DonorRecommendation recommendations = service.getRecommendationsForAnalysis(id);
+
+            model.addAttribute("analysis", analysis);
+            model.addAttribute("recommendations", recommendations);
+            return "analysis-recommendations.html";
+
+        } catch (RuntimeException e) {
+            return "redirect:/analysis?error=Analysis+not+found";
+        }
+    }
 }
