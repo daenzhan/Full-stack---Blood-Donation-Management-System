@@ -7,8 +7,9 @@
 <body>
 <h1>Edit Blood Analysis</h1>
 
-<form th:action="@{/analysis/edit/{id}(id=${analysis.analysis_id})}" th:object="${analysis}" method="post">
+<form th:action="@{'http://localhost:8080/analysis/edit/' + ${analysis.analysis_id}}" th:object="${analysis}" method="post">
     <input type="hidden" th:field="*{analysis_id}">
+    <input type="hidden" name="medcenter_id" th:value="${medcenter_id}">
 
     <table>
         <tr>

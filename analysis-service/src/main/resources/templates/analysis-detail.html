@@ -93,8 +93,10 @@
 </table>
 
 <div style="margin-top: 20px;">
-    <a th:href="@{/analysis/edit/{id}(id=${analysis.analysis_id})}">Edit</a> |
-    <a th:href="@{/analysis}">Back to List</a>
+    <a th:if="${medcenter_id != null}"
+       th:href="@{'http://localhost:8080/donation-history/medcenter/' + ${medcenter_id}}">
+        Back
+    </a>
 </div>
 </body>
 </html>

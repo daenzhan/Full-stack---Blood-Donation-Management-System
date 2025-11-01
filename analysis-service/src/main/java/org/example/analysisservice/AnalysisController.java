@@ -28,10 +28,12 @@ public class AnalysisController {
     }
 
     @GetMapping("/{id}")
-    public String show_by_id (@PathVariable Long id, Model model) {
+    public String show_by_id (@PathVariable Long id, Model model,
+                              @RequestParam(required = false) Long medcenter_id) {
         Optional<Analysis> analysis = service.get_by_id(id);
         if (analysis.isPresent()) {
             model.addAttribute("analysis", analysis.get());
+            model.addAttribute("medcenter_id",medcenter_id);
             return "analysis-detail";
         } else {
             return "redirect:/analysis";
@@ -39,26 +41,47 @@ public class AnalysisController {
     }
 
     @GetMapping("/new")
-    public String create_form (Model model) {
-        model.addAttribute("analysis", new Analysis());
+    public String create_form (@RequestParam(required = false) Long donation_id,
+                               @RequestParam(required = false) Long donor_id,
+                               @RequestParam( required = false) Long medcenter_id,
+                               Model model) {
+        Analysis analysis = new Analysis();
+        if (donation_id != null) {
+            analysis.setDonation_id(donation_id);
+        }
+        if (donor_id != null) {
+            analysis.setDonor_id(donor_id);
+        }
+        model.addAttribute("analysis", analysis);
         model.addAttribute("blood_groups", new String[]{"A", "B", "AB", "O"});
         model.addAttribute("rhesus_factors", new String[]{"+", "-"});
+        model.addAttribute("medcenter_id", medcenter_id);
         return "analysis-create-form";
     }
 
-    @PostMapping
-    public String create (@ModelAttribute Analysis analysis) {
-        service.save(analysis);
+    @PostMapping("/new")
+    public String create(@RequestParam(required = false) Long medcenter_id,
+                         @ModelAttribute Analysis analysis) {
+        Analysis saved_analysis = service.save(analysis);
+
+        if (medcenter_id != null && saved_analysis.getDonation_id() != null) {
+            return "redirect:http://localhost:8080/donation-history/" + saved_analysis.getDonation_id() +
+                    "/update-analysis?analysis_id=" + saved_analysis.getAnalysis_id() +
+                    "&medcenter_id=" + medcenter_id;
+        }
+
         return "redirect:/analysis";
     }
 
     @GetMapping("/edit/{id}")
-    public String edit_form(@PathVariable Long id, Model model) {
+    public String edit_form(@PathVariable Long id, Model model,
+                            @RequestParam(required = false) Long medcenter_id) {
         Optional<Analysis> analysis = service.get_by_id(id);
         if (analysis.isPresent()) {
             model.addAttribute("analysis", analysis.get());
             model.addAttribute("blood_groups", new String[]{"A", "B", "AB", "O"});
-            model.addAttribute("rhesusFactors", new String[]{"+", "-"});
+            model.addAttribute("rhesus_factors", new String[]{"+", "-"});
+            model.addAttribute("medcenter_id", medcenter_id);
             return "analysis-edit-form";
         } else {
             return "redirect:/analysis";
@@ -66,15 +89,48 @@ public class AnalysisController {
     }
 
     @PostMapping("/edit/{id}")
-    public String edit (@PathVariable Long id, @ModelAttribute Analysis analysis) {
-        analysis.setAnalysis_id(id);
-        service.save(analysis);
-        return "redirect:/analysis";
+    public String edit(@PathVariable Long id,
+                       @ModelAttribute Analysis analysis,
+                       @RequestParam(required = false) Long medcenter_id) {
+        Optional<Analysis> exist_analysis = service.get_by_id(id);
+
+        if (exist_analysis.isPresent()) {
+            Analysis update_analysis = exist_analysis.get();
+
+            update_analysis.setDonor_id(analysis.getDonor_id());
+            update_analysis.setDonation_id(analysis.getDonation_id());
+            update_analysis.setHiv(analysis.getHiv());
+            update_analysis.setHepatitisB(analysis.getHepatitisB());
+            update_analysis.setHepatitisC(analysis.getHepatitisC());
+            update_analysis.setSyphilis(analysis.getSyphilis());
+            update_analysis.setBrucellosis(analysis.getBrucellosis());
+            update_analysis.setAlt_level(analysis.getAlt_level());
+            update_analysis.setHemoglobin(analysis.getHemoglobin());
+            update_analysis.setBlood_group(analysis.getBlood_group());
+            update_analysis.setRhesus_factor(analysis.getRhesus_factor());
+            update_analysis.setTechnician_notes(analysis.getTechnician_notes());
+
+            service.save(update_analysis);
+        }
+
+        return "redirect:http://localhost:8080/donation-history/medcenter/" + medcenter_id;
     }
 
     @GetMapping("/delete/{id}")
-    public String delete (@PathVariable Long id) {
-        service.delete_by_id(id);
+    public String delete(@PathVariable Long id,
+                         @RequestParam(required = false) Long medcenter_id) {
+        Optional<Analysis> analysis = service.get_by_id(id);
+
+        if (analysis.isPresent()) {
+            Long donation_id = analysis.get().getDonation_id();
+            service.delete_by_id(id);
+
+            if (donation_id != null && medcenter_id != null) {
+                return "redirect:http://localhost:8080/donation-history/" + donation_id +
+                        "/remove-analysis?medcenter_id=" + medcenter_id;
+            }
+        }
+
         return "redirect:/analysis";
     }
 

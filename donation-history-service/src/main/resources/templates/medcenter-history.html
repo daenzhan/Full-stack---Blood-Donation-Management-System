@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donation History - BloodConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .donation-card {
+            border-left: 4px solid #dc3545;
+            margin-bottom: 1rem;
+            transition: transform 0.2s;
+        }
+        .donation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .status-completed {
+            color: #198754;
+        }
+        .status-pending {
+            color: #ffc107;
+        }
+        .blood-badge {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        .stat-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
+        }
+        .page-header {
+            border-bottom: 3px solid #dc3545;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        .btn-blood {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+        .btn-blood:hover {
+            background: #c82333;
+            border-color: #c82333;
+            color: white;
+        }
+        .table-custom th {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+        .analysis-badge {
+            background: #17a2b8;
+            color: white;
+        }
+        .btn-analysis {
+            background: #17a2b8;
+            border-color: #17a2b8;
+            color: white;
+        }
+        .btn-analysis:hover {
+            background: #138496;
+            border-color: #138496;
+            color: white;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container">
+        <a class="navbar-brand" href="/">BloodConnect</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/}">Home</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-clock-history me-2" viewBox="0 0 16 16">
+                        <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/>
+                        <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/>
+                        <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                    Donation History
+                </h1>
+            </div>
+            <div class="col-md-4 text-end">
+                <a th:href="@{/}" class="btn btn-outline-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card p-3 text-center">
+                <div class="text-danger mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-droplet" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c0 0-6 5.686-6 10a6 6 0 0 0 6 6zM6.646 4.646l.708.708c-.29.29-.864.808-1.51 1.519C4.838 7.487 4 8.745 4 10a4 4 0 0 0 8 0c0-1.255-.837-2.513-1.844-3.127-.646-.71-1.22-1.228-1.51-1.519l.708-.708c.23.23.59.537 1.003.93C11.152 6.396 12 7.734 12 10a4 4 0 0 1-8 0c0-2.266.848-3.604 1.643-4.424.414-.393.773-.7 1.003-.93z"/>
+                    </svg>
+                </div>
+                <h3 class="text-danger" th:text="${totalDonations}">0</h3>
+                <p class="text-muted mb-0">Total Donations</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card p-3 text-center">
+                <div class="text-danger mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-activity" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2Z"/>
+                    </svg>
+                </div>
+                <h3 class="text-danger" th:text="${#numbers.formatDecimal(totalVolume, 1, 2)}">0</h3>
+                <p class="text-muted mb-0">Total Volume (ml)</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card p-3 text-center">
+                <div class="text-danger mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                    </svg>
+                </div>
+                <h3 class="text-danger" th:text="${completedDonations}">0</h3>
+                <p class="text-muted mb-0">Completed</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card p-3 text-center">
+                <div class="text-danger mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
+                        <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                    </svg>
+                </div>
+                <h3 class="text-danger" th:text="${uniqueDonors}">0</h3>
+                <p class="text-muted mb-0">Unique Donors</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donations List -->
+    <div th:if="${donationHistory.empty}" class="text-center py-5">
+        <div class="text-muted">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-inbox" viewBox="0 0 16 16">
+                <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
+            </svg>
+        </div>
+        <h3 class="text-muted mt-3">No Donation Records</h3>
+        <p class="text-muted">There are no donation records for this medical center yet.</p>
+    </div>
+
+    <div th:unless="${donationHistory.empty}">
+        <!-- Desktop Table View -->
+        <div class="card d-none d-md-block">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="card-title mb-0 text-danger">Donation Records</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-custom mb-0">
+                        <thead>
+                        <tr>
+                            <th>Donation ID</th>
+                            <th>Donor ID</th>
+                            <th>Request ID</th>
+                            <th>Blood Type</th>
+                            <th>Component</th>
+                            <th>Donation Date</th>
+                            <th>Volume (ml)</th>
+                            <th>Status</th>
+                            <th>Analysis</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="donation : ${donationHistory}">
+                            <td class="fw-bold" th:text="${donation.donationId}">1</td>
+                            <td>
+                                <a th:href="@{/donation-history/donor/{id}(id=${donation.donorId})}"
+                                   th:text="${donation.donorId}"
+                                   class="text-decoration-none text-danger fw-bold">
+                                    123
+                                </a>
+                            </td>
+                            <td th:text="${donation.requestId}">456</td>
+                            <td>
+                                <span class="badge blood-badge" th:text="${donation.bloodType}">A+</span>
+                            </td>
+                            <td th:text="${donation.componentType}">Whole Blood</td>
+                            <td th:text="${#temporals.format(donation.donationDate, 'dd.MM.yyyy HH:mm')}">01.01.2024 10:00</td>
+                            <td th:text="${donation.volume} ?: 'N/A'">450</td>
+                            <td>
+                                    <span th:class="${donation.status == 'COMPLETED'} ? 'badge bg-success' : 'badge bg-warning text-dark'"
+                                          th:text="${donation.status}">COMPLETED</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- Кнопка "Добавить анализ" (показывается если анализа нет) -->
+                                    <a th:if="${donation.hasAnalysis == null or !donation.hasAnalysis}"
+                                       th:href="@{/analysis/new(donation_id=${donation.donationId}, donor_id=${donation.donorId}, medcenter_id=${medcenterId})}"
+                                       class="btn btn-analysis btn-sm"
+                                       title="Add Analysis">
+                                        <i class="fas fa-plus"></i> Add
+                                    </a>
+
+                                    <!-- Кнопки для анализа (показываются если анализ есть) -->
+                                    <div th:if="${donation.hasAnalysis != null and donation.hasAnalysis}" class="analysis-actions">
+                                        <span class="badge analysis-badge me-2">Analysis Done</span>
+
+                                        <!-- View Analysis -->
+                                        <a th:href="@{'http://localhost:8080/analysis/' + ${donation.analysisId} + '?medcenter_id=' + ${medcenterId}"
+                                           class="btn btn-info btn-sm"
+                                           title="View Analysis">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+
+                                        <!-- Edit Analysis -->
+                                        <a th:href="@{'http://localhost:8080/analysis/edit/' + ${donation.analysisId} + '?medcenter_id=' + ${medcenterId}}"
+                                           class="btn btn-warning btn-sm"
+                                           title="Edit Analysis">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+
+                                        <!-- Delete Analysis -->
+                                        <a th:href="@{'http://localhost:8080/analysis/delete/' + ${donation.analysisId} + '?medcenter_id=' + ${medcenterId}}"
+                                           class="btn btn-danger btn-sm"
+                                           title="Delete Analysis"
+                                           onclick="return confirm('Are you sure you want to delete this analysis?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

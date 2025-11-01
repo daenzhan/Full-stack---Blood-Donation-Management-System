@@ -43,4 +43,10 @@ public class DonationHistory {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "has_analysis")
+    private Boolean hasAnalysis = false;
+
+    @Column(name = "analysis_id")
+    private Long analysisId;
 }

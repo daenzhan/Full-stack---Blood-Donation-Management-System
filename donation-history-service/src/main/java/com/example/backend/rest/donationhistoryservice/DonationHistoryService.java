@@ -29,4 +29,24 @@ public class DonationHistoryService {
     public Optional<DonationHistory> getDonationHistoryById(Long id) {
         return donationHistoryRepository.findById(id);
     }
+
+    public void update_analysis_status(Long donation_id, Long analysis_id) {
+        Optional<DonationHistory> donation_opt = donationHistoryRepository.findById(donation_id);
+        if (donation_opt.isPresent()) {
+            DonationHistory donation = donation_opt.get();
+            donation.setHasAnalysis(true);
+            donation.setAnalysisId(analysis_id);
+            donationHistoryRepository.save(donation);
+        }
+    }
+
+    public void remove_analysis_status(Long donation_id) {
+        Optional<DonationHistory> donation_opt = donationHistoryRepository.findById(donation_id);
+        if (donation_opt.isPresent()) {
+            DonationHistory donation = donation_opt.get();
+            donation.setHasAnalysis(false);
+            donation.setAnalysisId(null);
+            donationHistoryRepository.save(donation);
+        }
+    }
 }
