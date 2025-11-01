@@ -229,21 +229,21 @@
                                         <span class="badge analysis-badge me-2">Analysis Done</span>
 
                                         <!-- View Analysis -->
-                                        <a th:href="@{'http://localhost:8080/analysis/' + ${donation.analysisId} + '?medcenter_id=' + ${medcenterId}"
+                                        <a th:href="@{/analysis/{id}(id=${donation.analysisId}, medcenter_id=${medcenterId})}"
                                            class="btn btn-info btn-sm"
                                            title="View Analysis">
                                             <i class="fas fa-eye"></i> View
                                         </a>
 
                                         <!-- Edit Analysis -->
-                                        <a th:href="@{'http://localhost:8080/analysis/edit/' + ${donation.analysisId} + '?medcenter_id=' + ${medcenterId}}"
+                                        <a th:href="@{/analysis/edit/{id}(id=${donation.analysisId}, medcenter_id=${medcenterId})}"
                                            class="btn btn-warning btn-sm"
                                            title="Edit Analysis">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
 
                                         <!-- Delete Analysis -->
-                                        <a th:href="@{'http://localhost:8080/analysis/delete/' + ${donation.analysisId} + '?medcenter_id=' + ${medcenterId}}"
+                                        <a th:href="@{/analysis/delete/{id}(id=${donation.analysisId}, medcenter_id=${medcenterId})}"
                                            class="btn btn-danger btn-sm"
                                            title="Delete Analysis"
                                            onclick="return confirm('Are you sure you want to delete this analysis?')">

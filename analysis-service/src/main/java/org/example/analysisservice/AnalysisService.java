@@ -37,4 +37,8 @@ public class AnalysisService {
                 .orElseThrow(() -> new RuntimeException("Analysis not found with id: " + analysisId));
         return recommendationService.generateRecommendations(analysis);
     }
+
+    public List<Analysis> get_analysis_by_donor_id(Long donorId) {
+        return analysisRepository.findByDonor_id(donorId);
+    }
 }

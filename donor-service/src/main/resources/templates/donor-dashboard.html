@@ -839,6 +839,13 @@
                 My Profile
             </a>
         </li>
+
+        <li>
+            <a th:href="@{'http://localhost:8080/analysis/donor/' + ${donor_id}}">
+                <i class="fas fa-microscope"></i>
+                My Analysis Results
+            </a>
+        </li>
     </ul>
 </div>
 
@@ -1197,6 +1204,21 @@
                             <button class="btn btn-orange btn-sm" data-bs-toggle="modal" data-bs-target="#tipsModal">
                                 <i class="fas fa-info me-1"></i> Read Tips
                             </button>
+                        </div>
+
+                        <!-- Analysis -->
+                        <div class="action-card">
+                            <div>
+                                <div class="action-icon bg-info text-white">
+                                    <i class="fas fa-microscope"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Analysis Results</h6>
+                                <p class="text-muted small mb-3">View your latest blood test results and health reports</p>
+                            </div>
+                            <a th:href="@{'http://localhost:8080/analysis/donor/' + ${donor_id}}"
+                               class="btn btn-info btn-sm">
+                                <i class="fas fa-chart-line me-1"></i> View Results
+                            </a>
                         </div>
                     </div>
                 </div>

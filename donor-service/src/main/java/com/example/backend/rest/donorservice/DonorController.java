@@ -47,6 +47,7 @@ public class DonorController {
             model.addAttribute("userId", userId);
             model.addAttribute("role", role);
             model.addAttribute("email", email);
+            model.addAttribute("donor_id", donor.getUserId());
 
             return "donor-dashboard";
 

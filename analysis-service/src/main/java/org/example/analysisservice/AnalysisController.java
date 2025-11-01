@@ -150,4 +150,12 @@ public class AnalysisController {
             return "redirect:/analysis?error=Analysis+not+found";
         }
     }
+
+    @GetMapping("/donor/{donor_id}")
+    public String show_analysis_for_donor (@PathVariable Long donor_id, Model model) {
+        List<Analysis> donor_analyses = service.get_analysis_by_donor_id(donor_id);
+        model.addAttribute("analyses", donor_analyses);
+        model.addAttribute("donorId", donor_id);
+        return "analysis-donor-list";
+    }
 }

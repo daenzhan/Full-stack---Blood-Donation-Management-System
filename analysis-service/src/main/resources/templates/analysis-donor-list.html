@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Donor Analyses</title>
+</head>
+<body>
+<h2>Analyses for Donor #<span th:text="${donorId}"></span></h2>
+
+<div>
+    <a th:href="@{/analysis}">← All Analyses</a>
+</div>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Analysis ID</th>
+        <th>Donation ID</th>
+        <th>Analysis Date</th>
+        <th>Blood Group</th>
+        <th>Rhesus Factor</th>
+        <th>Hemoglobin</th>
+        <th>HIV</th>
+        <th>Hepatitis B</th>
+        <th>Hepatitis C</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="analysis : ${analyses}">
+        <td th:text="${analysis.analysis_id}"></td>
+        <td th:text="${analysis.donation_id}"></td>
+        <td th:text="${analysis.analysis_date}"></td>
+        <td th:text="${analysis.blood_group}"></td>
+        <td th:text="${analysis.rhesus_factor}"></td>
+        <td th:text="${analysis.hemoglobin}"></td>
+        <td th:text="${analysis.hiv}"></td>
+        <td th:text="${analysis.hepatitisB}"></td>
+        <td th:text="${analysis.hepatitisC}"></td>
+    </tr>
+    <tr th:if="${analyses.empty}">
+        <td colspan="10" style="text-align: center;">No analyses found for this donor</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
