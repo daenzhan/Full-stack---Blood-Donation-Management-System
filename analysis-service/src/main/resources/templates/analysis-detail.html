@@ -2,101 +2,467 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BloodConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e53935;
+            --primary-light: #ff6b6b;
+            --primary-dark: #c62828;
+            --secondary: #455a64;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --text-lighter: #888888;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --info: #2196f3;
+            --danger: #f44336;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px 0;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo i {
+            font-size: 32px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header i {
+            font-size: 22px;
+            color: var(--primary);
+        }
+
+        .card-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .test-item {
+            background-color: var(--light-bg);
+            border-radius: var(--radius);
+            padding: 18px 15px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .test-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .test-name {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .test-result {
+            font-size: 15px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 30px;
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        .status-positive {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .status-negative {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .status-inconclusive {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .status-not-tested {
+            background-color: rgba(136, 136, 136, 0.1);
+            color: var(--text-lighter);
+            border: 1px solid rgba(136, 136, 136, 0.3);
+        }
+
+        .notes-card {
+            grid-column: 1 / -1;
+        }
+
+        .notes-content {
+            background-color: var(--light-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            font-style: italic;
+            color: var(--text-light);
+            line-height: 1.7;
+            min-height: 100px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--secondary);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .back-button:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .legend-positive { background-color: rgba(244, 67, 54, 0.2); border: 1px solid rgba(244, 67, 54, 0.5); }
+        .legend-negative { background-color: rgba(76, 175, 80, 0.2); border: 1px solid rgba(76, 175, 80, 0.5); }
+        .legend-pending { background-color: rgba(255, 152, 0, 0.2); border: 1px solid rgba(255, 152, 0, 0.5); }
+        .legend-inconclusive { background-color: rgba(33, 150, 243, 0.2); border: 1px solid rgba(33, 150, 243, 0.5); }
+        .legend-not-tested { background-color: rgba(136, 136, 136, 0.2); border: 1px solid rgba(136, 136, 136, 0.5); }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-<h1>Analysis Details</h1>
+<div class="container">
+    <header>
+        <div class="logo">
+            <i class="fas fa-tint"></i>
+            <h1>Analysis</h1>
+        </div>
+    </header>
 
-<table border="1" style="border-collapse: collapse;">
-    <tr>
-        <th>Donor ID</th>
-        <td th:text="${analysis.donor_id}"></td>
-    </tr>
-    <tr>
-        <th>Donation ID</th>
-        <td th:text="${analysis.donation_id}"></td>
-    </tr>
-    <tr>
-        <th>HIV</th>
-        <td>
-            <span th:if="${analysis.hiv == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
-            <span th:if="${analysis.hiv == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
-            <span th:if="${analysis.hiv == 'PENDING'}" style="color: orange;">PENDING</span>
-            <span th:if="${analysis.hiv == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
-            <span th:if="${analysis.hiv == null or analysis.hiv == '' or analysis.hiv == 'not tested'}">not tested</span>
-        </td>
-    </tr>
-    <tr>
-        <th>Hepatitis B</th>
-        <td>
-            <span th:if="${analysis.hepatitisB == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
-            <span th:if="${analysis.hepatitisB == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
-            <span th:if="${analysis.hepatitisB == 'PENDING'}" style="color: orange;">PENDING</span>
-            <span th:if="${analysis.hepatitisB == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
-            <span th:if="${analysis.hepatitisB == null or analysis.hepatitisB == '' or analysis.hepatitisB == 'not tested'}">not tested</span>
-        </td>
-    </tr>
-    <tr>
-        <th>Hepatitis C</th>
-        <td>
-            <span th:if="${analysis.hepatitisC == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
-            <span th:if="${analysis.hepatitisC == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
-            <span th:if="${analysis.hepatitisC == 'PENDING'}" style="color: orange;">PENDING</span>
-            <span th:if="${analysis.hepatitisC == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
-            <span th:if="${analysis.hepatitisC == null or analysis.hepatitisC == '' or analysis.hepatitisC == 'not tested'}">not tested</span>
-        </td>
-    </tr>
-    <tr>
-        <th>Syphilis</th>
-        <td>
-            <span th:if="${analysis.syphilis == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
-            <span th:if="${analysis.syphilis == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
-            <span th:if="${analysis.syphilis == 'PENDING'}" style="color: orange;">PENDING</span>
-            <span th:if="${analysis.syphilis == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
-            <span th:if="${analysis.syphilis == null or analysis.syphilis == '' or analysis.syphilis == 'not tested'}">not tested</span>
-        </td>
-    </tr>
-    <tr>
-        <th>Brucellosis</th>
-        <td>
-            <span th:if="${analysis.brucellosis == 'POSITIVE'}" style="color: red; font-weight: bold;">POSITIVE</span>
-            <span th:if="${analysis.brucellosis == 'NEGATIVE'}" style="color: green; font-weight: bold;">NEGATIVE</span>
-            <span th:if="${analysis.brucellosis == 'PENDING'}" style="color: orange;">PENDING</span>
-            <span th:if="${analysis.brucellosis == 'INCONCLUSIVE'}" style="color: blue;">INCONCLUSIVE</span>
-            <span th:if="${analysis.brucellosis == null or analysis.brucellosis == '' or analysis.brucellosis == 'not tested'}">not tested</span>
-        </td>
-    </tr>
-    <tr>
-        <th>ALT Level</th>
-        <td th:text="${analysis.alt_level} ?: 'not specified'"></td>
-    </tr>
-    <tr>
-        <th>Hemoglobin</th>
-        <td th:text="${analysis.hemoglobin} ?: 'not specified'"></td>
-    </tr>
-    <tr>
-        <th>Blood Group</th>
-        <td th:text="${analysis.blood_group} ?: 'not specified'"></td>
-    </tr>
-    <tr>
-        <th>Rhesus Factor</th>
-        <td th:text="${analysis.rhesus_factor} ?: 'not specified'"></td>
-    </tr>
-    <tr>
-        <th>Analysis Date</th>
-        <td th:text="${#temporals.format(analysis.analysis_date, 'dd.MM.yyyy HH:mm')}"></td>
-    </tr>
-    <tr>
-        <th>Technician Notes</th>
-        <td th:text="${analysis.technician_notes} ?: 'no notes'"></td>
-    </tr>
-</table>
+    <div class="content">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-user-injured"></i>
+                <h2>About donor</h2>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Donor ID</span>
+                    <span class="info-value" th:text="${analysis.donor_id}">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Donation ID</span>
+                    <span class="info-value" th:text="${analysis.donation_id}">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Analysis Date</span>
+                    <span class="info-value" th:text="${#temporals.format(analysis.analysis_date, 'dd.MM.yyyy HH:mm')}">-</span>
+                </div>
+            </div>
+        </div>
 
-<div style="margin-top: 20px;">
-    <a th:if="${medcenter_id != null}"
-       th:href="@{'http://localhost:8080/donation-history/medcenter/' + ${medcenter_id}}">
-        Back
-    </a>
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-vial"></i>
+                <h2>Blood Details</h2>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Blood group</span>
+                    <span class="info-value" th:text="${analysis.blood_group} ?: 'Not specified'">Not specified</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Rhesus factor</span>
+                    <span class="info-value" th:text="${analysis.rhesus_factor} ?: 'Not specified'">Not specified</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Hemoglobin level</span>
+                    <span class="info-value" th:text="${analysis.hemoglobin} ?: 'Not specified'">Not specified</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">ALT level</span>
+                    <span class="info-value" th:text="${analysis.alt_level} ?: 'Not specified'">Not specified</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-microscope"></i>
+                <h2>Results</h2>
+            </div>
+            <div class="tests-grid">
+                <div class="test-item">
+                    <div class="test-name">HIV</div>
+                    <div th:class="${analysis.hiv == 'POSITIVE'} ? 'test-result status-positive' :
+                                (${analysis.hiv == 'NEGATIVE'} ? 'test-result status-negative' :
+                                (${analysis.hiv == 'PENDING'} ? 'test-result status-pending' :
+                                (${analysis.hiv == 'INCONCLUSIVE'} ? 'test-result status-inconclusive' :
+                                'test-result status-not-tested')))"
+                         th:text="${analysis.hiv == null or analysis.hiv == '' or analysis.hiv == 'not tested'} ?
+                                'Not Tested' : ${analysis.hiv}">
+                        Not Tested
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <div class="test-name">Hepatitis B</div>
+                    <div th:class="${analysis.hepatitisB == 'POSITIVE'} ? 'test-result status-positive' :
+                                (${analysis.hepatitisB == 'NEGATIVE'} ? 'test-result status-negative' :
+                                (${analysis.hepatitisB == 'PENDING'} ? 'test-result status-pending' :
+                                (${analysis.hepatitisB == 'INCONCLUSIVE'} ? 'test-result status-inconclusive' :
+                                'test-result status-not-tested')))"
+                         th:text="${analysis.hepatitisB == null or analysis.hepatitisB == '' or analysis.hepatitisB == 'not tested'} ?
+                                'Not Tested' : ${analysis.hepatitisB}">
+                        Not Tested
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <div class="test-name">Hepatitis C</div>
+                    <div th:class="${analysis.hepatitisC == 'POSITIVE'} ? 'test-result status-positive' :
+                                (${analysis.hepatitisC == 'NEGATIVE'} ? 'test-result status-negative' :
+                                (${analysis.hepatitisC == 'PENDING'} ? 'test-result status-pending' :
+                                (${analysis.hepatitisC == 'INCONCLUSIVE'} ? 'test-result status-inconclusive' :
+                                'test-result status-not-tested')))"
+                         th:text="${analysis.hepatitisC == null or analysis.hepatitisC == '' or analysis.hepatitisC == 'not tested'} ?
+                                'Not Tested' : ${analysis.hepatitisC}">
+                        Not Tested
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <div class="test-name">Syphilis</div>
+                    <div th:class="${analysis.syphilis == 'POSITIVE'} ? 'test-result status-positive' :
+                                (${analysis.syphilis == 'NEGATIVE'} ? 'test-result status-negative' :
+                                (${analysis.syphilis == 'PENDING'} ? 'test-result status-pending' :
+                                (${analysis.syphilis == 'INCONCLUSIVE'} ? 'test-result status-inconclusive' :
+                                'test-result status-not-tested')))"
+                         th:text="${analysis.syphilis == null or analysis.syphilis == '' or analysis.syphilis == 'not tested'} ?
+                                'Not Tested' : ${analysis.syphilis}">
+                        Not Tested
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <div class="test-name">Brucellosis</div>
+                    <div th:class="${analysis.brucellosis == 'POSITIVE'} ? 'test-result status-positive' :
+                                (${analysis.brucellosis == 'NEGATIVE'} ? 'test-result status-negative' :
+                                (${analysis.brucellosis == 'PENDING'} ? 'test-result status-pending' :
+                                (${analysis.brucellosis == 'INCONCLUSIVE'} ? 'test-result status-inconclusive' :
+                                'test-result status-not-tested')))"
+                         th:text="${analysis.brucellosis == null or analysis.brucellosis == '' or analysis.brucellosis == 'not tested'} ?
+                                'Not Tested' : ${analysis.brucellosis}">
+                        Not Tested
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-positive"></div>
+                    <span>Positive</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-negative"></div>
+                    <span>Negative</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-pending"></div>
+                    <span>Pending</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-inconclusive"></div>
+                    <span>Inconclusive</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-not-tested"></div>
+                    <span>Not Tested</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sticky-note"></i>
+                <h2>Technician Notes</h2>
+            </div>
+            <div class="notes-content" th:text="${analysis.technician_notes} ?: 'No notes provided'">
+                No notes provided
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a th:if="${medcenter_id != null}"
+           th:href="@{'http://localhost:8080/donation-history/medcenter/' + ${medcenter_id}}"
+           class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Donation History
+        </a>
+    </div>
 </div>
 </body>
 </html>

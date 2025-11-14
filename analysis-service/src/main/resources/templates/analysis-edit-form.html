@@ -2,124 +2,637 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BloodConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e53935;
+            --primary-light: #ff6b6b;
+            --primary-dark: #c62828;
+            --secondary: #455a64;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --text-lighter: #888888;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --info: #2196f3;
+            --danger: #f44336;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 25px 30px;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title i {
+            font-size: 28px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .analysis-id {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .form-container {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .form-content {
+            padding: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header i {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: var(--primary);
+        }
+
+        .form-control, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .form-control:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+            outline: none;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-hint {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        .test-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status-indicator:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-positive {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .status-positive.active {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 2px solid rgba(244, 67, 54, 0.5);
+        }
+
+        .status-negative {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-negative.active {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 2px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .status-pending.active {
+            background-color: rgba(255, 152, 0, 0.2);
+            border: 2px solid rgba(255, 152, 0, 0.5);
+        }
+
+        .status-inconclusive {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .status-inconclusive.active {
+            background-color: rgba(33, 150, 243, 0.2);
+            border: 2px solid rgba(33, 150, 243, 0.5);
+        }
+
+        .status-not-tested {
+            background-color: rgba(117, 117, 117, 0.1);
+            color: var(--text-lighter);
+            border: 1px solid rgba(117, 117, 117, 0.3);
+        }
+
+        .status-not-tested.active {
+            background-color: rgba(117, 117, 117, 0.2);
+            border: 2px solid rgba(117, 117, 117, 0.5);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #37474f;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light-bg);
+            transform: translateY(-2px);
+        }
+
+        .status-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 15px;
+            background-color: var(--light-bg);
+            border-radius: var(--radius);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .legend-positive { background-color: rgba(244, 67, 54, 0.3); }
+        .legend-negative { background-color: rgba(76, 175, 80, 0.3); }
+        .legend-pending { background-color: rgba(255, 152, 0, 0.3); }
+        .legend-inconclusive { background-color: rgba(33, 150, 243, 0.3); }
+        .legend-not-tested { background-color: rgba(117, 117, 117, 0.3); }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-<h1>Edit Blood Analysis</h1>
+<div class="container">
+    <header>
+        <div class="header-content">
+            <div class="page-title">
+                <i class="fas fa-edit"></i>
+                <div>
+                    <h1>Edit analysis</h1>
+                </div>
+            </div>
+        </div>
+    </header>
 
-<form th:action="@{'http://localhost:8080/analysis/edit/' + ${analysis.analysis_id}}" th:object="${analysis}" method="post">
-    <input type="hidden" th:field="*{analysis_id}">
-    <input type="hidden" name="medcenter_id" th:value="${medcenter_id}">
+    <form th:action="@{'http://localhost:8080/analysis/edit/' + ${analysis.analysis_id}}" th:object="${analysis}" method="post" class="form-container">
+        <div class="form-content">
+            <input type="hidden" th:field="*{analysis_id}">
+            <input type="hidden" name="medcenter_id" th:value="${medcenter_id}">
 
-    <table>
-        <tr>
-            <td>Donor ID:</td>
-            <td><input type="number" th:field="*{donor_id}" required></td>
-        </tr>
-        <tr>
-            <td>Donation ID:</td>
-            <td><input type="number" th:field="*{donation_id}" required></td>
-        </tr>
-        <tr>
-            <td>HIV:</td>
-            <td>
-                <select th:field="*{hiv}">
-                    <option value="">not tested</option>
-                    <option value="NEGATIVE">NEGATIVE</option>
-                    <option value="POSITIVE">POSITIVE</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Hepatitis B:</td>
-            <td>
-                <select th:field="*{hepatitisB}">
-                    <option value="">not tested</option>
-                    <option value="NEGATIVE">NEGATIVE</option>
-                    <option value="POSITIVE">POSITIVE</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Hepatitis C:</td>
-            <td>
-                <select th:field="*{hepatitisC}">
-                    <option value="">not tested</option>
-                    <option value="NEGATIVE">NEGATIVE</option>
-                    <option value="POSITIVE">POSITIVE</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Syphilis:</td>
-            <td>
-                <select th:field="*{syphilis}">
-                    <option value="">not tested</option>
-                    <option value="NEGATIVE">NEGATIVE</option>
-                    <option value="POSITIVE">POSITIVE</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Brucellosis:</td>
-            <td>
-                <select th:field="*{brucellosis}">
-                    <option value="">not tested</option>
-                    <option value="NEGATIVE">NEGATIVE</option>
-                    <option value="POSITIVE">POSITIVE</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>ALT Level:</td>
-            <td><input type="number" step="0.1" th:field="*{alt_level}"></td>
-        </tr>
-        <tr>
-            <td>Hemoglobin:</td>
-            <td><input type="number" step="0.1" th:field="*{hemoglobin}"></td>
-        </tr>
-        <tr>
-            <td>Blood Group:</td>
-            <td>
-                <select th:field="*{blood_group}">
-                    <option value="">Select Blood Group</option>
-                    <option th:each="group : ${blood_groups}"
-                            th:value="${group}"
-                            th:text="${group}"></option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Rhesus Factor:</td>
-            <td>
-                <select th:field="*{rhesus_factor}">
-                    <option value="">Select Rhesus Factor</option>
-                    <option th:each="factor : ${rhesusFactors}"
-                            th:value="${factor}"
-                            th:text="${factor}"></option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <td>Technician Notes:</td>
-            <td><textarea th:field="*{technician_notes}" rows="4" cols="50"></textarea></td>
-        </tr>
-    </table>
+            <div class="form-grid">
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-user-injured"></i>
+                        <h2>Information</h2>
+                    </div>
 
-    <div style="margin-top: 20px;">
-        <button type="submit">Update Analysis</button>
-        <a th:href="@{/analysis}" style="margin-left: 10px;">Cancel</a>
-    </div>
-</form>
+                    <div class="form-group">
+                        <label for="donor_id" class="form-label required-field">Donor ID</label>
+                        <input type="number" class="form-control" id="donor_id" th:field="*{donor_id}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="donation_id" class="form-label required-field">Donation ID</label>
+                        <input type="number" class="form-control" id="donation_id" th:field="*{donation_id}" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-vial"></i>
+                        <h2>Blood type information</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blood_group" class="form-label">Blood Group</label>
+                        <select class="form-select" id="blood_group" th:field="*{blood_group}">
+                            <option value="">Not Tested</option>
+                            <option th:each="group : ${blood_groups}"
+                                    th:value="${group}"
+                                    th:text="${group}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rhesus_factor" class="form-label">Rhesus factor</label>
+                        <select class="form-select" id="rhesus_factor" th:field="*{rhesus_factor}">
+                            <option value="">Not Tested</option>
+                            <option value="+">+</option>
+                            <option value="-">-</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-microscope"></i>
+                    <h2>Infectious disease tests</h2>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="hiv" class="form-label">HIV</label>
+                        <select class="form-select" id="hiv" th:field="*{hiv}">
+                            <option value="">Not Tested</option>
+                            <option value="NEGATIVE">NEGATIVE</option>
+                            <option value="POSITIVE">POSITIVE</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                        </select>
+                        <div class="test-options">
+                            <span class="status-indicator status-negative" data-test="hiv" data-value="NEGATIVE">NEGATIVE</span>
+                            <span class="status-indicator status-positive" data-test="hiv" data-value="POSITIVE">POSITIVE</span>
+                            <span class="status-indicator status-pending" data-test="hiv" data-value="PENDING">PENDING</span>
+                            <span class="status-indicator status-inconclusive" data-test="hiv" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                            <span class="status-indicator status-not-tested" data-test="hiv" data-value="">Not Tested</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hepatitisB" class="form-label">Hepatitis B</label>
+                        <select class="form-select" id="hepatitisB" th:field="*{hepatitisB}">
+                            <option value="">Not Tested</option>
+                            <option value="NEGATIVE">NEGATIVE</option>
+                            <option value="POSITIVE">POSITIVE</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                        </select>
+                        <div class="test-options">
+                            <span class="status-indicator status-negative" data-test="hepatitisB" data-value="NEGATIVE">NEGATIVE</span>
+                            <span class="status-indicator status-positive" data-test="hepatitisB" data-value="POSITIVE">POSITIVE</span>
+                            <span class="status-indicator status-pending" data-test="hepatitisB" data-value="PENDING">PENDING</span>
+                            <span class="status-indicator status-inconclusive" data-test="hepatitisB" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                            <span class="status-indicator status-not-tested" data-test="hepatitisB" data-value="">Not Tested</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hepatitisC" class="form-label">Hepatitis C</label>
+                        <select class="form-select" id="hepatitisC" th:field="*{hepatitisC}">
+                            <option value="">Not Tested</option>
+                            <option value="NEGATIVE">NEGATIVE</option>
+                            <option value="POSITIVE">POSITIVE</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                        </select>
+                        <div class="test-options">
+                            <span class="status-indicator status-negative" data-test="hepatitisC" data-value="NEGATIVE">NEGATIVE</span>
+                            <span class="status-indicator status-positive" data-test="hepatitisC" data-value="POSITIVE">POSITIVE</span>
+                            <span class="status-indicator status-pending" data-test="hepatitisC" data-value="PENDING">PENDING</span>
+                            <span class="status-indicator status-inconclusive" data-test="hepatitisC" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                            <span class="status-indicator status-not-tested" data-test="hepatitisC" data-value="">Not Tested</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="syphilis" class="form-label">Syphilis</label>
+                        <select class="form-select" id="syphilis" th:field="*{syphilis}">
+                            <option value="">Not Tested</option>
+                            <option value="NEGATIVE">NEGATIVE</option>
+                            <option value="POSITIVE">POSITIVE</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                        </select>
+                        <div class="test-options">
+                            <span class="status-indicator status-negative" data-test="syphilis" data-value="NEGATIVE">NEGATIVE</span>
+                            <span class="status-indicator status-positive" data-test="syphilis" data-value="POSITIVE">POSITIVE</span>
+                            <span class="status-indicator status-pending" data-test="syphilis" data-value="PENDING">PENDING</span>
+                            <span class="status-indicator status-inconclusive" data-test="syphilis" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                            <span class="status-indicator status-not-tested" data-test="syphilis" data-value="">Not Tested</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="brucellosis" class="form-label">Brucellosis</label>
+                        <select class="form-select" id="brucellosis" th:field="*{brucellosis}">
+                            <option value="">Not Tested</option>
+                            <option value="NEGATIVE">NEGATIVE</option>
+                            <option value="POSITIVE">POSITIVE</option>
+                            <option value="PENDING">PENDING</option>
+                            <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                        </select>
+                        <div class="test-options">
+                            <span class="status-indicator status-negative" data-test="brucellosis" data-value="NEGATIVE">NEGATIVE</span>
+                            <span class="status-indicator status-positive" data-test="brucellosis" data-value="POSITIVE">POSITIVE</span>
+                            <span class="status-indicator status-pending" data-test="brucellosis" data-value="PENDING">PENDING</span>
+                            <span class="status-indicator status-inconclusive" data-test="brucellosis" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                            <span class="status-indicator status-not-tested" data-test="brucellosis" data-value="">Not Tested</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Legend -->
+                <div class="status-legend">
+                    <div class="legend-item">
+                        <div class="legend-color legend-negative"></div>
+                        <span>Negative</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-positive"></div>
+                        <span>Positive</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-pending"></div>
+                        <span>Pending</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-inconclusive"></div>
+                        <span>Inconclusive</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-not-tested"></div>
+                        <span>Not Tested</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h2>Blood parameters</h2>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="alt_level" class="form-label">ALT level (U/L)</label>
+                        <input type="number" step="0.1" class="form-control" id="alt_level" th:field="*{alt_level}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hemoglobin" class="form-label">Hemoglobin (g/dL)</label>
+                        <input type="number" step="0.1" class="form-control" id="hemoglobin" th:field="*{hemoglobin}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-sticky-note"></i>
+                    <h2>Technician notes</h2>
+                </div>
+
+                <div class="form-group">
+                    <label for="technician_notes" class="form-label">Additional Notes</label>
+                    <textarea class="form-textarea" id="technician_notes" th:field="*{technician_notes}" placeholder="Enter any additional observations or notes about this analysis..."></textarea>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Update Analysis
+                </button>
+                <a  th:href="@{'http://localhost:8080/donation-history/medcenter/' + ${medcenter_id}}" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeStatusIndicators();
+
+        document.querySelectorAll('.status-indicator').forEach(indicator => {
+            indicator.addEventListener('click', function() {
+                const testName = this.getAttribute('data-test');
+                const value = this.getAttribute('data-value');
+
+                const selectElement = document.getElementById(testName);
+                if (selectElement) {
+                    selectElement.value = value;
+
+                    updateActiveIndicators(testName, value);
+                }
+            });
+        });
+
+        document.querySelectorAll('.form-select').forEach(select => {
+            select.addEventListener('change', function() {
+                updateActiveIndicators(this.id, this.value);
+            });
+        });
+
+        function initializeStatusIndicators() {
+            document.querySelectorAll('.form-select').forEach(select => {
+                updateActiveIndicators(select.id, select.value);
+            });
+        }
+
+        function updateActiveIndicators(testName, value) {
+            document.querySelectorAll(`.status-indicator[data-test="${testName}"]`).forEach(indicator => {
+                indicator.classList.remove('active');
+            });
+
+            const activeIndicator = document.querySelector(`.status-indicator[data-test="${testName}"][data-value="${value}"]`);
+            if (activeIndicator) {
+                activeIndicator.classList.add('active');
+            }
+        }
+    });
+</script>
 </body>
 </html>

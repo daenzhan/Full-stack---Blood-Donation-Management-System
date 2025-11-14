@@ -2,193 +2,637 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>BloodConnect - Create Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Blood Analysis | BloodConnect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #e53935;
+            --primary-light: #ff6b6b;
+            --primary-dark: #c62828;
+            --secondary: #455a64;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --info: #2196f3;
+            --radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
         .form-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 900px;
+            margin: 2rem auto;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
         }
+
         .form-header {
-            border-bottom: 3px solid #dc3545;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            text-align: center;
         }
+
+        .form-header h1 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header .lead {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .section-title {
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
         .required-field::after {
             content: " *";
-            color: #dc3545;
+            color: var(--primary);
         }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(229, 57, 53, 0.15);
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-secondary {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status-indicator:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-positive {
+            background-color: rgba(229, 57, 53, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(229, 57, 53, 0.3);
+        }
+
+        .status-positive.active {
+            background-color: rgba(229, 57, 53, 0.2);
+            border: 2px solid rgba(229, 57, 53, 0.5);
+        }
+
+        .status-negative {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-negative.active {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 2px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .status-pending.active {
+            background-color: rgba(255, 152, 0, 0.2);
+            border: 2px solid rgba(255, 152, 0, 0.5);
+        }
+
+        .status-inconclusive {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .status-inconclusive.active {
+            background-color: rgba(33, 150, 243, 0.2);
+            border: 2px solid rgba(33, 150, 243, 0.5);
+        }
+
+        .status-not-tested {
+            background-color: rgba(117, 117, 117, 0.1);
+            color: var(--text-light);
+            border: 1px solid rgba(117, 117, 117, 0.3);
+        }
+
+        .status-not-tested.active {
+            background-color: rgba(117, 117, 117, 0.2);
+            border: 2px solid rgba(117, 117, 117, 0.5);
+        }
+
+        .test-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .test-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 1rem;
+            }
+
+            .form-body {
+                padding: 1.5rem;
+            }
+
+            .test-option {
+                min-width: 100%;
+            }
+        }
+
+        .floating-info {
+            background-color: rgba(69, 90, 100, 0.05);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .status-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 15px;
+            background-color: var(--light-bg);
+            border-radius: var(--radius);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .legend-positive { background-color: rgba(244, 67, 54, 0.3); }
+        .legend-negative { background-color: rgba(76, 175, 80, 0.3); }
+        .legend-pending { background-color: rgba(255, 152, 0, 0.3); }
+        .legend-inconclusive { background-color: rgba(33, 150, 243, 0.3); }
+        .legend-not-tested { background-color: rgba(117, 117, 117, 0.3); }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
     <div class="container">
-        <a class="navbar-brand" href="/">BloodConnect</a>
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-tint me-2"></i>BloodConnect
+        </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" th:href="@{/analysis}">Back to Analysis List</a>
+            <a class="nav-link" th:href="@{/analysis}">
+                <i class="fas fa-arrow-left me-1"></i>Back to Analysis List
+            </a>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container">
     <div class="form-container">
         <div class="form-header">
-            <h1 class="text-danger">Create New Blood Analysis</h1>
+            <h1>Create New Blood Analysis</h1>
             <p class="lead">Donation ID: <strong th:text="${analysis.donation_id}"></strong></p>
         </div>
 
-        <form th:action="@{/analysis/new}" th:object="${analysis}" method="post">
-            <!-- Donation ID (скрытое поле) -->
+        <form th:action="@{/analysis/new}" th:object="${analysis}" method="post" class="form-body">
+            <!-- Hidden fields -->
             <input type="hidden" th:field="*{donation_id}">
             <input type="hidden" name="medcenter_id" th:value="${medcenter_id}">
 
-            <div class="row">
-                <div class="col-md-6">
+            <!-- Donation Information Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="section-title">
+                        <i class="fas fa-info-circle"></i>Donation Information
+                    </h4>
+
+                    <div class="floating-info">
+                        <div class="info-item">
+                            <span class="info-label">Donation ID:</span>
+                            <span class="info-value" th:text="${analysis.donation_id}"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="donor_id" class="form-label required-field">Donor ID</label>
+                                <input type="number" class="form-control" id="donor_id" th:field="*{donor_id}" required>
+                                <div class="form-text">Enter the unique identifier for the donor</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Donation ID</label>
+                                <input type="text" class="form-control" th:value="${analysis.donation_id}" readonly>
+                                <div class="form-text">Automatically set from donation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blood Type Information Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="section-title">
+                        <i class="fas fa-vial"></i>Blood Type Information
+                    </h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="blood_group" class="form-label required-field">Blood Group</label>
+                                <select class="form-select" id="blood_group" th:field="*{blood_group}" required>
+                                    <option value="">Select Blood Group</option>
+                                    <option th:each="group : ${blood_groups}"
+                                            th:value="${group}"
+                                            th:text="${group}"></option>
+                                </select>
+                                <div class="form-text">Select the donor's blood group</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="rhesus_factor" class="form-label required-field">Rhesus Factor</label>
+                                <select class="form-select" id="rhesus_factor" th:field="*{rhesus_factor}" required>
+                                    <option value="">Select Rhesus Factor</option>
+                                    <option th:each="factor : ${rhesus_factors}"
+                                            th:value="${factor}"
+                                            th:text="${factor}"></option>
+                                </select>
+                                <div class="form-text">Select the Rh factor (positive or negative)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Infectious Disease Tests Card -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="section-title">
+                        <i class="fas fa-microscope"></i>Infectious Disease Tests
+                    </h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hiv" class="form-label">HIV</label>
+                                <select class="form-select" id="hiv" th:field="*{hiv}">
+                                    <option value="">Not Tested</option>
+                                    <option value="NEGATIVE">NEGATIVE</option>
+                                    <option value="POSITIVE">POSITIVE</option>
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                                </select>
+                                <div class="test-options">
+                                    <span class="status-indicator status-negative" data-test="hiv" data-value="NEGATIVE">NEGATIVE</span>
+                                    <span class="status-indicator status-positive" data-test="hiv" data-value="POSITIVE">POSITIVE</span>
+                                    <span class="status-indicator status-pending" data-test="hiv" data-value="PENDING">PENDING</span>
+                                    <span class="status-indicator status-inconclusive" data-test="hiv" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                                    <span class="status-indicator status-not-tested" data-test="hiv" data-value="">Not Tested</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hepatitisB" class="form-label">Hepatitis B</label>
+                                <select class="form-select" id="hepatitisB" th:field="*{hepatitisB}">
+                                    <option value="">Not Tested</option>
+                                    <option value="NEGATIVE">NEGATIVE</option>
+                                    <option value="POSITIVE">POSITIVE</option>
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                                </select>
+                                <div class="test-options">
+                                    <span class="status-indicator status-negative" data-test="hepatitisB" data-value="NEGATIVE">NEGATIVE</span>
+                                    <span class="status-indicator status-positive" data-test="hepatitisB" data-value="POSITIVE">POSITIVE</span>
+                                    <span class="status-indicator status-pending" data-test="hepatitisB" data-value="PENDING">PENDING</span>
+                                    <span class="status-indicator status-inconclusive" data-test="hepatitisB" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                                    <span class="status-indicator status-not-tested" data-test="hepatitisB" data-value="">Not Tested</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hepatitisC" class="form-label">Hepatitis C</label>
+                                <select class="form-select" id="hepatitisC" th:field="*{hepatitisC}">
+                                    <option value="">Not Tested</option>
+                                    <option value="NEGATIVE">NEGATIVE</option>
+                                    <option value="POSITIVE">POSITIVE</option>
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                                </select>
+                                <div class="test-options">
+                                    <span class="status-indicator status-negative" data-test="hepatitisC" data-value="NEGATIVE">NEGATIVE</span>
+                                    <span class="status-indicator status-positive" data-test="hepatitisC" data-value="POSITIVE">POSITIVE</span>
+                                    <span class="status-indicator status-pending" data-test="hepatitisC" data-value="PENDING">PENDING</span>
+                                    <span class="status-indicator status-inconclusive" data-test="hepatitisC" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                                    <span class="status-indicator status-not-tested" data-test="hepatitisC" data-value="">Not Tested</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="syphilis" class="form-label">Syphilis</label>
+                                <select class="form-select" id="syphilis" th:field="*{syphilis}">
+                                    <option value="">Not Tested</option>
+                                    <option value="NEGATIVE">NEGATIVE</option>
+                                    <option value="POSITIVE">POSITIVE</option>
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                                </select>
+                                <div class="test-options">
+                                    <span class="status-indicator status-negative" data-test="syphilis" data-value="NEGATIVE">NEGATIVE</span>
+                                    <span class="status-indicator status-positive" data-test="syphilis" data-value="POSITIVE">POSITIVE</span>
+                                    <span class="status-indicator status-pending" data-test="syphilis" data-value="PENDING">PENDING</span>
+                                    <span class="status-indicator status-inconclusive" data-test="syphilis" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                                    <span class="status-indicator status-not-tested" data-test="syphilis" data-value="">Not Tested</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="brucellosis" class="form-label">Brucellosis</label>
+                                <select class="form-select" id="brucellosis" th:field="*{brucellosis}">
+                                    <option value="">Not Tested</option>
+                                    <option value="NEGATIVE">NEGATIVE</option>
+                                    <option value="POSITIVE">POSITIVE</option>
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                                </select>
+                                <div class="test-options">
+                                    <span class="status-indicator status-negative" data-test="brucellosis" data-value="NEGATIVE">NEGATIVE</span>
+                                    <span class="status-indicator status-positive" data-test="brucellosis" data-value="POSITIVE">POSITIVE</span>
+                                    <span class="status-indicator status-pending" data-test="brucellosis" data-value="PENDING">PENDING</span>
+                                    <span class="status-indicator status-inconclusive" data-test="brucellosis" data-value="INCONCLUSIVE">INCONCLUSIVE</span>
+                                    <span class="status-indicator status-not-tested" data-test="brucellosis" data-value="">Not Tested</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="status-legend">
+                        <div class="legend-item">
+                            <div class="legend-color legend-negative"></div>
+                            <span>Negative</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-positive"></div>
+                            <span>Positive</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-pending"></div>
+                            <span>Pending</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-inconclusive"></div>
+                            <span>Inconclusive</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-not-tested"></div>
+                            <span>Not Tested</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="section-title">
+                        <i class="fas fa-chart-line"></i>Blood Parameters
+                    </h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="alt_level" class="form-label">ALT Level (U/L)</label>
+                                <input type="number" step="0.1" class="form-control" id="alt_level" th:field="*{alt_level}">
+                                <div class="form-text">Alanine transaminase level in units per liter</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hemoglobin" class="form-label">Hemoglobin (g/dL)</label>
+                                <input type="number" step="0.1" class="form-control" id="hemoglobin" th:field="*{hemoglobin}">
+                                <div class="form-text">Hemoglobin level in grams per deciliter</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="section-title">
+                        <i class="fas fa-sticky-note"></i>Technician Notes
+                    </h4>
+
                     <div class="mb-3">
-                        <label for="donor_id" class="form-label">Donor ID:</label>
-                        <input type="number" class="form-control" id="donor_id" th:field="*{donor_id}">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label">Donation ID:</label>
-                        <input type="text" class="form-control" th:value="${analysis.donation_id}" readonly>
-                        <small class="form-text text-muted">Automatically set from donation</small>
+                        <label for="technician_notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="technician_notes" th:field="*{technician_notes}" rows="4" placeholder="Enter any additional observations or notes about this analysis..."></textarea>
+                        <div class="form-text">Optional notes for reference</div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="blood_group" class="form-label required-field">Blood Group:</label>
-                        <select class="form-select" id="blood_group" th:field="*{blood_group}" required>
-                            <option value="">Select Blood Group</option>
-                            <option th:each="group : ${blood_groups}"
-                                    th:value="${group}"
-                                    th:text="${group}"></option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="rhesus_factor" class="form-label required-field">Rhesus Factor:</label>
-                        <select class="form-select" id="rhesus_factor" th:field="*{rhesus_factor}" required>
-                            <option value="">Select Rhesus Factor</option>
-                            <option th:each="factor : ${rhesus_factors}"
-                                    th:value="${factor}"
-                                    th:text="${factor}"></option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Infectious Disease Tests -->
-            <div class="mb-4">
-                <h5 class="border-bottom pb-2">Infectious Disease Tests</h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="hiv" class="form-label">HIV:</label>
-                            <select class="form-select" id="hiv" th:field="*{hiv}">
-                                <option value="">not tested</option>
-                                <option value="NEGATIVE">NEGATIVE</option>
-                                <option value="POSITIVE">POSITIVE</option>
-                                <option value="PENDING">PENDING</option>
-                                <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="hepatitisB" class="form-label">Hepatitis B:</label>
-                            <select class="form-select" id="hepatitisB" th:field="*{hepatitisB}">
-                                <option value="">not tested</option>
-                                <option value="NEGATIVE">NEGATIVE</option>
-                                <option value="POSITIVE">POSITIVE</option>
-                                <option value="PENDING">PENDING</option>
-                                <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="hepatitisC" class="form-label">Hepatitis C:</label>
-                            <select class="form-select" id="hepatitisC" th:field="*{hepatitisC}">
-                                <option value="">Not Tested</option>
-                                <option value="NEGATIVE">NEGATIVE</option>
-                                <option value="POSITIVE">POSITIVE</option>
-                                <option value="PENDING">PENDING</option>
-                                <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="syphilis" class="form-label">Syphilis:</label>
-                            <select class="form-select" id="syphilis" th:field="*{syphilis}">
-                                <option value="">not tested</option>
-                                <option value="NEGATIVE">NEGATIVE</option>
-                                <option value="POSITIVE">POSITIVE</option>
-                                <option value="PENDING">PENDING</option>
-                                <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="brucellosis" class="form-label">Brucellosis:</label>
-                            <select class="form-select" id="brucellosis" th:field="*{brucellosis}">
-                                <option value="">not tested</option>
-                                <option value="NEGATIVE">NEGATIVE</option>
-                                <option value="POSITIVE">POSITIVE</option>
-                                <option value="PENDING">PENDING</option>
-                                <option value="INCONCLUSIVE">INCONCLUSIVE</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Blood Parameters -->
-            <div class="mb-4">
-                <h5 class="border-bottom pb-2">Blood Parameters</h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="alt_level" class="form-label">ALT Level:</label>
-                            <input type="number" step="0.1" class="form-control" id="alt_level" th:field="*{alt_level}">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="hemoglobin" class="form-label">Hemoglobin:</label>
-                            <input type="number" step="0.1" class="form-control" id="hemoglobin" th:field="*{hemoglobin}">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Technician Notes -->
-            <div class="mb-4">
-                <label for="technician_notes" class="form-label">Technician Notes:</label>
-                <textarea class="form-control" id="technician_notes" th:field="*{technician_notes}" rows="4"></textarea>
-            </div>
-
-            <!-- Submit Buttons -->
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-danger">Create Analysis</button>
-                <a th:href="@{/donation-history/medcenter/{id}(id=${medcenter_id})}" class="btn btn-outline-secondary">Cancel</a>
+            <div class="d-flex gap-3 mt-4">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="fas fa-save me-2"></i>Create Analysis
+                </button>
+                <a th:href="@{/donation-history/medcenter/{id}(id=${medcenter_id})}" class="btn btn-outline-secondary flex-fill">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
             </div>
         </form>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeStatusIndicators();
+
+        document.querySelectorAll('.status-indicator').forEach(indicator => {
+            indicator.addEventListener('click', function() {
+                const testName = this.getAttribute('data-test');
+                const value = this.getAttribute('data-value');
+
+                // Update the corresponding select element
+                const selectElement = document.getElementById(testName);
+                if (selectElement) {
+                    selectElement.value = value;
+
+                    updateActiveIndicators(testName, value);
+                }
+            });
+        });
+
+        document.querySelectorAll('.form-select').forEach(select => {
+            select.addEventListener('change', function() {
+                updateActiveIndicators(this.id, this.value);
+            });
+        });
+
+        function initializeStatusIndicators() {
+            // Set initial active states based on form values
+            document.querySelectorAll('.form-select').forEach(select => {
+                updateActiveIndicators(select.id, select.value);
+            });
+        }
+
+        function updateActiveIndicators(testName, value) {
+            document.querySelectorAll(`.status-indicator[data-test="${testName}"]`).forEach(indicator => {
+                indicator.classList.remove('active');
+            });
+
+            const activeIndicator = document.querySelector(`.status-indicator[data-test="${testName}"][data-value="${value}"]`);
+            if (activeIndicator) {
+                activeIndicator.classList.add('active');
+            }
+        }
+    });
+</script>
 </body>
 </html>
