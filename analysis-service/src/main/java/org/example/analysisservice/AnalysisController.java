@@ -13,10 +13,13 @@ import java.util.Optional;
 public class AnalysisController {
     private AnalysisRepository repository;
     private AnalysisService service;
+    private RecommendationService recommendationService;
 
-    public AnalysisController(AnalysisRepository repository, AnalysisService service) {
+    public AnalysisController(AnalysisRepository repository, AnalysisService service,
+                              RecommendationService recommendationService) {
         this.repository = repository;
         this.service = service;
+        this.recommendationService = recommendationService;
     }
 
     @GetMapping
@@ -140,7 +143,42 @@ public class AnalysisController {
         List<Analysis> donor_analyses = service.get_analysis_by_donor_id(donor_id);
         model.addAttribute("analyses", donor_analyses);
         model.addAttribute("donorId", donor_id);
+        if (donor_analyses.isEmpty()) {
+            DonorRecommendation generalRec = recommendationService.getGeneralDonationRecommendations(donor_id);
+            model.addAttribute("generalRecommendations", generalRec);
+        }
         return "analysis-donor-list";
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public String show_recommendations(@PathVariable Long id, Model model) {
+        Optional<Analysis> analysis = service.get_by_id(id);
+        if (analysis.isPresent()) {
+            DonorRecommendation recommendations = recommendationService.generateRecommendations(analysis.get());
+            model.addAttribute("recommendations", recommendations);
+            model.addAttribute("analysis", analysis.get());
+            return "analysis-recommendations";
+        } else {
+            return "redirect:/analysis";
+        }
+    }
+
+    @GetMapping("/donor/{donorId}/latest-recommendations")
+    public String showLatestRecommendations(@PathVariable Long donorId, Model model) {
+        List<Analysis> analyses = service.get_analysis_by_donor_id(donorId);
+
+        if (analyses.isEmpty()) {
+            // Если анализов нет, показываем базовые рекомендации
+            DonorRecommendation generalRec = recommendationService.getGeneralDonationRecommendations(donorId);
+            model.addAttribute("recommendations", generalRec);
+            return "analysis-recommendations";
+        }
+
+        // Берем последний анализ
+        Analysis latestAnalysis = analyses.get(0);
+        DonorRecommendation recommendations = recommendationService.generateRecommendations(latestAnalysis);
+        model.addAttribute("recommendations", recommendations);
+        return "analysis-recommendations";
     }
 
 

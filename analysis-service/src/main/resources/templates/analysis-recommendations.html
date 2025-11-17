@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Recommendations - BloodConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .recommendation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .border-success { border-left: 4px solid #28a745; }
+        .border-warning { border-left: 4px solid #ffc107; }
+        .border-danger { border-left: 4px solid #dc3545; }
+        .icon-primary { color: #007bff; margin-right: 0.5rem; }
+        .icon-success { color: #28a745; margin-right: 0.5rem; }
+        .icon-warning { color: #ffc107; margin-right: 0.5rem; }
+        .icon-danger { color: #dc3545; margin-right: 0.5rem; }
+        .icon-info { color: #17a2b8; margin-right: 0.5rem; }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 fw-bold text-dark">
+            <i class="fas fa-stethoscope text-danger me-2"></i>
+            Personalized Health Recommendations
+        </h1>
+        <a th:href="@{/analysis/donor/{donorId}(donorId=${recommendations.donorId})}"
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Results
+        </a>
+    </div>
+
+    <!-- Статус донорства -->
+    <div th:with="status=${recommendations.eligibilityStatus}"
+         class="recommendation-card mb-4"
+         th:classappend="${status.name() == 'ELIGIBLE'} ? 'border-success' :
+                         (${status.name() == 'TEMPORARILY_DEFERRED'} ? 'border-warning' : 'border-danger')">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="mb-2">
+                    <span th:if="${status.name() == 'ELIGIBLE'}">
+                        <i class="fas fa-check-circle icon-success"></i>Eligible for Donation
+                    </span>
+                    <span th:if="${status.name() == 'TEMPORARILY_DEFERRED'}">
+                        <i class="fas fa-exclamation-triangle icon-warning"></i>Temporarily Deferred
+                    </span>
+                    <span th:if="${status.name() == 'PERMANENTLY_DEFERRED'}">
+                        <i class="fas fa-times-circle icon-danger"></i>Permanently Deferred
+                    </span>
+                </h4>
+                <p class="text-muted mb-0" th:if="${recommendations.nextDonationDate}">
+                    <i class="fas fa-calendar-alt icon-info"></i>Next eligible donation:
+                    <strong th:text="${#temporals.format(recommendations.nextDonationDate, 'dd/MM/yyyy')}"></strong>
+                </p>
+                <p class="text-muted mb-0" th:unless="${recommendations.nextDonationDate}">
+                    <i class="fas fa-calendar-alt icon-info"></i>No upcoming donation scheduled
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <span th:class="${status.name() == 'ELIGIBLE'} ? 'status-badge bg-success' :
+                               (${status.name() == 'TEMPORARILY_DEFERRED'} ? 'status-badge bg-warning' : 'status-badge bg-danger')"
+                      th:text="${status.name()}">
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Причины отстранения -->
+    <div th:if="${not #lists.isEmpty(recommendations.rejectionReasons)}"
+         class="recommendation-card border-warning mb-4">
+        <h5 class="text-warning mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Important Health Notes
+        </h5>
+        <ul class="list-unstyled">
+            <li th:each="reason : ${recommendations.rejectionReasons}" class="mb-2">
+                <span th:utext="${reason}"></span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <!-- Рекомендации по здоровью -->
+        <div class="col-md-6">
+            <div class="recommendation-card border-primary">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-heartbeat me-2"></i>
+                    Health & Medical Recommendations
+                </h5>
+                <ul class="list-unstyled">
+                    <li th:each="rec : ${recommendations.healthRecommendations}" class="mb-2">
+                        <span th:utext="${rec}"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Диетические рекомендации -->
+        <div class="col-md-6">
+            <div class="recommendation-card border-success">
+                <h5 class="text-success mb-3">
+                    <i class="fas fa-utensils me-2"></i>
+                    Nutrition & Diet Plan
+                </h5>
+                <ul class="list-unstyled">
+                    <li th:each="rec : ${recommendations.dietaryRecommendations}" class="mb-2">
+                        <span th:utext="${rec}"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Информация об анализе -->
+    <div class="recommendation-card mt-4">
+        <h6 class="text-muted">
+            <i class="fas fa-info-circle me-2"></i>
+            Analysis Information
+        </h6>
+        <div class="row">
+            <div class="col-md-4">
+                <strong><i class="fas fa-tint icon-danger"></i>Blood Type:</strong>
+                <span th:text="${recommendations.bloodGroupInfo}" class="ms-2"></span>
+            </div>
+            <div class="col-md-4">
+                <strong><i class="fas fa-chart-line icon-info"></i>Analysis Date:</strong>
+                <span th:if="${recommendations.analysisDate != null}"
+                      th:text="${#temporals.format(recommendations.analysisDate, 'dd/MM/yyyy HH:mm')}"
+                      class="ms-2"></span>
+                <span th:unless="${recommendations.analysisDate != null}" class="ms-2 text-muted">N/A</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

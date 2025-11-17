@@ -15,23 +15,6 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-        .nav-back {
-            background: white;
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .back-link {
-            color: #dc3545;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .back-link:hover {
-            color: #c82333;
-            transform: translateX(-3px);
-        }
         .page-header {
             background: white;
             border-radius: 15px;
@@ -47,71 +30,25 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 2rem;
         }
-        .card-header-custom {
-            background: white;
-            border-bottom: 2px solid #e9ecef;
-            padding: 1.5rem;
-            border-radius: 15px 15px 0 0 !important;
-        }
-        .table-custom {
-            margin-bottom: 0;
-        }
-        .table-custom thead th {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 1rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        .table-custom tbody td {
-            padding: 1rem;
-            border-color: #e9ecef;
-            vertical-align: middle;
-        }
-        .table-custom tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        .badge-blood {
-            background: #dc3545;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        .status-badge {
-            padding: 0.4rem 0.8rem;
+        .recommendation-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 500;
+            padding: 2rem;
+            margin-top: 2rem;
         }
-        .status-clean {
-            background: #d1edff;
-            color: #0066cc;
-            border: 1px solid #b3d9ff;
+        .recommendation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .status-alert {
-            background: #ffe6e6;
-            color: #cc0000;
-            border: 1px solid #ffb3b3;
-        }
-        .empty-state {
-            padding: 3rem 2rem;
-            text-align: center;
-            color: #6c757d;
-        }
-        .metric-value {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        @media (max-width: 768px) {
-            .page-header {
-                padding: 1.5rem;
-            }
-            .table-responsive {
-                border-radius: 10px;
-            }
-        }
+        .status-eligible { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .status-deferred { background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+        .status-permanent { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        .badge-recommendation { background: #28a745; }
+        .badge-warning { background: #ffc107; }
+        .badge-danger { background: #dc3545; }
     </style>
 </head>
 <body>
@@ -121,44 +58,66 @@
             <div class="col-md-8">
                 <h1 class="h2 mb-3 fw-bold text-dark">
                     <i class="fas fa-microscope text-danger me-3"></i>
-                    My analysis results
+                    My Analysis Results
                 </h1>
+                <p class="text-muted mb-0">Comprehensive blood test results and personalized recommendations</p>
             </div>
         </div>
     </div>
 
-    <div class="card card-custom">
-        <div class="card-header-custom">
-            <div class="d-flex justify-content-between align-items-center">
-                <h3 class="h5 mb-0 fw-bold text-dark">
-                    <i class="fas fa-file-medical text-danger me-2"></i>
-                    Blood Test Reports
-                </h3>
-                <span class="badge bg-danger fs-6">
-                        <span th:text="${analyses.size()}"></span> records
-                    </span>
+    <!-- Базовые рекомендации после донации (показываются когда нет анализов) -->
+    <div th:if="${analyses.empty}" class="recommendation-section">
+        <div class="text-center mb-4">
+            <i class="fas fa-heartbeat fa-3x text-danger mb-3"></i>
+            <h3 class="text-dark">Post-Donation Care Guidelines</h3>
+            <p class="text-muted">General recommendations for recovery after blood donation</p>
+        </div>
+
+        <div th:if="${generalRecommendations}" class="row">
+            <div class="col-md-6">
+                <div class="recommendation-card status-eligible">
+                    <h5><i class="fas fa-heart text-success me-2"></i>Health & Activity</h5>
+                    <ul class="list-unstyled">
+                        <li th:each="rec : ${generalRecommendations.healthRecommendations}">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <span th:text="${rec}"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="recommendation-card status-eligible">
+                    <h5><i class="fas fa-utensils text-primary me-2"></i>Nutrition & Hydration</h5>
+                    <ul class="list-unstyled">
+                        <li th:each="rec : ${generalRecommendations.dietaryRecommendations}">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <span th:text="${rec}"></span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <div class="card-body p-0">
-            <div th:if="${analyses.empty}" class="empty-state">
-                <i class="fas fa-clipboard-list fa-3x mb-4 text-muted"></i>
-                <h4 class="text-muted mb-3">No Analysis Records Found</h4>
-                <p class="text-muted fs-5 mb-4">
-                    No blood test results available for this donor at the moment.
-                </p>
-                <a th:href="@{/analysis}" class="btn btn-danger btn-lg">
-                    <i class="fas fa-list me-2"></i>
-                    View All Analyses
-                </a>
-            </div>
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Note:</strong> These are general guidelines. Specific recommendations will be provided after your blood analysis results are available.
+        </div>
+    </div>
 
-            <div th:unless="${analyses.empty}" class="table-responsive">
-                <table class="table table-hover table-custom">
+
+    <!-- Список анализов -->
+    <div th:unless="${analyses.empty}" class="card card-custom">
+        <div class="card-header bg-white">
+            <h3 class="h5 mb-0 fw-bold text-dark">
+                <i class="fas fa-file-medical text-danger me-2"></i>
+                Blood Test Reports
+            </h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover">
                     <thead>
                     <tr>
-                        <th>Analysis ID</th>
-                        <th>Donation ID</th>
                         <th>Blood Type</th>
                         <th>Hemoglobin</th>
                         <th>HIV</th>
@@ -166,46 +125,44 @@
                         <th>Hepatitis C</th>
                         <th>Syphilis</th>
                         <th>ALT</th>
+                        <th>Recommendations</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="analysis : ${analyses}">
-                        <td class="metric-value" th:text="${analysis.analysis_id}"></td>
-                        <td th:text="${analysis.donation_id} ?: 'N/A'"></td>
                         <td>
-                                    <span class="badge-blood"
-                                          th:text="${analysis.blood_group + analysis.rhesus_factor}">
-                                    </span>
+                                <span class="badge bg-danger"
+                                      th:text="${analysis.blood_group + analysis.rhesus_factor}">
+                                </span>
                         </td>
-                        <td class="metric-value"
-                            th:text="${analysis.hemoglobin} + ' g/dL'">
-                        </td>
+                        <td th:text="${analysis.hemoglobin} + ' g/dL'"></td>
                         <td>
-                                    <span th:class="${analysis.hiv == 'NEGATIVE'} ?
-                                          'status-badge status-clean' : 'status-badge status-alert'"
-                                          th:text="${analysis.hiv}">
-                                    </span>
+                                <span th:class="${analysis.hiv == 'NEGATIVE'} ? 'badge bg-success' : 'badge bg-danger'"
+                                      th:text="${analysis.hiv}">
+                                </span>
                         </td>
                         <td>
-                                    <span th:class="${analysis.hepatitisB == 'NEGATIVE'} ?
-                                          'status-badge status-clean' : 'status-badge status-alert'"
-                                          th:text="${analysis.hepatitisB}">
-                                    </span>
+                                <span th:class="${analysis.hepatitisB == 'NEGATIVE'} ? 'badge bg-success' : 'badge bg-danger'"
+                                      th:text="${analysis.hepatitisB}">
+                                </span>
                         </td>
                         <td>
-                                    <span th:class="${analysis.hepatitisC == 'NEGATIVE'} ?
-                                          'status-clean status-badge' : 'status-alert status-badge'"
-                                          th:text="${analysis.hepatitisC}">
-                                    </span>
+                                <span th:class="${analysis.hepatitisC == 'NEGATIVE'} ? 'badge bg-success' : 'badge bg-danger'"
+                                      th:text="${analysis.hepatitisC}">
+                                </span>
                         </td>
                         <td>
-                                    <span th:class="${analysis.syphilis == 'NEGATIVE'} ?
-                                          'status-badge status-clean' : 'status-badge status-alert'"
-                                          th:text="${analysis.syphilis} ?: 'N/A'">
-                                    </span>
+                                <span th:class="${analysis.syphilis == 'NEGATIVE'} ? 'badge bg-success' : 'badge bg-warning'"
+                                      th:text="${analysis.syphilis} ?: 'N/A'">
+                                </span>
                         </td>
-                        <td class="metric-value"
-                            th:text="${analysis.alt_level} + ' U/L'">
+                        <td th:text="${analysis.alt_level} + ' U/L'"></td>
+                        <td>
+                            <a th:href="@{/analysis/{id}/recommendations(id=${analysis.analysis_id})}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-stethoscope me-1"></i>
+                                View
+                            </a>
                         </td>
                     </tr>
                     </tbody>

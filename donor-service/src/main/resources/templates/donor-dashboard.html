@@ -828,7 +828,8 @@
             </a>
         </li>
         <li>
-            <a th:href="@{/requests(user_id=${userId}, role=${role}, email=${email})}">
+
+                 <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
                 <i class="fas fa-search"></i>
                 Find All Requests
             </a>
@@ -846,10 +847,17 @@
                 My Analysis Results
             </a>
         </li>
+
+        <li>
+            <a th:href="@{'http://localhost:8080/analysis/donor/' + ${donor_id} + '/latest-recommendations?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-stethoscope"></i>
+                Health Recommendations
+            </a>
+        </li>
     </ul>
 </div>
 
-<!-- Modal Overlays -->
+
 <div class="modal-overlay" id="matchingRequestsOverlay"></div>
 <div class="modal-overlay" id="guidelinesOverlay"></div>
 

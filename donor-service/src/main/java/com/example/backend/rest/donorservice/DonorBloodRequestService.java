@@ -176,7 +176,7 @@ public class DonorBloodRequestService {
 
         return result;
     }
-    private boolean isBloodTypeCompatible(String donorBloodType, String requestBloodType) {
+    public boolean isBloodTypeCompatible(String donorBloodType, String requestBloodType) {
         if (donorBloodType == null || requestBloodType == null) {
             return false;
         }
@@ -230,6 +230,25 @@ public class DonorBloodRequestService {
         }
 
         return info;
+    }
+
+    public List<BloodRequestDto> getActiveBloodRequests(String bloodGroup, String rhesusFactor,
+                                                        String componentType, String medcenterName) {
+        try {
+            ResponseEntity<List<BloodRequestDto>> response = bloodRequestFeignClient.getFilteredBloodRequests(
+                    bloodGroup, rhesusFactor, componentType, medcenterName);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                // Фильтруем только активные запросы (дедлайн в будущем)
+                return response.getBody().stream()
+                        .filter(request -> request.getDeadline() != null &&
+                                request.getDeadline().isAfter(LocalDateTime.now()))
+                        .collect(Collectors.toList());
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            log.error("Error fetching active blood requests: {}", e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     private Double parseVolume(String volumeStr) {

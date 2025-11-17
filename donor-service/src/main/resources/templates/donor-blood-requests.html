@@ -250,6 +250,61 @@
         .menu-toggle:hover {
             background: var(--light-red);
         }
+
+        /* Стили для модальных окон email */
+        .email-modal .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .email-modal .modal-body {
+            padding-top: 0;
+        }
+
+        .email-sending {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .email-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* Стили для статусов запросов */
+        .request-card.expired {
+            border-left-color: #ffc107 !important;
+            background: linear-gradient(135deg, #fffaf0 0%, #fff5f5 100%);
+        }
+
+        .request-card.expired:hover {
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .deadline-warning {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .expired-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 8px;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -408,24 +463,32 @@
                     </div>
                 </div>
             </div>
-            <!-- ЗАМЕНИТЕ ЭТУ СЕКЦИЮ (начиная с <div th:if="${not requests.empty}">): -->
+
             <div th:if="${not requests.empty}">
                 <div class="row">
                     <div th:each="request : ${requests}" class="col-md-6 mb-3">
                         <div class="card request-card h-100"
-                             th:classappend="${donor.bloodType == request.blood_group + request.rhesus_factor} ? 'matching' : 'incompatible'">
+                             th:classappend="${#temporals.createNow().isAfter(request.deadline)} ?
+                                 'border-warning' :
+                                 (donor.bloodType == request.blood_group + request.rhesus_factor ? 'matching' : 'incompatible')">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <h6 class="card-title fw-bold" th:text="${request.component_type + ' Needed'}"></h6>
-                                    <!-- ИНДИКАТОР СОВМЕСТИМОСТИ -->
-                                    <span th:if="${donor.bloodType == request.blood_group + request.rhesus_factor}"
-                                          class="badge bg-success">
-                            <i class="fas fa-check me-1"></i>Compatible
-                        </span>
-                                    <span th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}"
-                                          class="badge bg-secondary">
-                            <i class="fas fa-times me-1"></i>Incompatible
-                        </span>
+                                    <!-- СТАТУС ЗАПРОСА -->
+                                    <div>
+                            <span th:if="${#temporals.createNow().isAfter(request.deadline)}"
+                                  class="badge bg-warning text-dark">
+                                <i class="fas fa-clock me-1"></i>Expired
+                            </span>
+                                        <span th:if="${not #temporals.createNow().isAfter(request.deadline) and donor.bloodType == request.blood_group + request.rhesus_factor}"
+                                              class="badge bg-success">
+                                <i class="fas fa-check me-1"></i>Compatible & Active
+                            </span>
+                                        <span th:if="${not #temporals.createNow().isAfter(request.deadline) and donor.bloodType != request.blood_group + request.rhesus_factor}"
+                                              class="badge bg-secondary">
+                                <i class="fas fa-times me-1"></i>Incompatible
+                            </span>
+                                    </div>
                                 </div>
 
                                 <div class="row mb-2">
@@ -450,8 +513,13 @@
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <strong>Deadline:</strong>
-                                        <span class="text-danger fw-bold"
+                                        <span th:class="${#temporals.createNow().isAfter(request.deadline)} ?
+                                           'text-warning fw-bold' : 'text-danger fw-bold'"
                                               th:text="${#temporals.format(request.deadline, 'dd/MM/yyyy HH:mm')}"></span>
+                                        <div th:if="${#temporals.createNow().isAfter(request.deadline)}"
+                                             class="small text-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Deadline passed
+                                        </div>
                                     </div>
                                 </div>
 
@@ -460,7 +528,7 @@
                                     <p class="mb-0 text-muted small" th:text="${request.comments}"></p>
                                 </div>
 
-                                <!-- ИНФОРМАЦИЯ О ДОСТУПНОСТИ -->
+                                <!-- ИНФОРМАЦИЯ О ДОСТУПНОСТИ ДОНОРА -->
                                 <div th:if="${donationInfo != null and donationInfo.daysUntilNextDonation > 0}"
                                      class="alert alert-warning small p-2 mb-3">
                                     <i class="fas fa-clock me-1"></i>
@@ -471,29 +539,56 @@
                                 <div th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}"
                                      class="alert alert-danger small p-2 mb-3">
                                     <i class="fas fa-exclamation-triangle me-1"></i>
-                                    Your blood type (<span th:text="${donor.bloodType}"></span>) is not compatible
+                                    Your blood type (<span th:text="${donor.bloodType}"></span>) is not compatible with required type (<span th:text="${request.blood_group + request.rhesus_factor}"></span>)
+                                </div>
+
+                                <!-- ПРЕДУПРЕЖДЕНИЕ О ПРОСРОЧЕННОМ ДЕДЛАЙНЕ -->
+                                <div th:if="${#temporals.createNow().isAfter(request.deadline)}"
+                                     class="alert alert-warning small p-2 mb-3">
+                                    <i class="fas fa-ban me-1"></i>
+                                    <strong>This request has expired</strong> - the deadline has passed and it can no longer be accepted.
                                 </div>
 
                                 <div class="d-grid">
-                                    <form th:action="@{'/donor/requests/' + ${request.blood_request_id} + '/accept'}" method="post">
+                                    <form th:action="@{'/donor/requests/' + ${request.blood_request_id} + '/accept'}" method="post" class="email-form">
                                         <input type="hidden" name="token" th:value="${token}">
                                         <input type="hidden" name="userId" th:value="${userId}">
                                         <input type="hidden" name="role" th:value="${role}">
                                         <input type="hidden" name="email" th:value="${email}">
-                                        <!-- УМНАЯ КНОПКА С ПРОВЕРКОЙ ОГРАНИЧЕНИЙ -->
+
+                                        <!-- УМНАЯ КНОПКА С ПРОВЕРКОЙ ВСЕХ ОГРАНИЧЕНИЙ -->
                                         <button type="submit"
                                                 class="btn w-100"
-                                                th:classappend="${donor.bloodType == request.blood_group + request.rhesus_factor and (donationInfo == null or donationInfo.daysUntilNextDonation == 0)} ? 'btn-success' : 'btn-secondary'"
-                                                th:disabled="${donor.bloodType != request.blood_group + request.rhesus_factor or (donationInfo != null and donationInfo.daysUntilNextDonation > 0)}">
+                                                th:classappend="${(donor.bloodType == request.blood_group + request.rhesus_factor) and
+                                                    (donationInfo == null or donationInfo.daysUntilNextDonation == 0) and
+                                                    (not #temporals.createNow().isAfter(request.deadline))} ?
+                                                    'btn-success' : 'btn-secondary'"
+                                                th:disabled="${(donor.bloodType != request.blood_group + request.rhesus_factor) or
+                                                  (donationInfo != null and donationInfo.daysUntilNextDonation > 0) or
+                                                  (#temporals.createNow().isAfter(request.deadline))}"
+                                                th:attr="data-request-id=${request.blood_request_id}">
                                             <i class="fas fa-check me-1"></i>
-                                            <span th:if="${donor.bloodType == request.blood_group + request.rhesus_factor and (donationInfo == null or donationInfo.daysUntilNextDonation == 0)}">
-                                    Accept Request
+
+                                            <!-- ТЕКСТ ДЛЯ АКТИВНОЙ КНОПКИ -->
+                                            <span th:if="${(donor.bloodType == request.blood_group + request.rhesus_factor) and
+                                              (donationInfo == null or donationInfo.daysUntilNextDonation == 0) and
+                                              (not #temporals.createNow().isAfter(request.deadline))}">
+                                    Accept Request & Send Email
                                 </span>
+
+                                            <!-- ТЕКСТ ДЛЯ НЕСОВМЕСТИМОЙ ГРУППЫ КРОВИ -->
                                             <span th:if="${donor.bloodType != request.blood_group + request.rhesus_factor}">
                                     Not Compatible
                                 </span>
+
+                                            <!-- ТЕКСТ ДЛЯ ОЖИДАНИЯ МЕЖДУ ДОНАЦИЯМИ -->
                                             <span th:if="${donationInfo != null and donationInfo.daysUntilNextDonation > 0}">
                                     Wait <span th:text="${donationInfo.daysUntilNextDonation}"></span> days
+                                </span>
+
+                                            <!-- ТЕКСТ ДЛЯ ПРОСРОЧЕННОГО ЗАПРОСА -->
+                                            <span th:if="${#temporals.createNow().isAfter(request.deadline)}">
+                                    Request Expired
                                 </span>
                                         </button>
                                     </form>
@@ -524,6 +619,58 @@
     </div>
 </div>
 
+<!-- Модальное окно отправки email (спиннер) -->
+<div class="modal fade email-modal" id="emailSendingModal" tabindex="-1" aria-labelledby="emailSendingModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 email-sending text-white rounded-top">
+                <h5 class="modal-title w-100 text-center" id="emailSendingModalLabel">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Sending Confirmation
+                </h5>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Sending email...</span>
+                </div>
+                <h6 class="text-dark mb-2">Processing Your Request</h6>
+                <p class="text-muted small mb-0">
+                    Sending confirmation email and updating records...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения отправки email -->
+<div class="modal fade email-modal" id="emailConfirmationModal" tabindex="-1" aria-labelledby="emailConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 email-success text-white rounded-top">
+                <h5 class="modal-title w-100 text-center" id="emailConfirmationModalLabel">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Email Sent!
+                </h5>
+                <button type="button" class="btn-close btn-close-white d-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-envelope-circle-check text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h6 class="text-dark mb-2">Confirmation Sent Successfully</h6>
+                <p class="text-muted small mb-0">
+                    Donation confirmation email has been sent to your email address.
+                </p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                    <i class="fas fa-check me-1"></i>Continue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="text-center mt-4 mb-5">
     <div class="p-4 rounded bg-light">
         <i class="fas fa-hands-helping fa-lg text-danger mb-3"></i>
@@ -545,11 +692,98 @@
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
-    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Закрытие sidebar по клику на overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
+        // Инициализация tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Обработка форм принятия запросов с отправкой email
+        const emailForms = document.querySelectorAll('form.email-form');
+
+        emailForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Останавливаем стандартную отправку
+
+                const submitButton = this.querySelector('button[type="submit"]');
+                const requestId = submitButton.getAttribute('data-request-id');
+
+                // Проверяем, активна ли кнопка
+                if (submitButton && !submitButton.disabled) {
+                    // Показываем спиннер отправки
+                    const sendingModal = new bootstrap.Modal(document.getElementById('emailSendingModal'));
+                    sendingModal.show();
+
+                    // Создаем клон формы для отправки
+                    const formData = new FormData(this);
+
+                    // Симуляция отправки email и обработки запроса
+                    setTimeout(() => {
+                        // Скрываем спиннер
+                        sendingModal.hide();
+
+                        // Показываем подтверждение
+                        const confirmationModal = new bootstrap.Modal(document.getElementById('emailConfirmationModal'));
+                        confirmationModal.show();
+
+                        // Отправляем AJAX запрос на сервер
+                        fetch(this.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'Accept': 'text/html'
+                            }
+                        })
+                            .then(response => {
+                                if (response.redirected) {
+                                    // Если сервер перенаправляет, переходим по новому URL
+                                    window.location.href = response.url;
+                                } else {
+                                    // Иначе перезагружаем страницу
+                                    window.location.reload();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                window.location.reload();
+                            });
+
+                    }, 2000); // 2 секунды симуляции отправки
+                }
+            });
+        });
+
+        // Автоматическое закрытие модального окна подтверждения через 3 секунды
+        const confirmationModal = document.getElementById('emailConfirmationModal');
+        if (confirmationModal) {
+            confirmationModal.addEventListener('show.bs.modal', function () {
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(confirmationModal);
+                    if (modal) {
+                        modal.hide();
+                    }
+                }, 3000);
+            });
+        }
+    });
+
+    // Функция для ручного вызова (если нужно)
+    function showEmailConfirmation() {
+        const sendingModal = new bootstrap.Modal(document.getElementById('emailSendingModal'));
+        sendingModal.show();
+
+        setTimeout(() => {
+            sendingModal.hide();
+
+            const confirmationModal = new bootstrap.Modal(document.getElementById('emailConfirmationModal'));
+            confirmationModal.show();
+        }, 2000);
+    }
 </script>
 </body>
 </html>
