@@ -10,11 +10,9 @@ import java.util.Optional;
 @Transactional
 public class AnalysisService {
     private AnalysisRepository analysisRepository;
-    private RecommendationService recommendationService;
 
-    public AnalysisService(AnalysisRepository analysisRepository,RecommendationService recommendationService) {
-        this.analysisRepository = analysisRepository;
-        this.recommendationService = recommendationService;}
+    public AnalysisService(AnalysisRepository analysisRepository) {
+        this.analysisRepository = analysisRepository;}
 
     public List<Analysis> get_all_analysis(){
         return analysisRepository.findAll();
@@ -32,11 +30,6 @@ public class AnalysisService {
         return analysisRepository.save(a);
     }
 
-    public DonorRecommendation getRecommendationsForAnalysis(Long analysisId) {
-        Analysis analysis = analysisRepository.findById(analysisId)
-                .orElseThrow(() -> new RuntimeException("Analysis not found with id: " + analysisId));
-        return recommendationService.generateRecommendations(analysis);
-    }
 
     public List<Analysis> get_analysis_by_donor_id(Long donorId) {
         return analysisRepository.findByDonor_id(donorId);

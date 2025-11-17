@@ -134,22 +134,6 @@ public class AnalysisController {
         return "redirect:/analysis";
     }
 
-    @GetMapping("/{id}/recommendations")
-    public String showRecommendations(@PathVariable Long id, Model model) {
-        try {
-            Analysis analysis = service.get_by_id(id)
-                    .orElseThrow(() -> new RuntimeException("Analysis not found"));
-
-            DonorRecommendation recommendations = service.getRecommendationsForAnalysis(id);
-
-            model.addAttribute("analysis", analysis);
-            model.addAttribute("recommendations", recommendations);
-            return "analysis-recommendations.html";
-
-        } catch (RuntimeException e) {
-            return "redirect:/analysis?error=Analysis+not+found";
-        }
-    }
 
     @GetMapping("/donor/{donor_id}")
     public String show_analysis_for_donor (@PathVariable Long donor_id, Model model) {
@@ -158,4 +142,6 @@ public class AnalysisController {
         model.addAttribute("donorId", donor_id);
         return "analysis-donor-list";
     }
+
+
 }
