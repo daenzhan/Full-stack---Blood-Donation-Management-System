@@ -25,6 +25,9 @@ public class DonorController {
     private final DonationHistoryFeignClient donationHistoryFeignClient;
     private final EmailService emailService;
     private final BloodRequestFeignClient bloodRequestFeignClient;
+    private final GamificationService gamificationService;
+    private final DonorAchievementRepository donorAchievementRepository;
+    private final DonorStatsRepository donorStatsRepository;
 
     @GetMapping("/dashboard")
     public String showDashboard(@RequestParam String token,
@@ -32,31 +35,29 @@ public class DonorController {
                                 @RequestParam String role,
                                 @RequestParam String email,
                                 Model model) {
-
         try {
             Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
-            if (donorOpt.isEmpty()) {
-                return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
+            if (donorOpt.isEmpty()) {return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
             Donor donor = donorOpt.get();
+            gamificationService.initializeDonorStats(donor.getUserId());
             List<BloodRequestDto> matchingRequests = donorBloodRequestService.getMatchingBloodRequests(donor.getBloodType());
             Map<String, Object> donationInfo = donorBloodRequestService.getNextDonationInfo(donor.getUserId());
             List<DonationHistoryDto> donationHistory = getDonationHistoryForDonor(donor.getUserId());
+            Map<String, Object> donorProgress = gamificationService.getDonorProgress(donor.getUserId());
+
             model.addAttribute("donor", donor);
             model.addAttribute("matchingRequests", matchingRequests);
             model.addAttribute("donationHistory", donationHistory);
             model.addAttribute("donationInfo", donationInfo);
+            model.addAttribute("donorProgress", donorProgress);
             model.addAttribute("token", token);
             model.addAttribute("userId", userId);
             model.addAttribute("role", role);
             model.addAttribute("email", email);
             model.addAttribute("donor_id", donor.getUserId());
-
             return "donor-dashboard";
-
-        } catch (Exception e) {
-            log.error("Error in dashboard for user {}: {}", userId, e.getMessage());
+        } catch (Exception e) {log.error("Error in dashboard for user {}: {}", userId, e.getMessage());
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
     }
@@ -65,22 +66,17 @@ public class DonorController {
         try {
             ResponseEntity<List<DonationHistoryDto>> historyResponse =
                     donationHistoryFeignClient.getDonationHistoryByDonorId(donorId);
-
             if (historyResponse.getStatusCode().is2xxSuccessful() && historyResponse.getBody() != null) {
                 List<DonationHistoryDto> donationHistory = historyResponse.getBody();
-                // Добавляем имена медцентров к истории донаций
                 for (DonationHistoryDto history : donationHistory) {
                     String medcenterName = donorBloodRequestService.getMedCenterName(history.getMedcenterId());
                     history.setMedcenterName(medcenterName);
                 }
                 return donationHistory;
             }
-        } catch (Exception e) {
-            log.error("Error fetching donation history for donor {}: {}", donorId, e.getMessage());
-        }
-        return new ArrayList<>();
+        } catch (Exception e) {log.error("Error fetching donation history for donor {}: {}", donorId, e.getMessage());
+        }return new ArrayList<>();
     }
-
 
     @GetMapping("/requests")
     public String viewBloodRequests(@RequestParam String token,
@@ -92,16 +88,12 @@ public class DonorController {
                                     @RequestParam(required = false) String componentType,
                                     @RequestParam(required = false) String medcenterName,
                                     Model model) {
-
         Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
-        if (donorOpt.isEmpty()) {
-            return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
+        if (donorOpt.isEmpty()) {return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
-
         Donor donor = donorOpt.get();
         Map<String, Object> donationInfo = donorBloodRequestService.getNextDonationInfo(donor.getUserId());
         List<BloodRequestDto> requests = donorBloodRequestService.getBloodRequests(bloodGroup, rhesusFactor, componentType, medcenterName);
-
         model.addAttribute("donor", donor);
         model.addAttribute("requests", requests);
         model.addAttribute("token", token);
@@ -113,9 +105,9 @@ public class DonorController {
         model.addAttribute("componentType", componentType);
         model.addAttribute("medcenterName", medcenterName);
         model.addAttribute("donationInfo", donationInfo);
-
         return "donor-blood-requests";
     }
+
     @PostMapping("/requests/{requestId}/accept")
     public String acceptBloodRequest(@PathVariable Long requestId,
                                      @RequestParam String token,
@@ -123,32 +115,25 @@ public class DonorController {
                                      @RequestParam String role,
                                      @RequestParam String email,
                                      RedirectAttributes redirectAttributes) {
-        try {
-            Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
-            if (donorOpt.isEmpty()) {
-                return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
+        try {Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
+            if (donorOpt.isEmpty()) {return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
             Donor donor = donorOpt.get();
-
-            // Получаем информацию о запросе
+            System.out.println("=== ACCEPTING BLOOD REQUEST ===");
+            System.out.println("Donor: " + donor.getFullName() + " (ID: " + donor.getUserId() + ")");
+            System.out.println("Request ID: " + requestId);
             ResponseEntity<BloodRequestDto> response = bloodRequestFeignClient.getBloodRequestById(requestId);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
                 redirectAttributes.addFlashAttribute("error", "Blood request not found");
                 return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
             BloodRequestDto bloodRequestDto = response.getBody();
-
-            // ПРОВЕРКА 1: Не просрочен ли запрос
             if (bloodRequestDto.getDeadline().isBefore(LocalDateTime.now())) {
                 redirectAttributes.addFlashAttribute("error",
                         "This blood request has expired and can no longer be accepted. Deadline was: " +
                                 bloodRequestDto.getDeadline().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
                 return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
-            // ПРОВЕРКА 2: Совместимость групп крови
             String donorBloodType = donor.getBloodType();
             String requestBloodType = bloodRequestDto.getBlood_group() + bloodRequestDto.getRhesus_factor();
 
@@ -157,25 +142,18 @@ public class DonorController {
                         "Your blood type (" + donorBloodType + ") is not compatible with the required type (" + requestBloodType + ")");
                 return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
-            // ПРОВЕРКА 3: 60-дневное ограничение между донациями
             ResponseEntity<List<DonationHistoryDto>> historyResponse =
                     donationHistoryFeignClient.getDonationHistoryByDonorId(donor.getUserId());
-
             if (historyResponse.getStatusCode().is2xxSuccessful() && historyResponse.getBody() != null) {
                 List<DonationHistoryDto> donationHistory = historyResponse.getBody();
                 if (!donationHistory.isEmpty()) {
-                    // Находим последнюю донацию
                     DonationHistoryDto lastDonation = donationHistory.stream()
                             .max(Comparator.comparing(DonationHistoryDto::getDonationDate))
                             .orElse(null);
-
                     if (lastDonation != null) {
                         LocalDateTime lastDonationDate = lastDonation.getDonationDate();
                         LocalDateTime now = LocalDateTime.now();
-
                         long daysBetween = ChronoUnit.DAYS.between(lastDonationDate, now);
-
                         if (daysBetween < 60) {
                             long daysLeft = 60 - daysBetween;
                             redirectAttributes.addFlashAttribute("error",
@@ -187,26 +165,19 @@ public class DonorController {
                     }
                 }
             }
-
-            // Создаем BloodRequest объект для email
             BloodRequestDto bloodRequest = convertToBloodRequest(bloodRequestDto);
-
-            // Отправляем email подтверждения
-            try {
-                emailService.sendDonationConfirmation(email, bloodRequest);
+            try {emailService.sendDonationConfirmation(email, bloodRequest);
                 log.info("Donation confirmation email sent successfully to: {}", email);
-            } catch (Exception e) {
-                log.error("Failed to send email to {}, but continuing with request acceptance: {}", email, e.getMessage());
-                // Продолжаем выполнение даже если email не отправился
+            } catch (Exception e) {log.error("Failed to send email to {}, but continuing with request acceptance: {}", email, e.getMessage());
             }
-
-            // Принимаем запрос
             Map<String, Object> result = donorBloodRequestService.acceptBloodRequest(requestId, donor.getUserId());
 
             boolean success = (Boolean) result.getOrDefault("success", false);
             String message = (String) result.getOrDefault("message", "");
 
             if (success) {
+                System.out.println("Calling gamificationService.processDonation for donor: " + donor.getUserId());
+                gamificationService.processDonation(donor.getUserId());
                 redirectAttributes.addFlashAttribute("success",
                         message + " Confirmation email has been sent to " + email);
             } else {
@@ -214,15 +185,12 @@ public class DonorController {
             }
 
             return "redirect:/donor/donation-history?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
-
         } catch (Exception e) {
             log.error("Error accepting blood request {} by donor {}: {}", requestId, userId, e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Error accepting request: " + e.getMessage());
             return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
     }
-
-    // Вспомогательный метод для конвертации
     private BloodRequestDto convertToBloodRequest(BloodRequestDto dto) {
         BloodRequestDto request = new BloodRequestDto();
         request.setBlood_request_id(dto.getBlood_request_id());
@@ -242,18 +210,15 @@ public class DonorController {
                                           @RequestParam String role,
                                           @RequestParam String email,
                                           Model model) {
-
         if (donorRepository.existsByUserId(userId)) {
             return "redirect:/donor/dashboard?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
-
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
         model.addAttribute("role", role);
         model.addAttribute("email", email);
         model.addAttribute("minDate", LocalDate.now().minusYears(65));
         model.addAttribute("maxDate", LocalDate.now().minusYears(18));
-
         return "donor-complete-profile";
     }
 
@@ -270,16 +235,13 @@ public class DonorController {
                                          @RequestParam String email,
                                          RedirectAttributes redirectAttributes) {
         try {
-
             LocalDate birthDate = LocalDate.parse(dateOfBirth);
             LocalDate minDate = LocalDate.now().minusYears(65);
             LocalDate maxDate = LocalDate.now().minusYears(18);
-
             if (birthDate.isAfter(maxDate) || birthDate.isBefore(minDate)) {
                 redirectAttributes.addFlashAttribute("error", "You must be between 18 and 65 years old to donate blood");
                 return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
             DonorRequest request = new DonorRequest();
             request.setFullName(fullName);
             request.setDateOfBirth(birthDate);
@@ -287,12 +249,9 @@ public class DonorController {
             request.setPhoneNumber(phoneNumber);
             request.setAddress(address);
             request.setGender(gender);
-
             donorService.completeProfile(userId, request);
-
             redirectAttributes.addFlashAttribute("success", "Profile completed successfully!");
             return "redirect:/donor/dashboard?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
-
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error: " + e.getMessage());
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
@@ -305,18 +264,15 @@ public class DonorController {
                               @RequestParam String role,
                               @RequestParam String email,
                               Model model) {
-
         Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
         if (donorOpt.isEmpty()) {
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
-
         model.addAttribute("donor", donorOpt.get());
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
         model.addAttribute("role", role);
         model.addAttribute("email", email);
-
         return "donor-profile";
     }
 
@@ -326,12 +282,10 @@ public class DonorController {
                                       @RequestParam String role,
                                       @RequestParam String email,
                                       Model model) {
-
         Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
         if (donorOpt.isEmpty()) {
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
-
         model.addAttribute("donor", donorOpt.get());
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
@@ -341,7 +295,6 @@ public class DonorController {
         model.addAttribute("maxDate", LocalDate.now().minusYears(18));
         model.addAttribute("bloodTypes", Arrays.asList("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"));
         model.addAttribute("genders", Arrays.asList("MALE", "FEMALE", "OTHER"));
-
         return "donor-edit-profile";
     }
 
@@ -362,16 +315,13 @@ public class DonorController {
             if (donorOpt.isEmpty()) {
                 return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
             LocalDate birthDate = LocalDate.parse(dateOfBirth);
             LocalDate minDate = LocalDate.now().minusYears(65);
             LocalDate maxDate = LocalDate.now().minusYears(18);
-
             if (birthDate.isAfter(maxDate) || birthDate.isBefore(minDate)) {
                 redirectAttributes.addFlashAttribute("error", "You must be between 18 and 65 years old to donate blood");
                 return "redirect:/donor/profile/edit?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
             }
-
             Donor donor = donorOpt.get();
             donor.setFullName(fullName);
             donor.setDateOfBirth(birthDate);
@@ -379,12 +329,9 @@ public class DonorController {
             donor.setPhoneNumber(phoneNumber);
             donor.setAddress(address);
             donor.setGender(gender);
-
             donorRepository.save(donor);
-
             redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
             return "redirect:/donor/profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
-
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error updating profile: " + e.getMessage());
             return "redirect:/donor/profile/edit?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
@@ -404,7 +351,6 @@ public class DonorController {
                 redirectAttributes.addFlashAttribute("success", "Profile deleted successfully");
             }
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
-
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error deleting profile: " + e.getMessage());
             return "redirect:/donor/dashboard?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
@@ -418,22 +364,94 @@ public class DonorController {
                                       @RequestParam String role,
                                       @RequestParam String email,
                                       Model model) {
-
         Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
         if (donorOpt.isEmpty()) {
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
-
         Donor donor = donorOpt.get();
         List<DonationHistoryDto> donationHistory = getDonationHistoryForDonor(donor.getUserId());
-
         model.addAttribute("donor", donor);
         model.addAttribute("donationHistory", donationHistory);
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
         model.addAttribute("role", role);
         model.addAttribute("email", email);
-
         return "donor-donation-history";
+    }
+
+    @GetMapping("/leaderboard")
+    public String showLeaderboard(@RequestParam String token,
+                                  @RequestParam Long userId,
+                                  @RequestParam String role,
+                                  @RequestParam String email,
+                                  Model model) {
+        Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
+        if (donorOpt.isEmpty()) {return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;}
+        Donor donor = donorOpt.get();
+        gamificationService.initializeStatsForExistingDonors();
+        gamificationService.initializeDonorStats(donor.getUserId());
+        List<Map<String, Object>> leaderboard = gamificationService.getLeaderboard();
+        Map<String, Object> donorProgress = gamificationService.getDonorProgress(donor.getUserId());
+
+        System.out.println("=== LEADERBOARD DEBUG ===");
+        System.out.println("Current donor: " + donor.getFullName() + " (ID: " + donor.getUserId() + ")");
+        System.out.println("Leaderboard entries: " + leaderboard.size());
+
+        List<DonorStats> allStats = donorStatsRepository.findAll();
+        System.out.println("All stats in DB:");
+        allStats.forEach(s -> {
+            Optional<Donor> d = donorRepository.findByUserId(s.getDonorId());
+            String name = d.map(Donor::getFullName).orElse("Unknown");
+            System.out.println(" - " + name + ": " + s.getPoints() + " points, " + s.getTotalDonations() + " donations");
+        });
+
+        int userRank = 1;
+        boolean userFound = false;
+        for (Map<String, Object> entry : leaderboard) {
+            if (entry.get("donorId").equals(donor.getUserId())) {
+                userFound = true;
+                break;
+            }
+            userRank++;
+        }
+        if (!userFound) {
+            userRank = leaderboard.size() + 1;
+        }
+        model.addAttribute("donor", donor);
+        model.addAttribute("leaderboard", leaderboard);
+        model.addAttribute("donorProgress", donorProgress);
+        model.addAttribute("userRank", userRank);
+        model.addAttribute("token", token);
+        model.addAttribute("userId", userId);
+        model.addAttribute("role", role);
+        model.addAttribute("email", email);
+        return "donor-leaderboard";
+    }
+
+    @GetMapping("/achievements")
+    public String showAchievements(@RequestParam String token,
+                                   @RequestParam Long userId,
+                                   @RequestParam String role,
+                                   @RequestParam String email,
+                                   Model model) {
+        Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
+        if (donorOpt.isEmpty()) {return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;}
+        Donor donor = donorOpt.get();
+        List<DonorAchievement> achievements = donorAchievementRepository.findByDonorIdOrderByEarnedAtDesc(donor.getUserId());
+        Map<String, Object> donorProgress = gamificationService.getDonorProgress(donor.getUserId());
+        achievements.forEach(achievement -> {
+            if (achievement.getIsNew()) {
+                achievement.setIsNew(false);
+                donorAchievementRepository.save(achievement);
+            }
+        });
+        model.addAttribute("donor", donor);
+        model.addAttribute("achievements", achievements);
+        model.addAttribute("donorProgress", donorProgress);
+        model.addAttribute("token", token);
+        model.addAttribute("userId", userId);
+        model.addAttribute("role", role);
+        model.addAttribute("email", email);
+        return "donor-achievements";
     }
 }

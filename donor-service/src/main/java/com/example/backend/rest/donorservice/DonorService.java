@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class DonorService {
 
     private final DonorRepository donorRepository;
+    private final GamificationService gamificationService;
 
     public Donor completeProfile(Long userId, DonorRequest request) {
         if (donorRepository.existsByUserId(userId)) {
@@ -32,7 +33,7 @@ public class DonorService {
         profile.setAddress(request.getAddress());
         profile.setGender(request.getGender());
         profile.setCreatedAt(LocalDateTime.now());
-
+        gamificationService.initializeDonorStats(userId);
         return donorRepository.save(profile);
     }
 
