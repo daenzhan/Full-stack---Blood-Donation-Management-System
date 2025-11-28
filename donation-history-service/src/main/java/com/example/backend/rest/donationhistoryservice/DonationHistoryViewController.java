@@ -1,5 +1,6 @@
 package com.example.backend.rest.donationhistoryservice;
 
+import com.example.backend.rest.donationhistoryservice.activities_story.ActivityStoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,13 +14,13 @@ import java.util.List;
 public class DonationHistoryViewController {
 
     private final DonationHistoryService donationHistoryService;
+    private final ActivityStoryService activityStoryService;
 
 
     @GetMapping("/medcenter/{medcenterId}")
     public String getDonationHistoryByMedcenterId(@PathVariable Long medcenterId, Model model) {
         List<DonationHistory> donationHistory = donationHistoryService.getDonationHistoryByMedcenterId(medcenterId);
 
-        // Вычисляем всю статистику в контроллере
         long totalDonations = donationHistory.size();
 
         double totalVolume = donationHistory.stream()
@@ -52,6 +53,14 @@ public class DonationHistoryViewController {
                                          @RequestParam Long analysis_id,
                                          @RequestParam Long medcenter_id) {
         donationHistoryService.update_analysis_status(donation_id, analysis_id);
+
+        activityStoryService.record_activity(
+                donation_id,
+                "MEDICAL_CENTER",
+                "DONATION_ANALYSIS_UPDATE_FAILED",
+                "Failed to update analysis for donation"
+        );
+
         return "redirect:http://localhost:8080/donation-history/medcenter/" + medcenter_id;
     }
 
@@ -59,6 +68,13 @@ public class DonationHistoryViewController {
     public String remove_analysis(@PathVariable Long donation_id,
                                   @RequestParam Long medcenter_id) {
         donationHistoryService.remove_analysis_status(donation_id);
+
+        activityStoryService.record_activity(
+                donation_id,
+                "MEDICAL_CENTER",
+                "DONATION_ANALYSIS_REMOVED",
+                "Medical center removed analysis from donation"
+        );
 
         return "redirect:http://localhost:8080/donation-history/medcenter/" + medcenter_id;
     }

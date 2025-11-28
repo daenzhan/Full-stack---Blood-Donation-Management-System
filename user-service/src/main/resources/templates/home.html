@@ -61,21 +61,24 @@
         </div>
     </div>
 
-            <!-- Для админов -->
-            <div th:if="${role == 'ADMIN'}" class="mt-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Admin Dashboard</h5>
-                        <p class="card-text">System administration panel</p>
-                        <a th:href="@{/medcenters}" class="btn btn-danger me-2">All Medcenters</a>
-                        <a th:href="@{/requests}" class="btn btn-sm btn-danger">All Requests</a>
-                        <a th:href="@{/requests/statistics(user_id=${user_id}, role=${role}, email=${email})}"
-                           class="btn btn-sm btn-danger">
-                            Statistic
-                        </a>
-                    </div>
-                </div>
+    <!-- Для админов -->
+    <div th:if="${role == 'ADMIN'}" class="mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Admin Dashboard</h5>
+                <p class="card-text">System administration panel</p>
+                <a th:href="@{/medcenters}" class="btn btn-danger me-2">All Medcenters</a>
+                <a th:href="@{/requests}" class="btn btn-sm btn-danger me-2">All Requests</a>
+                <a th:href="@{/requests/statistics(user_id=${user_id}, role=${role}, email=${email})}"
+                   class="btn btn-sm btn-danger me-2">
+                    Statistic
+                </a>
+                <a th:href="@{http://localhost:8084/activities}" class="btn btn-sm btn-danger">
+                    Activity History
+                </a>
             </div>
+        </div>
+    </div>
 
 
         </div>

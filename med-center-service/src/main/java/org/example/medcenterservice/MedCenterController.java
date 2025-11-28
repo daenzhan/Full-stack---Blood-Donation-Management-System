@@ -1,5 +1,7 @@
 package org.example.medcenterservice;
 
+import org.example.medcenterservice.activities_story.ActivityStoryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -26,20 +28,16 @@ public class MedCenterController {
 
     private final MedCenterService medCenterService;
     private final String upload_dir = "uploads/licenses/";
-
     private static final long max_file_size = 5 * 1024 * 1024; // 5MB
     private static final List<String> allowed_format = Arrays.asList("jpg", "jpeg", "png", "pdf");
+    private final ActivityStoryService activityStoryService;
 
-    public MedCenterController(MedCenterService medCenterService) throws IOException {
+    public MedCenterController(MedCenterService medCenterService, ActivityStoryService activityStoryService) throws IOException {
+        this.activityStoryService = activityStoryService;
         this.medCenterService = medCenterService;
         Files.createDirectories(Paths.get(upload_dir));
     }
 
-    // ========== КАРТЫ И ГЕОЛОКАЦИЯ ==========
-
-    /**
-     * Страница с картой всех центров
-     */
     @GetMapping("/map")
     public String showMapPage(Model model) {
         List<MedCenter> centers = medCenterService.getAllCentersWithCoordinates();
@@ -83,6 +81,15 @@ public class MedCenterController {
         try {
             MedCenter updated = medCenterService.updateCenterCoordinates(id);
             if (updated != null) {
+
+                activityStoryService.record_activity(
+                        updated.getUser_id(),
+                        "MEDICAL_CENTER",
+                        "COORDINATES_UPDATED",
+                        "Medical center coordinates updated via map - Lat: " +
+                                updated.getLatitude() + ", Lon: " + updated.getLongitude()
+                );
+
                 redirectAttributes.addFlashAttribute("success", "Координаты успешно обновлены");
             } else {
                 redirectAttributes.addFlashAttribute("error", "Не удалось обновить координаты");
@@ -92,8 +99,6 @@ public class MedCenterController {
         }
         return "redirect:/medcenters/" + id;
     }
-
-    // ========== СУЩЕСТВУЮЩИЕ МЕТОДЫ (без изменений) ==========
 
     @GetMapping("/complete-profile")
     public String showCompleteProfilePage(@RequestParam String token,
@@ -109,6 +114,14 @@ public class MedCenterController {
             }
         } catch (Exception e) {
         }
+
+        activityStoryService.record_activity(
+                userId,
+                "MEDICAL_CENTER",
+                "PROFILE_CREATION_STARTED",
+                "Medical center started profile creation"
+        );
+
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
         model.addAttribute("role", role);
@@ -153,15 +166,23 @@ public class MedCenterController {
                     directorName, centerEmail, license_file
             );
 
-            // Если геокодирование успешно, обновляем координаты
             if (coordinates != null) {
                 profile.setLatitude(coordinates.get("latitude"));
                 profile.setLongitude(coordinates.get("longitude"));
-                medCenterService.save(profile); // Сохраняем с координатами
+                medCenterService.save(profile);
                 System.out.println("Coordinates set: " + coordinates.get("latitude") + ", " + coordinates.get("longitude"));
             } else {
                 System.out.println("Geocoding failed for address: " + location);
             }
+
+            activityStoryService.record_activity(
+                    userId,
+                    "MEDICAL_CENTER",
+                    "PROFILE_CREATED",
+                    "Medical center profile created - Name: " + name +
+                            ", Location: " + location + ", Specialization: " + specialization +
+                            (license_file != null ? " (with license)" : " (without license)")
+            );
 
             System.out.println("Medical center profile created with ID: " + profile.getMed_center_id());
 
@@ -170,6 +191,14 @@ public class MedCenterController {
                     "&success=Medical center profile completed successfully!";
 
         } catch (Exception e) {
+
+            activityStoryService.record_activity(
+                    userId,
+                    "MEDICAL_CENTER",
+                    "PROFILE_CREATION_FAILED",
+                    "Failed to create medical center profile: " + e.getMessage()
+            );
+
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error completing profile: " + e.getMessage());
             return "redirect:/medcenters/complete-profile?token=" + token +
@@ -220,6 +249,15 @@ public class MedCenterController {
                 return "redirect:/medcenters/new";
             }
         }
+
+        activityStoryService.record_activity(
+                user_id,
+                "MEDICAL_CENTER",
+                "MED_CENTER_CREATED_ADMIN",
+                "Medical center created by admin - Name: " + name +
+                        ", ID: " + medCenter.getMed_center_id()
+        );
+
         medCenterService.save(medCenter);
         redirectAttributes.addFlashAttribute("success", "Медицинский центр успешно создан");
         return "redirect:/medcenters";
@@ -229,6 +267,14 @@ public class MedCenterController {
     public String detail_page (@PathVariable Long id, Model model) {
         MedCenter medCenter = medCenterService.get_by_id(id);
         if (medCenter != null) {
+
+            activityStoryService.record_activity(
+                    medCenter.getUser_id(),
+                    "MEDICAL_CENTER",
+                    "PROFILE_VIEWED_DETAILS",
+                    "Medical center details viewed - ID: " + id
+            );
+
             model.addAttribute("medCenter", medCenter);
             return "view";
         }
@@ -254,6 +300,14 @@ public class MedCenterController {
     public String update_page (@PathVariable Long id, Model model) {
         MedCenter medCenter = medCenterService.get_by_id(id);
         if (medCenter != null) {
+
+            activityStoryService.record_activity(
+                    medCenter.getUser_id(),
+                    "MEDICAL_CENTER",
+                    "PROFILE_EDIT_STARTED",
+                    "Started editing medical center profile - ID: " + id
+            );
+
             model.addAttribute("medCenter", medCenter);
             return "edit";
         }
@@ -294,15 +348,31 @@ public class MedCenterController {
                     String file_name = save_uploaded_file(file);
                     new_medCenter.setLicense_file(file_name);
                 } else {
-                    // если вдруг файл не загружен
                     new_medCenter.setLicense_file(existing_medCenter.getLicense_file());
                 }
 
                 medCenterService.update(id, new_medCenter);
+
+                activityStoryService.record_activity(
+                        user_id,
+                        "MEDICAL_CENTER",
+                        "PROFILE_UPDATED",
+                        "Medical center profile updated - Name: " + name +
+                                ", Location: " + location + ", Specialization: " + specialization
+                );
+
                 redirectAttributes.addFlashAttribute("success", "Медицинский центр успешно обновлен");
             }
             return "redirect:/medcenters";
         } catch (Exception e) {
+
+            activityStoryService.record_activity(
+                    user_id,
+                    "MEDICAL_CENTER",
+                    "PROFILE_UPDATE_FAILED",
+                    "Failed to update medical center profile: " + e.getMessage()
+            );
+
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Ошибка при обновлении: " + e.getMessage());
             return "redirect:/medcenters/" + id + "/edit";
@@ -311,14 +381,32 @@ public class MedCenterController {
 
     @GetMapping("/{id}/delete")
     public String deleteMedCenter(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        MedCenter medCenter = null;
         try {
-            MedCenter medCenter = medCenterService.get_by_id(id);
+            medCenter = medCenterService.get_by_id(id);
             if (medCenter != null && medCenter.getLicense_file() != null) {
-                delete_file(medCenter.getLicense_file()); // Исправлено имя метода
+
+                activityStoryService.record_activity(
+                        medCenter.getUser_id(),
+                        "MEDICAL_CENTER",
+                        "PROFILE_DELETED",
+                        "Medical center deleted - Name: " + medCenter.getName() +
+                                ", ID: " + id
+                );
+
+                delete_file(medCenter.getLicense_file());
             }
             medCenterService.delete(id);
             redirectAttributes.addFlashAttribute("success", "Медицинский центр успешно удален");
         } catch (Exception e) {
+
+            activityStoryService.record_activity(
+                    medCenter.getUser_id(),
+                    "SYSTEM",
+                    "PROFILE_DELETE_FAILED",
+                    "Failed to delete medical center ID: " + id + " - " + e.getMessage()
+            );
+
             redirectAttributes.addFlashAttribute("error", "Ошибка при удалении: " + e.getMessage());
         }
         return "redirect:/medcenters";
@@ -328,13 +416,20 @@ public class MedCenterController {
     public String showLicense(@PathVariable Long id, Model model) {
         MedCenter medCenter = medCenterService.get_by_id(id);
         if (medCenter != null) {
+
+            activityStoryService.record_activity(
+                    medCenter.getUser_id(),
+                    "MEDICAL_CENTER",
+                    "LICENSE_VIEWED",
+                    "Medical center license viewed - ID: " + id
+            );
+
             model.addAttribute("medCenter", medCenter);
             return "license-view";
         }
         return "redirect:/medcenters";
     }
 
-    // чтобы скачать файл
     @GetMapping("/{id}/license/download")
     public ResponseEntity<Resource> download_license(@PathVariable Long id) {
         try {
@@ -349,6 +444,13 @@ public class MedCenterController {
             if (!resource.exists()) {
                 return ResponseEntity.notFound().build();
             }
+
+            activityStoryService.record_activity(
+                    medCenter.getUser_id(),
+                    "MEDICAL_CENTER",
+                    "LICENSE_DOWNLOADED",
+                    "Medical center license downloaded - File: " + medCenter.getLicense_file()
+            );
 
             String file_type = determine_file_type(medCenter.getLicense_file());
 
@@ -460,9 +562,14 @@ public class MedCenterController {
             Model model) {
 
         try {
-            // Получаем профиль медцентра
             MedCenter medCenter = medCenterService.getProfileByUserId(userId);
 
+            activityStoryService.record_activity(
+                    userId,
+                    "MEDICAL_CENTER",
+                    "DASHBOARD_VIEWED",
+                    "Medical center dashboard viewed"
+            );
 
             model.addAttribute("medCenter", medCenter);
             model.addAttribute("token", token);
@@ -471,7 +578,6 @@ public class MedCenterController {
             model.addAttribute("email", email);
 
         } catch (Exception e) {
-            // Если профиль не найден, перенаправляем на заполнение
             return "redirect:/medcenters/complete-profile?token=" + token +
                     "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
@@ -489,6 +595,14 @@ public class MedCenterController {
 
         try {
             MedCenter medCenter = medCenterService.getProfileByUserId(userId);
+
+            activityStoryService.record_activity(
+                    userId,
+                    "MEDICAL_CENTER",
+                    "PROFILE_VIEWED",
+                    "Medical center profile viewed"
+            );
+
             model.addAttribute("medCenter", medCenter);
             model.addAttribute("token", token);
             model.addAttribute("userId", userId);

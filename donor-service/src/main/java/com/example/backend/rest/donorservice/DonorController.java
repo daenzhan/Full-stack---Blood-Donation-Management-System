@@ -1,6 +1,8 @@
 package com.example.backend.rest.donorservice;
+import com.example.backend.rest.donorservice.activities_story.ActivityStoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +30,8 @@ public class DonorController {
     private final GamificationService gamificationService;
     private final DonorAchievementRepository donorAchievementRepository;
     private final DonorStatsRepository donorStatsRepository;
+    @Autowired
+    private ActivityStoryService activityStoryService;
 
     @GetMapping("/dashboard")
     public String showDashboard(@RequestParam String token,
@@ -45,6 +49,13 @@ public class DonorController {
             Map<String, Object> donationInfo = donorBloodRequestService.getNextDonationInfo(donor.getUserId());
             List<DonationHistoryDto> donationHistory = getDonationHistoryForDonor(donor.getUserId());
             Map<String, Object> donorProgress = gamificationService.getDonorProgress(donor.getUserId());
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "DASHBOARD_VIEWED",
+                    "User viewed donor dashboard"
+            );
 
             model.addAttribute("donor", donor);
             model.addAttribute("matchingRequests", matchingRequests);
@@ -94,6 +105,15 @@ public class DonorController {
         Donor donor = donorOpt.get();
         Map<String, Object> donationInfo = donorBloodRequestService.getNextDonationInfo(donor.getUserId());
         List<BloodRequestDto> requests = donorBloodRequestService.getBloodRequests(bloodGroup, rhesusFactor, componentType, medcenterName);
+
+        activityStoryService.record_activity(
+                userId,
+                "DONOR",
+                "BLOOD_REQUESTS_VIEWED",
+                "User viewed blood requests with filters - bloodGroup: " + bloodGroup +
+                        ", rhesusFactor: " + rhesusFactor + ", componentType: " + componentType
+        );
+
         model.addAttribute("donor", donor);
         model.addAttribute("requests", requests);
         model.addAttribute("token", token);
@@ -129,6 +149,14 @@ public class DonorController {
             }
             BloodRequestDto bloodRequestDto = response.getBody();
             if (bloodRequestDto.getDeadline().isBefore(LocalDateTime.now())) {
+
+                activityStoryService.record_activity(
+                        userId,
+                        "DONOR",
+                        "BLOOD_REQUEST_EXPIRED_ATTEMPT",
+                        "Attempted to accept expired blood request #" + requestId +
+                                " (deadline: " + bloodRequestDto.getDeadline().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + ")"
+                );
                 redirectAttributes.addFlashAttribute("error",
                         "This blood request has expired and can no longer be accepted. Deadline was: " +
                                 bloodRequestDto.getDeadline().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
@@ -138,6 +166,16 @@ public class DonorController {
             String requestBloodType = bloodRequestDto.getBlood_group() + bloodRequestDto.getRhesus_factor();
 
             if (!donorBloodRequestService.isBloodTypeCompatible(donorBloodType, requestBloodType)) {
+
+                activityStoryService.record_activity(
+                        userId,
+                        "DONOR",
+                        "BLOOD_TYPE_INCOMPATIBLE",
+                        "Attempted to accept blood request #" + requestId +
+                                " but blood types are incompatible (donor: " + donorBloodType +
+                                ", required: " + requestBloodType + ")"
+                );
+
                 redirectAttributes.addFlashAttribute("error",
                         "Your blood type (" + donorBloodType + ") is not compatible with the required type (" + requestBloodType + ")");
                 return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
@@ -156,6 +194,15 @@ public class DonorController {
                         long daysBetween = ChronoUnit.DAYS.between(lastDonationDate, now);
                         if (daysBetween < 60) {
                             long daysLeft = 60 - daysBetween;
+
+                            activityStoryService.record_activity(
+                                    userId,
+                                    "DONOR",
+                                    "DONATION_TOO_EARLY_ATTEMPT",
+                                    "Attempted to donate too early - last donation was " + daysBetween +
+                                            " days ago, need to wait " + daysLeft + " more days"
+                            );
+
                             redirectAttributes.addFlashAttribute("error",
                                     "You can only donate blood once every 60 days. " +
                                             "Your last donation was " + daysBetween + " days ago. " +
@@ -176,16 +223,42 @@ public class DonorController {
             String message = (String) result.getOrDefault("message", "");
 
             if (success) {
+
+                activityStoryService.record_activity(
+                        userId,
+                        "DONOR",
+                        "BLOOD_REQUEST_ACCEPTED",
+                        "Successfully accepted blood request #" + requestId +
+                                " for blood type " + requestBloodType +
+                                " at medical center " + bloodRequestDto.getMedcenter_id()
+                );
+
                 System.out.println("Calling gamificationService.processDonation for donor: " + donor.getUserId());
                 gamificationService.processDonation(donor.getUserId());
                 redirectAttributes.addFlashAttribute("success",
                         message + " Confirmation email has been sent to " + email);
             } else {
+
+                activityStoryService.record_activity(
+                        userId,
+                        "DONOR",
+                        "BLOOD_REQUEST_ACCEPT_FAILED",
+                        "Failed to accept blood request #" + requestId + " - " + message
+                );
+
                 redirectAttributes.addFlashAttribute("error", message);
             }
 
             return "redirect:/donor/donation-history?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         } catch (Exception e) {
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "BLOOD_REQUEST_ACCEPT_ERROR",
+                    "Error accepting blood request #" + requestId + ": " + e.getMessage()
+            );
+
             log.error("Error accepting blood request {} by donor {}: {}", requestId, userId, e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Error accepting request: " + e.getMessage());
             return "redirect:/donor/requests?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
@@ -213,6 +286,14 @@ public class DonorController {
         if (donorRepository.existsByUserId(userId)) {
             return "redirect:/donor/dashboard?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
+
+        activityStoryService.record_activity(
+                userId,
+                "DONOR",
+                "PROFILE_CREATION_STARTED",
+                "User started completing donor profile"
+        );
+
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
         model.addAttribute("role", role);
@@ -250,9 +331,26 @@ public class DonorController {
             request.setAddress(address);
             request.setGender(gender);
             donorService.completeProfile(userId, request);
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "PROFILE_CREATED",
+                    "Donor profile created successfully - Name: " + fullName +
+                            ", Blood Type: " + bloodType + ", Phone: " + phoneNumber
+            );
+
             redirectAttributes.addFlashAttribute("success", "Profile completed successfully!");
             return "redirect:/donor/dashboard?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         } catch (Exception e) {
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "PROFILE_CREATION_FAILED",
+                    "Failed to create donor profile: " + e.getMessage()
+            );
+
             redirectAttributes.addFlashAttribute("error", "Error: " + e.getMessage());
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
@@ -268,6 +366,14 @@ public class DonorController {
         if (donorOpt.isEmpty()) {
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
+
+        activityStoryService.record_activity(
+                userId,
+                "DONOR",
+                "PROFILE_VIEWED",
+                "User viewed their donor profile"
+        );
+
         model.addAttribute("donor", donorOpt.get());
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
@@ -286,6 +392,14 @@ public class DonorController {
         if (donorOpt.isEmpty()) {
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
+
+        activityStoryService.record_activity(
+                userId,
+                "DONOR",
+                "PROFILE_EDIT_STARTED",
+                "User started editing donor profile"
+        );
+
         model.addAttribute("donor", donorOpt.get());
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
@@ -330,9 +444,26 @@ public class DonorController {
             donor.setAddress(address);
             donor.setGender(gender);
             donorRepository.save(donor);
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "PROFILE_UPDATED",
+                    "Donor profile updated - Name: " + fullName +
+                            ", Blood Type: " + bloodType + ", Phone: " + phoneNumber
+            );
+
             redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
             return "redirect:/donor/profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         } catch (Exception e) {
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "PROFILE_UPDATE_FAILED",
+                    "Failed to update donor profile: " + e.getMessage()
+            );
+
             redirectAttributes.addFlashAttribute("error", "Error updating profile: " + e.getMessage());
             return "redirect:/donor/profile/edit?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
@@ -346,12 +477,30 @@ public class DonorController {
                                 RedirectAttributes redirectAttributes) {
         try {
             Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
+            Donor donor = donorOpt.get();
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "PROFILE_DELETED",
+                    "Donor profile deleted - Name: " + donor.getFullName() +
+                            ", Blood Type: " + donor.getBloodType()
+            );
+
             if (donorOpt.isPresent()) {
                 donorRepository.delete(donorOpt.get());
                 redirectAttributes.addFlashAttribute("success", "Profile deleted successfully");
             }
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         } catch (Exception e) {
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "PROFILE_DELETE_FAILED",
+                    "Failed to delete donor profile: " + e.getMessage()
+            );
+
             redirectAttributes.addFlashAttribute("error", "Error deleting profile: " + e.getMessage());
             return "redirect:/donor/dashboard?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
@@ -369,6 +518,14 @@ public class DonorController {
             return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
         }
         Donor donor = donorOpt.get();
+
+        activityStoryService.record_activity(
+                userId,
+                "DONOR",
+                "DONATION_HISTORY_VIEWED",
+                "User viewed donation history"
+        );
+
         List<DonationHistoryDto> donationHistory = getDonationHistoryForDonor(donor.getUserId());
         model.addAttribute("donor", donor);
         model.addAttribute("donationHistory", donationHistory);
@@ -417,6 +574,14 @@ public class DonorController {
         if (!userFound) {
             userRank = leaderboard.size() + 1;
         }
+
+        activityStoryService.record_activity(
+                userId,
+                "DONOR",
+                "LEADERBOARD_VIEWED",
+                "User viewed donor leaderboard"
+        );
+
         model.addAttribute("donor", donor);
         model.addAttribute("leaderboard", leaderboard);
         model.addAttribute("donorProgress", donorProgress);
@@ -445,6 +610,14 @@ public class DonorController {
                 donorAchievementRepository.save(achievement);
             }
         });
+
+        activityStoryService.record_activity(
+                userId,
+                "DONOR",
+                "ACHIEVEMENTS_VIEWED",
+                "User viewed their achievements"
+        );
+
         model.addAttribute("donor", donor);
         model.addAttribute("achievements", achievements);
         model.addAttribute("donorProgress", donorProgress);
