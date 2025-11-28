@@ -49,6 +49,9 @@ public class MedCenter {
     @Transient
     private Double distance;
 
+    @Transient
+    private Boolean isFavorite;
+
     public MedCenter() {}
 
     public MedCenter(Long med_center_id, String name, String location, String phone,
@@ -94,4 +97,7 @@ public class MedCenter {
     public void setLongitude(Double longitude) { this.longitude = longitude; }
     public Double getDistance() { return distance; }
     public void setDistance(Double distance) { this.distance = distance; }
+    public Boolean getIsFavorite() { return isFavorite; }
+    public void setIsFavorite(Boolean favorite) { isFavorite = favorite; }
+    public void setFavorite(Boolean favorite) { isFavorite = favorite; }
 }

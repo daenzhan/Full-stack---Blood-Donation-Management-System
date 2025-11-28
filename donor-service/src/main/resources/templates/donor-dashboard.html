@@ -806,6 +806,23 @@
             border-radius: 12px;
             overflow: hidden;
         }
+
+        .bg-calm-blue {
+            background: linear-gradient(135deg, #1e88e5, #42a5f5) !important;
+        }
+
+        .btn-calm-blue {
+            background: linear-gradient(135deg, #1e88e5, #42a5f5);
+            color: white !important;
+            border: none;
+        }
+
+        .btn-calm-blue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4);
+        }
+
+
     </style>
 </head>
 <body>
@@ -861,6 +878,14 @@
                 Leaderboard
             </a>
         </li>
+
+        <li>
+            <a th:href="@{/medcenters/favorites(token=${token}, userId=${userId}, role=${role}, email=${email})}">
+                <i class="fas fa-star"></i>
+                My Favorites
+            </a>
+        </li>
+
     </ul>
 </div>
 
@@ -1250,6 +1275,25 @@
                                 <i class="fas fa-chart-line me-1"></i> View Leaderboard
                             </a>
                         </div>
+
+                        <!-- Favorites -->
+                        <div class="action-card">
+                            <div>
+                                <div class="action-icon bg-calm-blue text-white">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">My Favorites</h6>
+                                <p class="text-muted small mb-3">
+                                    Quickly access your saved medical centers for future donations
+                                </p>
+                            </div>
+                            <a th:href="@{'/medcenters/favorites?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                               class="btn btn-calm-blue btn-sm">
+                                <i class="fas fa-star me-1"></i> View Favorites
+                            </a>
+                        </div>
+
+
                     </div>
                 </div>
             </div>

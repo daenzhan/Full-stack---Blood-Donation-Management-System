@@ -31,18 +31,36 @@ public class MedCenterController {
     private static final long max_file_size = 5 * 1024 * 1024; // 5MB
     private static final List<String> allowed_format = Arrays.asList("jpg", "jpeg", "png", "pdf");
     private final ActivityStoryService activityStoryService;
+    private final FavoriteMedCenterService favoriteMedCenterService;
 
-    public MedCenterController(MedCenterService medCenterService, ActivityStoryService activityStoryService) throws IOException {
+    public MedCenterController(MedCenterService medCenterService, ActivityStoryService activityStoryService, FavoriteMedCenterService favoriteMedCenterService) throws IOException {
         this.activityStoryService = activityStoryService;
         this.medCenterService = medCenterService;
+        this.favoriteMedCenterService = favoriteMedCenterService;
         Files.createDirectories(Paths.get(upload_dir));
     }
 
     @GetMapping("/map")
-    public String showMapPage(Model model) {
+    public String showMapPage(@RequestParam String token,
+                              @RequestParam Long userId,
+                              @RequestParam String role,
+                              @RequestParam String email,
+                              Model model) {
         List<MedCenter> centers = medCenterService.getAllCentersWithCoordinates();
+
+        // Получаем статус избранного для каждого центра
+        for (MedCenter center : centers) {
+            boolean isFavorite = favoriteMedCenterService.isFavorite(userId, center.getMed_center_id());
+            center.setFavorite(isFavorite); // Добавьте это поле в класс MedCenter
+        }
+
         model.addAttribute("centers", centers);
-        model.addAttribute("yandexApiKey", "92fb74a1-4389-4f41-8801-8e9d93e4548c"); // Замените на ваш ключ
+        model.addAttribute("token", token);
+        model.addAttribute("userId", userId);
+        model.addAttribute("role", role);
+        model.addAttribute("email", email);
+        model.addAttribute("yandexApiKey", "92fb74a1-4389-4f41-8801-8e9d93e4548c");
+
         return "map-page";
     }
 
@@ -615,5 +633,72 @@ public class MedCenterController {
         }
 
         return "med-center-profile";
+    }
+
+
+    @PostMapping("/favorites/{medCenterId}/add")
+    public String addToFavorites(@PathVariable Long medCenterId,
+                                 @RequestParam String token,
+                                 @RequestParam Long donorId,
+                                 @RequestParam String role,
+                                 @RequestParam String email,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            boolean success = favoriteMedCenterService.addToFavorites(donorId, medCenterId);
+
+            if (success) {
+                redirectAttributes.addFlashAttribute("success", "Medical center added to favorites!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Medical center is already in favorites");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error adding to favorites");
+        }
+
+        return "redirect:/medcenters/map?token=" + token + "&userId=" + donorId + "&role=" + role + "&email=" + email;
+    }
+
+    @PostMapping("/favorites/{medCenterId}/remove")
+    public String removeFromFavorites(@PathVariable Long medCenterId,
+                                      @RequestParam String token,
+                                      @RequestParam Long donorId,
+                                      @RequestParam String role,
+                                      @RequestParam String email,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            boolean success = favoriteMedCenterService.removeFromFavorites(donorId, medCenterId);
+
+            if (success) {
+                redirectAttributes.addFlashAttribute("success", "Medical center removed from favorites!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Medical center is not in favorites");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error removing from favorites");
+        }
+
+        return "redirect:/medcenters/map?token=" + token + "&userId=" + donorId + "&role=" + role + "&email=" + email;
+    }
+
+    @GetMapping("/favorites")
+    public String showFavorites(@RequestParam String token,
+                                @RequestParam Long userId,
+                                @RequestParam String role,
+                                @RequestParam String email,
+                                Model model) {
+        try {
+            List<MedCenter> favoriteMedCenters = favoriteMedCenterService.getFavoriteMedCenters(userId);
+
+            model.addAttribute("favoriteMedCenters", favoriteMedCenters);
+            model.addAttribute("token", token);
+            model.addAttribute("userId", userId);
+            model.addAttribute("role", role);
+            model.addAttribute("email", email);
+
+            return "donor-favorites";
+
+        } catch (Exception e) {
+            return "redirect:/medcenters/map?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
+        }
     }
 }
