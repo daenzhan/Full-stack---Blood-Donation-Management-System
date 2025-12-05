@@ -1,6 +1,8 @@
 package org.example.bloodrequestservice;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +29,6 @@ public class BloodRequestController {
         this.emailService = emailService;
         this.repository = repository;
         this.medCenterFeignClient = medCenterFeignClient;
-
     }
 
     @GetMapping
@@ -37,10 +38,16 @@ public class BloodRequestController {
             @RequestParam(required = false) String componentType,
             @RequestParam(required = false) String medcenterName,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String user_id,
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false) String email,
+            HttpServletRequest request,
             Model model) {
+
+        // Получаем информацию о пользователе из атрибутов запроса
+        String userEmail = (String) request.getAttribute("userEmail");
+        String userRole = (String) request.getAttribute("userRole");
+        Long userId = (Long) request.getAttribute("userId");
+        String token = request.getParameter("token");
+
+        log.info("List requests - UserId: {}, Role: {}, Email: {}", userId, userRole, userEmail);
 
         List<BloodRequest> requests;
 
@@ -70,9 +77,10 @@ public class BloodRequestController {
         model.addAttribute("componentType", componentType);
         model.addAttribute("medcenterName", medcenterName);
         model.addAttribute("sort", sort);
-        model.addAttribute("user_id", user_id);
-        model.addAttribute("role", role);
-        model.addAttribute("email", email);
+        model.addAttribute("user_id", userId != null ? userId.toString() : "");
+        model.addAttribute("role", userRole != null ? userRole : "");
+        model.addAttribute("email", userEmail != null ? userEmail : "");
+        model.addAttribute("token", token);
         model.addAttribute("sortOptions", List.of(
                 "deadline_asc: По сроку (сначала ближайшие)",
                 "deadline_desc: По сроку (сначала дальние)",
@@ -84,7 +92,6 @@ public class BloodRequestController {
         return "list";
     }
 
-
     @PostMapping("/{id}/join-donation")
     public String joinDonation(
             @PathVariable("id") Long id,
@@ -92,6 +99,7 @@ public class BloodRequestController {
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam String requestId,
+            @RequestParam(required = false) String token,
             RedirectAttributes redirectAttributes) {
 
         try {
@@ -115,7 +123,8 @@ public class BloodRequestController {
                     "Failed to join donation. Please try again.");
         }
 
-        return "redirect:/requests?user_id=" + user_id + "&role=" + role + "&email=" + email;
+        return "redirect:/requests?user_id=" + user_id + "&role=" + role + "&email=" + email +
+                (token != null ? "&token=" + token : "");
     }
 
     private boolean hasActiveFilters(String bloodGroup, String rheusFactor,
@@ -127,22 +136,78 @@ public class BloodRequestController {
     }
 
     @GetMapping("/new")
-    public String create_request(Model model) {
-        model.addAttribute("bloodRequest", new BloodRequest());
+    public String create_request(HttpServletRequest request, Model model) {
+        // Получаем информацию о пользователе
+        String userEmail = (String) request.getAttribute("userEmail");
+        String userRole = (String) request.getAttribute("userRole");
+        Long userId = (Long) request.getAttribute("userId");
+        String token = request.getParameter("token");
+
+        BloodRequest bloodRequest = new BloodRequest();
+        model.addAttribute("bloodRequest", bloodRequest);
+        model.addAttribute("user_id", userId != null ? userId.toString() : "");
+        model.addAttribute("role", userRole != null ? userRole : "");
+        model.addAttribute("email", userEmail != null ? userEmail : "");
+        model.addAttribute("token", token);
         return "form";
     }
 
     @PostMapping("/save")
-    public String save_request(@ModelAttribute BloodRequest blood_request) {
-        service.save_request(blood_request);
-        return "redirect:/requests";
+    public String save_request(@ModelAttribute BloodRequest blood_request,
+                               @RequestParam(required = false) String token,
+                               HttpServletRequest request,
+                               Model model) {
+        try {
+            // Получаем информацию о пользователе
+            String userEmail = (String) request.getAttribute("userEmail");
+            String userRole = (String) request.getAttribute("userRole");
+            Long userId = (Long) request.getAttribute("userId");
+
+            // Проверяем существование медицинского центра
+            String medCenterName = service.getMedCenterName(blood_request.getMedcenter_id());
+
+            if (medCenterName.contains("Unknown") || medCenterName.contains("not found")) {
+                model.addAttribute("errorMessage", "Medical center not found. Please check the medical center ID.");
+                model.addAttribute("bloodRequest", blood_request);
+                model.addAttribute("user_id", userId != null ? userId.toString() : "");
+                model.addAttribute("role", userRole != null ? userRole : "");
+                model.addAttribute("email", userEmail != null ? userEmail : "");
+                model.addAttribute("token", token);
+                return "form";
+            }
+
+            service.save_request(blood_request);
+            return "redirect:/requests" + (token != null ? "?token=" + token : "");
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error saving request: " + e.getMessage());
+            model.addAttribute("bloodRequest", blood_request);
+
+            // Получаем информацию о пользователе
+            String userEmail = (String) request.getAttribute("userEmail");
+            String userRole = (String) request.getAttribute("userRole");
+            Long userId = (Long) request.getAttribute("userId");
+
+            model.addAttribute("user_id", userId != null ? userId.toString() : "");
+            model.addAttribute("role", userRole != null ? userRole : "");
+            model.addAttribute("email", userEmail != null ? userEmail : "");
+            model.addAttribute("token", token);
+            return "form";
+        }
     }
 
     @GetMapping("/{id}/edit")
-    public String edit_request(@PathVariable Long id, Model model) {
+    public String edit_request(@PathVariable Long id,
+                               HttpServletRequest request,
+                               Model model) {
+        // Получаем информацию о пользователе
+        String userEmail = (String) request.getAttribute("userEmail");
+        String userRole = (String) request.getAttribute("userRole");
+        Long userId = (Long) request.getAttribute("userId");
+        String token = request.getParameter("token");
+
         var opt = service.get_request_by_id(id);
         if (opt.isEmpty()) {
-            return "redirect:/requests";
+            return "redirect:/requests" + (token != null ? "?token=" + token : "");
         }
 
         BloodRequest bloodRequest = opt.get();
@@ -150,15 +215,21 @@ public class BloodRequestController {
 
         model.addAttribute("bloodRequest", bloodRequest);
         model.addAttribute("medcenterName", medcenterName);
+        model.addAttribute("user_id", userId != null ? userId.toString() : "");
+        model.addAttribute("role", userRole != null ? userRole : "");
+        model.addAttribute("email", userEmail != null ? userEmail : "");
+        model.addAttribute("token", token);
 
         return "edit-form";
     }
 
     @PostMapping("/{id}/edit")
-    public String update_request(@PathVariable Long id, @ModelAttribute BloodRequest bloodRequest) {
+    public String update_request(@PathVariable Long id,
+                                 @ModelAttribute BloodRequest bloodRequest,
+                                 @RequestParam(required = false) String token) {
         var opt = service.get_request_by_id(id);
         if (opt.isEmpty()) {
-            return "redirect:/requests";
+            return "redirect:/requests" + (token != null ? "?token=" + token : "");
         }
 
         BloodRequest existingRequest = opt.get();
@@ -171,24 +242,37 @@ public class BloodRequestController {
         existingRequest.setComments(bloodRequest.getComments());
 
         service.save_request(existingRequest);
-        return "redirect:/requests";
+        return "redirect:/requests" + (token != null ? "?token=" + token : "");
     }
 
     @PostMapping("/{id}/delete")
-    public String delete_request(@PathVariable Long id) {
+    public String delete_request(@PathVariable Long id,
+                                 @RequestParam(required = false) String token) {
         service.delete_request(id);
-        return "redirect:/requests";
+        return "redirect:/requests" + (token != null ? "?token=" + token : "");
     }
 
     @GetMapping("/{id}")
-    public String view_details(@PathVariable Long id, Model model) {
+    public String view_details(@PathVariable Long id,
+                               HttpServletRequest request,
+                               Model model) {
+        // Получаем информацию о пользователе
+        String userEmail = (String) request.getAttribute("userEmail");
+        String userRole = (String) request.getAttribute("userRole");
+        Long userId = (Long) request.getAttribute("userId");
+        String token = request.getParameter("token");
+
         var opt = service.get_request_by_id(id);
         if (opt.isEmpty()) {
-            return "redirect:/requests";
+            return "redirect:/requests" + (token != null ? "?token=" + token : "");
         }
-        BloodRequest request = opt.get();
-        model.addAttribute("request", request);
-        model.addAttribute("medcenterName", service.getMedCenterName(request.getMedcenter_id()));
+        BloodRequest requestObj = opt.get();
+        model.addAttribute("request", requestObj);
+        model.addAttribute("medcenterName", service.getMedCenterName(requestObj.getMedcenter_id()));
+        model.addAttribute("user_id", userId != null ? userId.toString() : "");
+        model.addAttribute("role", userRole != null ? userRole : "");
+        model.addAttribute("email", userEmail != null ? userEmail : "");
+        model.addAttribute("token", token);
         return "details";
     }
 
@@ -199,11 +283,17 @@ public class BloodRequestController {
             @RequestParam(required = false) String rheusFactor,
             @RequestParam(required = false) String componentType,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String token,
-            @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false) String email,
+            HttpServletRequest request,
             Model model) {
+
+        // Получаем информацию о пользователе
+        String userEmail = (String) request.getAttribute("userEmail");
+        String userRole = (String) request.getAttribute("userRole");
+        Long userId = (Long) request.getAttribute("userId");
+        String token = request.getParameter("token");
+
+        log.info("List by medcenter - MedcenterId: {}, UserId: {}, Role: {}",
+                medcenter_id, userId, userRole);
 
         List<BloodRequest> requests;
 
@@ -234,15 +324,15 @@ public class BloodRequestController {
         model.addAttribute("requests", requests);
         model.addAttribute("medcenter_id", medcenter_id);
         model.addAttribute("medcenterName", service.getMedCenterName(medcenter_id));
-        model.addAttribute("medCenter", medCenter); // ← ДОБАВЬТЕ ЭТУ СТРОКУ
+        model.addAttribute("medCenter", medCenter);
         model.addAttribute("bloodGroup", bloodGroup);
         model.addAttribute("rheusFactor", rheusFactor);
         model.addAttribute("componentType", componentType);
         model.addAttribute("sort", sort);
         model.addAttribute("token", token);
         model.addAttribute("userId", userId);
-        model.addAttribute("role", role);
-        model.addAttribute("email", email);
+        model.addAttribute("role", userRole);
+        model.addAttribute("email", userEmail);
         model.addAttribute("sortOptions", List.of(
                 "deadline_asc: По сроку (сначала ближайшие)",
                 "deadline_desc: По сроку (сначала дальние)",
@@ -254,13 +344,13 @@ public class BloodRequestController {
         return "list-by-medcenter";
     }
 
-
     @GetMapping("/statistics")
-    public String getStatistics(
-            @RequestParam(required = false) String user_id,
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false) String email,
-            Model model) {
+    public String getStatistics(HttpServletRequest request, Model model) {
+        // Получаем информацию о пользователе
+        String userEmail = (String) request.getAttribute("userEmail");
+        String userRole = (String) request.getAttribute("userRole");
+        Long userId = (Long) request.getAttribute("userId");
+        String token = request.getParameter("token");
 
         List<BloodRequest> allRequests = service.get_all_requests();
 
@@ -335,11 +425,38 @@ public class BloodRequestController {
         model.addAttribute("urgentRequests", urgentRequests);
         model.addAttribute("topBloodGroups", topBloodGroups);
         model.addAttribute("averageVolume", String.format("%.2f", averageVolume));
-        model.addAttribute("user_id", user_id);
-        model.addAttribute("role", role);
-        model.addAttribute("email", email);
+        model.addAttribute("user_id", userId != null ? userId.toString() : "");
+        model.addAttribute("role", userRole != null ? userRole : "");
+        model.addAttribute("email", userEmail != null ? userEmail : "");
+        model.addAttribute("token", token);
 
         return "stat";
+    }
+
+    @GetMapping("/medcenter/{medcenter_id}/test")
+    @ResponseBody  // ← ВАЖНО! Возвращаем JSON, а не HTML
+    public ResponseEntity<Map<String, Object>> testMedCenter(
+            @PathVariable Long medcenter_id,
+            HttpServletRequest request) {
+
+        log.info("=== TEST ENDPOINT CALLED ===");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("medcenterId", medcenter_id);
+        response.put("message", "Test endpoint working");
+        response.put("timestamp", LocalDateTime.now().toString());
+
+        // Простая проверка сервиса
+        try {
+            List<BloodRequest> requests = service.get_requests_by_medcenter(medcenter_id);
+            response.put("requestCount", requests.size());
+            response.put("serviceStatus", "working");
+        } catch (Exception e) {
+            response.put("serviceStatus", "error: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(response);
     }
 
 }
