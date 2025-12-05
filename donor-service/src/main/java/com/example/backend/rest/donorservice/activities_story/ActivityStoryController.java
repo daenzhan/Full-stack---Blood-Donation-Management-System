@@ -18,9 +18,12 @@ import java.util.List;
 public class ActivityStoryController {
 
     private final ActivityStoryRepository activityStoryRepository;
+    private final ActivityRatingService activityRatingService;
 
-    public ActivityStoryController(ActivityStoryRepository activityStoryRepository) {
+    public ActivityStoryController(ActivityStoryRepository activityStoryRepository,
+                                   ActivityRatingService activityRatingService) {
         this.activityStoryRepository = activityStoryRepository;
+        this.activityRatingService = activityRatingService;
     }
 
     @GetMapping
@@ -29,15 +32,12 @@ public class ActivityStoryController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction,
-
-            // NEW FILTERS:
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String role,
             @RequestParam(required = false) String service,
             @RequestParam(required = false) String action,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
-
             Model model) {
 
         Sort sort = direction.equalsIgnoreCase("asc")
@@ -47,7 +47,6 @@ public class ActivityStoryController {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<ActivityStory> activitiesPage;
 
-        // ORDER OF PRIORITY (you can modify)
         if (userId != null) {
             activitiesPage = activityStoryRepository.findByUserId(userId, pageable);
         }
@@ -77,7 +76,6 @@ public class ActivityStoryController {
         model.addAttribute("direction", direction);
         model.addAttribute("pageSize", size);
 
-        // return selected filters back to UI
         model.addAttribute("filterUserId", userId);
         model.addAttribute("filterRole", role);
         model.addAttribute("filterService", service);
@@ -85,37 +83,10 @@ public class ActivityStoryController {
         model.addAttribute("filterStartDate", startDate);
         model.addAttribute("filterEndDate", endDate);
 
-        return "activities/list";
-    }
-
-
-    @GetMapping("/user")
-    public String getActivitiesByUser(
-            @RequestParam Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            Model model) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<ActivityStory> activitiesPage = activityStoryRepository.findAll(pageable);
-        // Если нужно фильтровать по userId, потребуется дополнительный метод в репозитории
-
-        model.addAttribute("activities", activitiesPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", activitiesPage.getTotalPages());
-        model.addAttribute("totalItems", activitiesPage.getTotalElements());
-        model.addAttribute("filterUserId", userId);
+        List<UserActivityRating> topUsers = activityRatingService.getTopUsers(3);
+        model.addAttribute("topUsers", topUsers);
 
         return "activities/list";
     }
 
-    // Получение последних активностей (для дашборда)
-    @GetMapping("/recent")
-    public String getRecentActivities(Model model) {
-        Pageable pageable = PageRequest.of(0, 5, Sort.by("createdAt").descending());
-        List<ActivityStory> recentActivities = activityStoryRepository.findAll(pageable).getContent();
-
-        model.addAttribute("recentActivities", recentActivities);
-        return "activities/recent"; // или другой шаблон для дашборда
-    }
 }
