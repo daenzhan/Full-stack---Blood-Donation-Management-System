@@ -84,6 +84,16 @@
             color: white;
         }
 
+        .btn-info {
+            background: #98e6d8;
+            border: 1px solid #98e6d8;
+        }
+
+        .btn-info:hover {
+            background: #bef8eb;
+            border-color: #bef8eb;
+        }
+
         .badge {
             font-size: 0.75rem;
             font-weight: 500;
@@ -282,25 +292,25 @@
             </a>
         </li>
         <li>
-            <a th:href="@{'/requests'}">
+            <a th:href="@{'/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
                 <i class="fas fa-tint"></i>
                 All Blood Requests
             </a>
         </li>
         <li>
-            <a th:href="@{'/requests/medcenter/' + ${medCenter.med_center_id}}">
+            <a th:href="@{'/requests/medcenter/' + ${medCenter.med_center_id} + '?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
                 <i class="fas fa-list-alt"></i>
                 My Requests
             </a>
         </li>
         <li>
-            <a th:href="@{'/requests/new'}">
+            <a th:href="@{'/requests/new?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
                 <i class="fas fa-plus-circle"></i>
                 New Request
             </a>
         </li>
         <li>
-            <a th:href="@{'/medcenters/map'}">
+            <a th:href="@{'/medcenters/map?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
                 <i class="fas fa-map-marker-alt"></i>
                 Centers Map
             </a>
@@ -320,11 +330,13 @@
                 <button class="menu-toggle me-2" onclick="openSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
+                <!-- В навигационной панели: -->
                 <a th:href="@{'http://localhost:8080/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
                    class="btn btn-outline-primary btn-sm me-2">
                     <i class="fas fa-home me-1"></i> Home
                 </a>
-                <a th:href="@{'/requests'}"
+
+                <a th:href="@{'/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
                    class="btn btn-outline-secondary btn-sm">
                     <i class="fas fa-arrow-left me-1"></i> All Requests
                 </a>
@@ -344,6 +356,15 @@
                 </p>
             </div>
             <div class="col-md-4 text-end">
+                <a th:href="@{'/templates?medcenterId=' + ${medcenter_id} +
+             '&token=' + ${token} +
+             '&userId=' + ${userId} +
+             '&role=' + ${role} +
+             '&email=' + ${email}}"
+                   class="btn btn-info btn-lg me-3">
+                    <i class="fas fa-clone me-2"></i>Templates
+                </a>
+
                 <span class="badge bg-white text-danger fw-bold p-2">
                     <i class="fas fa-list-ol me-1"></i>
                     <span th:text="${requests.size()}"></span> requests
@@ -563,7 +584,7 @@
                                         Ready to create your first request?
                                     </h6>
                                     <p class="mb-3 text-muted">Start by creating a new blood request to get matched with potential donors.</p>
-                                    <a th:href="@{/requests/new}" class="btn btn-primary">
+                                    <a th:href="@{'/requests/new?medcenterId=' + ${medcenter_id}}" class="btn btn-primary">
                                         <i class="fas fa-plus me-1"></i>Create New Request
                                     </a>
                                 </div>
@@ -617,10 +638,41 @@
 
     <!-- Action Buttons -->
     <div class="text-center mt-4 mb-5">
-        <a th:href="@{/requests}" class="btn btn-outline-primary btn-lg me-3">
+<!--        <a th:href="@{'/requests'}" class="btn btn-outline-primary btn-lg me-3">-->
+<!--            <i class="fas fa-arrow-left me-2"></i>Back to All Requests-->
+<!--        </a>-->
+<!--     -->
+<!--        <a th:href="@{'/templates?medcenterId=' + ${medcenter_id} +-->
+<!--             '&token=' + ${token != null ? token : ''} +-->
+<!--             '&userId=' + ${userId != null ? userId : ''} +-->
+<!--             '&role=' + ${role != null ? role : ''} +-->
+<!--             '&email=' + ${email != null ? email : ''}}"-->
+<!--           class="btn btn-info btn-lg me-3">-->
+<!--            <i class="fas fa-clone me-2"></i>Templates-->
+<!--        </a>-->
+
+<!--        <a th:href="@{'/requests/new?medcenterId=' + ${medcenter_id}}" class="btn btn-primary btn-lg">-->
+<!--            <i class="fas fa-plus me-2"></i>Create New Request-->
+<!--        </a>-->
+
+        <a th:href="@{'/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+           class="btn btn-outline-primary btn-lg me-3">
             <i class="fas fa-arrow-left me-2"></i>Back to All Requests
         </a>
-        <a th:href="@{/requests/new}" class="btn btn-primary btn-lg">
+<!--        <a th:href="@{'/templates?medcenterId=' + ${medcenter_id} +-->
+<!--             '&token=' + ${token} +-->
+<!--             '&userId=' + ${userId} +-->
+<!--             '&role=' + ${role} +-->
+<!--             '&email=' + ${email}}"-->
+<!--           class="btn btn-info btn-lg me-3">-->
+<!--            <i class="fas fa-clone me-2"></i>Templates-->
+<!--        </a>-->
+        <a th:href="@{'/requests/new?medcenterId=' + ${medcenter_id} +
+             '&token=' + ${token} +
+             '&userId=' + ${userId} +
+             '&role=' + ${role} +
+             '&email=' + ${email}}"
+           class="btn btn-primary btn-lg">
             <i class="fas fa-plus me-2"></i>Create New Request
         </a>
     </div>

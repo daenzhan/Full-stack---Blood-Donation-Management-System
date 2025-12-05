@@ -159,12 +159,20 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-white bg-white">
   <div class="container">
-    <a class="navbar-brand fw-bold text-danger" href="/">
+    <a class="navbar-brand fw-bold text-danger" th:href="@{'/requests?token=' + ${token} + '&user_id=' + ${user_id} + '&role=' + ${role} + '&email=' + ${email}}">
       <i class="fas fa-heartbeat me-2"></i>
       BloodConnect
     </a>
   </div>
 </nav>
+<!--<nav class="navbar navbar-expand-lg navbar-white bg-white">-->
+<!--  <div class="container">-->
+<!--    <a class="navbar-brand fw-bold text-danger" href="/">-->
+<!--      <i class="fas fa-heartbeat me-2"></i>-->
+<!--      BloodConnect-->
+<!--    </a>-->
+<!--  </div>-->
+<!--</nav>-->
 
 <div class="container mt-4">
   <!-- Toast уведомления -->
@@ -200,7 +208,13 @@
           <p class="text-muted mb-0 mt-1 small">Manage and track blood donation requests</p>
         </div>
 
-        <a th:if="${role != 'DONOR'}" th:href="@{/requests/new}" class="btn btn-primary">
+<!--        <a th:if="${role != 'DONOR'}" th:href="@{/requests/new}" class="btn btn-primary">-->
+<!--          <i class="fas fa-plus me-1"></i>Create Request-->
+<!--        </a>-->
+        <!-- Кнопка Create Request: -->
+        <a th:if="${role != 'DONOR'}"
+           th:href="@{'/requests/new?token=' + ${token} + '&user_id=' + ${user_id} + '&role=' + ${role} + '&email=' + ${email}}"
+           class="btn btn-primary">
           <i class="fas fa-plus me-1"></i>Create Request
         </a>
       </div>
@@ -231,11 +245,19 @@
             <h6 class="fw-bold mb-3 text-dark">
               <i class="fas fa-filter me-2 text-danger"></i>Filter Requests
             </h6>
+            <!-- В фильтрах добавьте скрытые поля: -->
             <form th:action="@{/requests}" method="get" class="row g-3">
-              <input type="hidden" name="sort" th:value="${sort}">
+              <input type="hidden" name="token" th:value="${token}">
               <input type="hidden" name="user_id" th:value="${user_id}">
               <input type="hidden" name="role" th:value="${role}">
               <input type="hidden" name="email" th:value="${email}">
+<!--              &lt;!&ndash; остальные поля &ndash;&gt;-->
+<!--            -->
+<!--            <form th:action="@{/requests}" method="get" class="row g-3">-->
+<!--              <input type="hidden" name="sort" th:value="${sort}">-->
+<!--              <input type="hidden" name="user_id" th:value="${user_id}">-->
+<!--              <input type="hidden" name="role" th:value="${role}">-->
+<!--              <input type="hidden" name="email" th:value="${email}">-->
 
               <div class="col-md-3">
                 <label class="form-label small fw-medium">Blood Group</label>
@@ -355,18 +377,42 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <a th:href="@{'/requests/' + ${req.blood_request_id}(user_id=${user_id}, role=${role}, email=${email})}"
+
+
+                  <!-- Ссылки в таблице: -->
+                  <a th:href="@{'/requests/' + ${req.blood_request_id} +
+             '?token=' + ${token} +
+             '&user_id=' + ${user_id} +
+             '&role=' + ${role} +
+             '&email=' + ${email}}"
                      class="btn btn-sm btn-outline-primary"
                      data-bs-toggle="tooltip" title="View Details">
                     <i class="fas fa-eye"></i>
                   </a>
 
                   <a th:if="${role != 'DONOR'}"
-                     th:href="@{'/requests/' + ${req.blood_request_id} + '/edit'(user_id=${user_id}, role=${role}, email=${email})}"
+                     th:href="@{'/requests/' + ${req.blood_request_id} + '/edit' +
+             '?token=' + ${token} +
+             '&user_id=' + ${user_id} +
+             '&role=' + ${role} +
+             '&email=' + ${email}}"
                      class="btn btn-sm btn-outline-primary"
                      data-bs-toggle="tooltip" title="Edit Request">
                     <i class="fas fa-edit"></i>
                   </a>
+
+<!--                  <a th:href="@{'/requests/' + ${req.blood_request_id}(user_id=${user_id}, role=${role}, email=${email})}"-->
+<!--                     class="btn btn-sm btn-outline-primary"-->
+<!--                     data-bs-toggle="tooltip" title="View Details">-->
+<!--                    <i class="fas fa-eye"></i>-->
+<!--                  </a>-->
+
+<!--                  <a th:if="${role != 'DONOR'}"-->
+<!--                     th:href="@{'/requests/' + ${req.blood_request_id} + '/edit'(user_id=${user_id}, role=${role}, email=${email})}"-->
+<!--                     class="btn btn-sm btn-outline-primary"-->
+<!--                     data-bs-toggle="tooltip" title="Edit Request">-->
+<!--                    <i class="fas fa-edit"></i>-->
+<!--                  </a>-->
 
                   <form th:if="${role != 'DONOR'}"
                         th:action="@{'/requests/' + ${req.blood_request_id} + '/delete'}"
