@@ -1,10 +1,12 @@
 package org.example.bloodrequestservice;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class BloodRequestService {
 
@@ -132,17 +134,55 @@ public class BloodRequestService {
     }
 
     // Вспомогательный метод для получения имени медцентра
+//    public String getMedCenterName(Long medcenterId) {
+//        if (medcenterId == null) {
+//            return "Unknown";
+//        }
+//
+//        try {
+//            MedCenterDto medCenter = medCenterFeignClient.get_medcenter_by_id(medcenterId);
+//
+//            if (medCenter == null || medCenter.getName() == null) {
+//                log.warn("Medical center {} not found or has no name", medcenterId);
+//                return "Medical Center " + medcenterId;
+//            }
+//
+//            return medCenter.getName();
+//
+//        } catch (Exception e) {
+//            log.warn("Error fetching medcenter name for ID {}: {}", medcenterId, e.getMessage());
+//            return "Medical Center " + medcenterId;
+//        }
+//    }
+
     public String getMedCenterName(Long medcenterId) {
         if (medcenterId == null) {
-            return "Unknown";
+            log.warn("Medical center ID is null");
+            return "Unknown Medical Center";
         }
 
         try {
+            log.debug("Fetching medical center name for ID: {}", medcenterId);
             MedCenterDto medCenter = medCenterFeignClient.get_medcenter_by_id(medcenterId);
-            return medCenter != null ? medCenter.getName() : "Unknown";
+
+            if (medCenter == null) {
+                log.warn("Medical center {} not found - returned null", medcenterId);
+                return "Medical Center " + medcenterId;
+            }
+
+            String name = medCenter.getName();
+            if (name == null || name.trim().isEmpty()) {
+                log.warn("Medical center {} has no name", medcenterId);
+                return "Medical Center " + medcenterId;
+            }
+
+            log.debug("Medical center name found: {}", name);
+            return name;
+
         } catch (Exception e) {
-            System.err.println("Error fetching medcenter name: " + e.getMessage());
-            return "Unknown (ID: " + medcenterId + ")";
+            log.error("Error fetching medcenter name for ID {}: {}", medcenterId, e.getMessage());
+            log.debug("Exception details: ", e);
+            return "Medical Center " + medcenterId;
         }
     }
 
