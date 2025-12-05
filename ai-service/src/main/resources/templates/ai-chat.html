@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Assistant - Blood Donation</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #dc3545;
+      --primary-light: #ffeaea;
+      --secondary-color: #6c757d;
+      --light-bg: #f8f9fa;
+      --dark-text: #212529;
+    }
+
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .chat-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, var(--primary-color), #c82333);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .chat-header h2 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .chat-header .badge {
+      background: rgba(255,255,255,0.2);
+      font-weight: 400;
+    }
+
+    .chat-body {
+      height: 500px;
+      overflow-y: auto;
+      padding: 1.5rem;
+      background: var(--light-bg);
+    }
+
+    .message {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-message {
+      justify-content: flex-end;
+    }
+
+    .assistant-message {
+      justify-content: flex-start;
+    }
+
+    .message-content {
+      max-width: 70%;
+      padding: 0.75rem 1rem;
+      border-radius: 15px;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    .user-message .message-content {
+      background: var(--primary-color);
+      color: white;
+      border-bottom-right-radius: 5px;
+    }
+
+    .assistant-message .message-content {
+      background: white;
+      color: var(--dark-text);
+      border: 1px solid #dee2e6;
+      border-bottom-left-radius: 5px;
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .user-avatar {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .assistant-avatar {
+      background: #6c757d;
+      color: white;
+    }
+
+    .chat-footer {
+      padding: 1rem;
+      border-top: 1px solid #dee2e6;
+      background: white;
+    }
+
+    .typing-indicator {
+      display: none;
+      padding: 0.5rem 1rem;
+      color: var(--secondary-color);
+      font-style: italic;
+    }
+
+    .typing-indicator.active {
+      display: block;
+    }
+
+    .typing-dots {
+      display: inline-block;
+    }
+
+    .typing-dots span {
+      animation: typing 1.4s infinite;
+      display: inline-block;
+      opacity: 0.6;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .suggestion-btn {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      color: var(--secondary-color);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .suggestion-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .chat-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      color: var(--secondary-color);
+    }
+
+    .loading.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="chat-header">
+    <h2><i class="fas fa-robot me-2"></i>AI Assistant</h2>
+    <p class="mb-0 mt-2">Вопросы о донорстве крови</p>
+  </div>
+
+  <div class="chat-body" id="chatBody">
+    <div class="welcome-message">
+      <div class="message assistant-message">
+        <div class="message-avatar assistant-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="message-content">
+          <strong>Привет! Я Айдана! Ваш AI-ассистент по вопросам донорства крови.</strong><br><br>
+          Я могу помочь вам с информацией о:
+          <ul>
+            <li>Требованиях к донорам</li>
+            <li>Подготовке к донации</li>
+            <li>Процессе сдачи крови</li>
+            <li>Восстановлении после донации</li>
+            <li>И многом другом!</li>
+          </ul>
+          <div class="suggestions mt-3">
+            <button class="suggestion-btn" onclick="sendSuggestion('Какие требования к донорам?')">
+              Какие требования к донорам?
+            </button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Как подготовиться к сдаче крови?')">
+              Как подготовиться?
+            </button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Сколько раз можно сдавать кровь?')">
+              Частота сдачи
+            </button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Что нельзя делать после донации?')">
+              После донации
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="typing-indicator" id="typingIndicator">
+    <i class="fas fa-robot me-2"></i>AI Assistant печатает<span class="typing-dots">
+                <span>.</span><span>.</span><span>.</span>
+            </span>
+  </div>
+
+  <div class="chat-footer">
+    <div class="input-group">
+      <input type="text"
+             class="form-control"
+             id="messageInput"
+             placeholder="Введите ваш вопрос о донорстве..."
+             onkeypress="handleKeyPress(event)">
+      <button class="btn" style="background-color: var(--primary-color); color: white; border-color: var(--primary-color);" onclick="sendMessage()">
+        <i class="fas fa-paper-plane"></i> Отправить
+      </button>
+    </div>
+
+    <div class="chat-controls">
+      <button class="btn btn-outline-secondary btn-sm" onclick="clearChat()">
+        <i class="fas fa-trash-alt me-1"></i> Очистить чат
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const userId = /*[[${userId}]]*/ 'default';
+  const donorId = /*[[${donorId}]]*/ null;
+  const email = /*[[${email}]]*/ 'user@example.com';
+  const role = /*[[${role}]]*/ 'DONOR';
+  const token = /*[[${token}]]*/ '';
+
+  let sessionId = localStorage.getItem('chatSessionId');
+  if (!sessionId) {
+    sessionId = generateSessionId();
+    localStorage.setItem('chatSessionId', sessionId);
+  }
+
+  const API_BASE_URL = 'http://localhost:8087/api/chat';
+  /*]]>*/
+
+  function generateSessionId() {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    input.value = '';
+
+    addMessage(message, 'user');
+
+    showTypingIndicator();
+
+    const requestData = {
+      message: message,
+      userId: userId,
+      donorId: donorId,
+      email: email,
+      role: role,
+      token: token,
+      sessionId: sessionId
+    };
+
+    fetch(API_BASE_URL + '/message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData)
+    })
+            .then(response => response.json())
+            .then(data => {
+              hideTypingIndicator();
+              addMessage(data.message, 'assistant');
+              saveChatToHistory();
+            })
+            .catch(error => {
+              hideTypingIndicator();
+              console.error('Error:', error);
+              addMessage('Извините, произошла ошибка. Пожалуйста, попробуйте еще раз.', 'assistant');
+            });
+  }
+
+  function sendSuggestion(text) {
+    document.getElementById('messageInput').value = text;
+    sendMessage();
+  }
+
+  function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+      sendMessage();
+    }
+  }
+
+  function addMessage(text, sender) {
+    const chatBody = document.getElementById('chatBody');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+
+    const avatarIcon = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
+    const avatarClass = sender === 'user' ? 'user-avatar' : 'assistant-avatar';
+
+    messageDiv.innerHTML = `
+                <div class="message-avatar ${avatarClass}">
+                    <i class="${avatarIcon}"></i>
+                </div>
+                <div class="message-content">
+                    ${text.replace(/\n/g, '<br>')}
+                </div>
+            `;
+
+    chatBody.appendChild(messageDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function showTypingIndicator() {
+    document.getElementById('typingIndicator').classList.add('active');
+    const chatBody = document.getElementById('chatBody');
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function hideTypingIndicator() {
+    document.getElementById('typingIndicator').classList.remove('active');
+  }
+
+  function clearChat() {
+    if (confirm('Вы уверены, что хотите очистить историю чата?')) {
+      const chatBody = document.getElementById('chatBody');
+      const welcomeMessage = chatBody.querySelector('.welcome-message');
+
+
+      while (chatBody.children.length > 1) {
+        chatBody.removeChild(chatBody.lastChild);
+      }
+
+      fetch(`${API_BASE_URL}/history?userId=${userId}&sessionId=${sessionId}`, {
+        method: 'DELETE'
+      });
+
+      localStorage.removeItem('chatHistory_' + sessionId);
+
+      sessionId = generateSessionId();
+      localStorage.setItem('chatSessionId', sessionId);
+    }
+  }
+
+  function saveChatToHistory() {
+    const chatBody = document.getElementById('chatBody');
+    const messages = chatBody.querySelectorAll('.message');
+    const history = [];
+
+    messages.forEach(msg => {
+      const sender = msg.classList.contains('user-message') ? 'user' : 'assistant';
+      const content = msg.querySelector('.message-content').textContent;
+      history.push({ sender, content });
+    });
+
+    localStorage.setItem('chatHistory_' + sessionId, JSON.stringify(history));
+  }
+
+  function loadChatHistory() {
+    const history = localStorage.getItem('chatHistory_' + sessionId);
+    if (history) {
+      const messages = JSON.parse(history);
+      messages.forEach(msg => {
+        if (!msg.content.includes('Привет! Я ваша ИИ-помощница Айдана!')) {
+          addMessage(msg.content, msg.sender);
+        }
+      });
+    }
+  }
+
+  window.onload = function() {
+    loadChatHistory();
+    document.getElementById('messageInput').focus();
+  };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

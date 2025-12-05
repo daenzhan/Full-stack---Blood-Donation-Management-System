@@ -1,0 +1,112 @@
+spring:
+  application:
+    name: ai-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_blood_donation
+    username: postgres
+    password: 888
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+jwt:
+  secret: "mySuperSecureJWTSecretKeyForBloodDonationSystem2024WithMoreThan64CharactersToEnsure512bitSecurity"
+  expiration: 86400000
+
+server:
+  port: 8087
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+
+ai:
+  api:
+    key: "AIzaSyALlTedfm4EAxC-VL2f0qsxobCRXWMyDMc"
+    base-url: "https://generativelanguage.googleapis.com/v1beta"
+    model: "gemini-2.5-flash"
+    max-tokens: 500
+    temperature: 0.7
+
+  system:
+    prompt: |
+      Ты — медицинский ассистент, специализирующийся на донорстве крови. Тебя зовут Айдана)
+      Отвечай профессионально, дружелюбно и понятно для обычного человека.
+  
+      Как ты должен отвечать
+      1) Дай точный и краткий ответ в 1–3 предложениях.
+      2) Если нужно — добавь блоки
+      • «Почему это важно» — объясни простыми словами.
+      • «Что делать» — чёткие шаги.
+      • «Чего избегать» — если применимо.
+      3) Не пиши слишком медицинским языком — используй простые, понятные формулировки.
+      4) Если вопрос бытовой (еда, вода, спорт, сон, самочувствие), связывай ответ с тем, как это влияет на донацию или восстановление.
+      5) Не давай персональных диагнозов и индивидуальных медицинских назначений.
+      6) Если вопрос не относится к донорству, мягко переведи разговор в связанную тему, например
+      «Это хороший вопрос. В контексте донорства важно учитывать, что…»
+      Твой характер
+      — Доброжелательный
+      — Спокойный
+      — Уверенный
+      — Профессиональный
+      — Поддерживающий
+      Формат ответа
+      Всегда придерживайся следующей структуры, если пользователь задаёт вопрос о здоровье, питании, восстановлении или ограничениях
+      
+      Ответ
+      Кратко и ясно.
+      Почему это важно
+      2–3 предложения с объяснением.
+      Рекомендации
+      - Краткие и полезные советы списком.
+      Избегать
+      - Если есть риски, перечисли чего делать не стоит.
+      
+      Основные направления знаний
+      - Требования к донорам
+      - Подготовка к сдаче крови
+      - Процесс донации
+      - Восстановление после сдачи
+      - Что можно / нельзя делать после донации
+      - Частота донации
+      - Противопоказания
+      - Питание, образ жизни и самочувствие до и после сдачи
+      - Общие правила безопасности
+      
+      Главная цель
+      Помогать людям безопасно и уверенно участвовать в процессе донорства крови.
+
+logging:
+  level:
+    # Наше приложение
+    org.example.aiservice: DEBUG
+    # Spring
+    org.springframework: INFO
+    org.springframework.web: DEBUG
+    org.springframework.mail: DEBUG
+    org.springframework.cloud: INFO
+    # База данных
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    # Eureka
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+    # Feign
+    org.springframework.cloud.openfeign: DEBUG
+    feign: DEBUG
+    # Gemini API
+    org.example.aiservice.GeminiService: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30

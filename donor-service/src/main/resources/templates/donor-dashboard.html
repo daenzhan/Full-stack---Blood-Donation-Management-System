@@ -822,6 +822,53 @@
             box-shadow: 0 4px 15px rgba(30, 136, 229, 0.4);
         }
 
+        .bg-ai-red {
+            background: linear-gradient(135deg, #ff4757, #ff6b81) !important;
+        }
+
+        .btn-ai-red {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            border: none;
+        }
+
+        .btn-ai-red:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+        }
+
+        .ai-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+        }
+
+        .action-card .ai-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .action-card:hover .ai-icon {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+        }
+
 
     </style>
 </head>
@@ -1290,6 +1337,23 @@
                             <a th:href="@{'/medcenters/favorites?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
                                class="btn btn-calm-blue btn-sm">
                                 <i class="fas fa-star me-1"></i> View Favorites
+                            </a>
+                        </div>
+
+                        <!-- AI Assistant Card -->
+                        <div class="action-card">
+                            <div>
+                                <div class="ai-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">AI Assistant</h6>
+                                <p class="text-muted small mb-3">
+                                    Get instant answers to your questions about blood donation
+                                </p>
+                            </div>
+                            <a th:href="@{'/chat?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email} + '&donorId=' + ${donor_id}}"
+                               class="btn btn-ai-red btn-sm">
+                                <i class="fas fa-comments me-1"></i> Chat Now
                             </a>
                         </div>
 
