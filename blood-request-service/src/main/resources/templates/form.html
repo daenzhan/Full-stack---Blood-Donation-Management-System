@@ -167,6 +167,20 @@
     .bg-danger {
       background-color: var(--primary-red) !important;
     }
+
+    /* Стили для блока шаблонов */
+    .template-preview {
+      border: 2px dashed #0dcaf0;
+      border-radius: 10px;
+      padding: 15px;
+      background-color: #f8fdff;
+      margin-bottom: 20px;
+    }
+
+    .template-badge {
+      background: linear-gradient(135deg, #0dcaf0, #20c997);
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -202,6 +216,47 @@
     <div class="col-lg-8">
       <div class="card floating-form">
         <div class="card-body p-4">
+
+          <!-- НОВЫЙ БЛОК: Быстрое создание из шаблона -->
+          <div th:if="${bloodRequest.blood_request_id == null and bloodRequest.medcenter_id != null}"
+               class="template-preview mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0 fw-bold text-info">
+                <i class="fas fa-clone me-2"></i>Quick Create from Template
+              </h6>
+              <span class="badge template-badge">
+                <i class="fas fa-bolt me-1"></i>Time Saver
+              </span>
+            </div>
+            <p class="text-muted small mb-3">
+              Use a template to quickly fill this form with pre-defined values.
+            </p>
+            <div class="d-flex gap-2 flex-wrap">
+              <a th:href="@{'/templates?medcenterId=' + ${bloodRequest.medcenter_id}}"
+                 class="btn btn-outline-info btn-sm">
+                <i class="fas fa-clone me-1"></i>Browse Templates
+              </a>
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      data-bs-toggle="collapse" data-bs-target="#recentTemplates">
+                <i class="fas fa-history me-1"></i>Recent Templates
+              </button>
+            </div>
+
+            <!-- Свернутый список последних шаблонов -->
+            <div class="collapse mt-3" id="recentTemplates">
+              <div class="card card-body border-0 bg-light">
+                <p class="text-muted small mb-2">
+                  <i class="fas fa-info-circle me-1"></i>
+                  To use templates, first create some in the Templates section.
+                </p>
+                <a th:href="@{'/templates/new?medcenterId=' + ${bloodRequest.medcenter_id}}"
+                   class="btn btn-sm btn-info">
+                  <i class="fas fa-plus me-1"></i>Create Your First Template
+                </a>
+              </div>
+            </div>
+          </div>
+
           <form th:action="@{/requests/save}" th:object="${bloodRequest}" method="post">
             <input type="hidden" th:field="*{blood_request_id}" />
 
@@ -310,6 +365,19 @@
           <h6 class="text-dark mb-2">Together We Save Lives</h6>
           <p class="text-muted small mb-0">
             Every request you create brings us one step closer to saving more lives in our community.
+            <span class="d-block mt-2 text-info">
+              <i class="fas fa-lightbulb me-1"></i>
+              <strong>Tip:</strong> Use templates for frequently requested blood types to save time!
+            </span>
+            <a th:href="@{'/templates?medcenterId=' + ${medcenter_id} +
+                         '&token=' + ${token} +
+                         '&userId=' + ${userId} +
+                         '&role=' + ${role} +
+                         '&email=' + ${email}}"
+               class="btn btn-info btn-lg me-3">
+              <i class="fas fa-clone me-2"></i>Templates
+            </a>
+
           </p>
         </div>
       </div>
