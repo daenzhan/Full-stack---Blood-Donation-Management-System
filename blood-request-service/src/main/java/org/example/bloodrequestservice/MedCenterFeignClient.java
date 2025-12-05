@@ -11,7 +11,7 @@ import java.util.List;
 public interface MedCenterFeignClient {
 
     @GetMapping("/medcenters/client/{medcenter_id}")
-    MedCenterDto get_medcenter_by_id(@PathVariable Long medcenter_id);
+    MedCenterDto get_medcenter_by_id(@PathVariable("medcenter_id") Long medcenter_id);
 
     @GetMapping("/medcenters/client/search")
     List<MedCenterDto> search_by_name(@RequestParam String name);
