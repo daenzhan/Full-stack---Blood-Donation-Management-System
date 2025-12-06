@@ -15,7 +15,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/db_blood_donation
     username: postgres
-    password: 888
+    password: Qt4076042
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -48,6 +48,11 @@ feign:
 
 server:
   port: 8084
+  tomcat:
+    connection-timeout: 30s
+    keep-alive-timeout: 30s
+    max-keep-alive-requests: 100
+
 
 eureka:
   client:

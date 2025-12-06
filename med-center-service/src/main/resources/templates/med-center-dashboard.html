@@ -313,7 +313,7 @@
                 <button class="menu-toggle me-2" onclick="openSidebar()">
                     <i class="fas fa-bars"></i>
                 </button>
-                <a th:href="@{'http://localhost:8080/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                <a th:href="@{'/home?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
                    class="btn btn-outline-primary btn-sm me-2">
                     <i class="fas fa-home me-1"></i> Home
                 </a>
@@ -387,7 +387,23 @@
             </a>
         </div>
 
-        <!-- НОВАЯ КАРТОЧКА: Donation History -->
+        <div class="col-md-3 mb-3 action-card-wrapper">
+            <a th:href="@{'/appointments/medcenter?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+               class="text-decoration-none">
+                <div class="action-card blue">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-calendar-check fa-2x"></i>
+                    </div>
+                    <h6 class="text-dark fw-bold">Appointments</h6>
+                    <p class="text-muted small mb-0">View and manage appointments</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- НОВАЯ КАРТОЧКА: Donation History -->
         <div class="col-md-3 mb-3">
             <a th:href="@{'/donation-history/medcenter/' + ${medCenter.med_center_id}}" class="text-decoration-none">
                 <div class="action-card">
@@ -418,6 +434,72 @@
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
+
+    function loadTodayAppointments() {
+        const loadingEl = document.getElementById('appointmentsLoading');
+        const containerEl = document.getElementById('appointmentsContainer');
+        const noAppointmentsEl = document.getElementById('noAppointments');
+        const countEl = document.getElementById('appointmentsCount');
+        const listEl = document.getElementById('appointmentsList');
+
+        // Используем старый путь для API
+        fetch(`/appointments/medcenter/today?userId=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingEl.classList.add('d-none');
+
+                if (data.success && data.appointments.length > 0) {
+                    containerEl.classList.remove('d-none');
+                    countEl.textContent = data.appointments.length;
+
+                    let html = '';
+                    data.appointments.forEach(appointment => {
+                        html += `
+                            <div class="appointment-item mb-2 p-2 border rounded">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>${appointment.donorName}</strong>
+                                        <span class="badge bg-danger ms-2">${appointment.donorBloodType}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted">${appointment.appointmentTime}</span>
+                                        <span class="badge ${getStatusBadgeClass(appointment.status)} ms-2">
+                                            ${appointment.status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    listEl.innerHTML = html;
+                    document.getElementById('shownAppointments').textContent = data.appointments.length;
+                } else {
+                    noAppointmentsEl.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading appointments:', error);
+                loadingEl.classList.add('d-none');
+                noAppointmentsEl.classList.remove('d-none');
+            });
+    }
+
+    function getStatusBadgeClass(status) {
+        switch(status) {
+            case 'SCHEDULED': return 'bg-primary';
+            case 'CONFIRMED': return 'bg-success';
+            case 'COMPLETED': return 'bg-secondary';
+            case 'CANCELLED': return 'bg-danger';
+            default: return 'bg-warning';
+        }
+    }
+
+    // Загружаем записи при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTodayAppointments();
+    });
+
 </script>
 </body>
 </html>

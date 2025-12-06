@@ -22,6 +22,7 @@ public class Donor {
     private String address;
     private String gender;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private String email;
 
     public Long getId() {
         return id;
@@ -94,4 +95,8 @@ public class Donor {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getEmail() {return email;}
+
+    public void setEmail(String email) {this.email = email;}
 }

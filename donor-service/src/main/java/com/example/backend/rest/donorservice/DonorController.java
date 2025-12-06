@@ -1,5 +1,6 @@
 package com.example.backend.rest.donorservice;
 import com.example.backend.rest.donorservice.activities_story.ActivityStoryService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -30,6 +32,7 @@ public class DonorController {
     private final GamificationService gamificationService;
     private final DonorAchievementRepository donorAchievementRepository;
     private final DonorStatsRepository donorStatsRepository;
+    private final MedCenterFeignClient  appointmentFeignClient;
     @Autowired
     private ActivityStoryService activityStoryService;
 
@@ -40,22 +43,111 @@ public class DonorController {
                                 @RequestParam String email,
                                 Model model) {
         try {
-            Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
-            if (donorOpt.isEmpty()) {return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
-            }
-            Donor donor = donorOpt.get();
-            gamificationService.initializeDonorStats(donor.getUserId());
-            List<BloodRequestDto> matchingRequests = donorBloodRequestService.getMatchingBloodRequests(donor.getBloodType());
-            Map<String, Object> donationInfo = donorBloodRequestService.getNextDonationInfo(donor.getUserId());
-            List<DonationHistoryDto> donationHistory = getDonationHistoryForDonor(donor.getUserId());
-            Map<String, Object> donorProgress = gamificationService.getDonorProgress(donor.getUserId());
+            log.info("Dashboard request for user: {}", userId);
 
-            activityStoryService.record_activity(
-                    userId,
-                    "DONOR",
-                    "DASHBOARD_VIEWED",
-                    "User viewed donor dashboard"
-            );
+            Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
+            if (donorOpt.isEmpty()) {
+                log.warn("Donor not found for user: {}", userId);
+                // Вместо редиректа показываем форму прямо здесь
+                model.addAttribute("error", "Профиль не найден. Пожалуйста, заполните информацию.");
+                model.addAttribute("token", token);
+                model.addAttribute("userId", userId);
+                model.addAttribute("role", role);
+                model.addAttribute("email", email);
+                model.addAttribute("minDate", LocalDate.now().minusYears(65));
+                model.addAttribute("maxDate", LocalDate.now().minusYears(18));
+                return "donor-complete-profile"; // Прямой возврат формы
+            }
+
+            Donor donor = donorOpt.get();
+            log.info("Donor found: {}", donor.getFullName());
+
+            // Инициализация статистики с обработкой ошибок
+            try {
+                gamificationService.initializeDonorStats(donor.getUserId());
+            } catch (Exception e) {
+                log.warn("Failed to initialize stats: {}", e.getMessage());
+            }
+
+            // Получение данных с защитой от ошибок
+            List<BloodRequestDto> matchingRequests = new ArrayList<>();
+            try {
+                matchingRequests = donorBloodRequestService.getMatchingBloodRequests(donor.getBloodType());
+            } catch (Exception e) {
+                log.warn("Failed to get matching requests: {}", e.getMessage());
+            }
+
+            Map<String, Object> donationInfo = new HashMap<>();
+            try {
+                donationInfo = donorBloodRequestService.getNextDonationInfo(donor.getUserId());
+            } catch (Exception e) {
+                log.warn("Failed to get donation info: {}", e.getMessage());
+            }
+
+            List<DonationHistoryDto> donationHistory = new ArrayList<>();
+            try {
+                donationHistory = getDonationHistoryForDonor(donor.getUserId());
+            } catch (Exception e) {
+                log.warn("Failed to get donation history: {}", e.getMessage());
+            }
+
+            Map<String, Object> donorProgress = new HashMap<>();
+            try {
+                donorProgress = gamificationService.getDonorProgress(donor.getUserId());
+            } catch (Exception e) {
+                log.warn("Failed to get donor progress: {}", e.getMessage());
+            }
+
+            // Получение назначений
+            boolean hasUpcomingAppointments = false;
+            int upcomingAppointmentsCount = 0;
+
+            try {
+                ResponseEntity<List<Map<String, Object>>> appointmentsResponse =
+                        appointmentFeignClient.getDonorAppointments(donor.getUserId());
+
+                if (appointmentsResponse != null &&
+                        appointmentsResponse.getStatusCode().is2xxSuccessful() &&
+                        appointmentsResponse.getBody() != null) {
+
+                    List<Map<String, Object>> appointments = appointmentsResponse.getBody();
+                    LocalDate today = LocalDate.now();
+
+                    for (Map<String, Object> appointment : appointments) {
+                        try {
+                            if (appointment.get("appointmentDate") == null || appointment.get("status") == null) {
+                                continue;
+                            }
+
+                            LocalDate appDate = LocalDate.parse(appointment.get("appointmentDate").toString());
+                            String status = appointment.get("status").toString();
+
+                            if ((appDate.isAfter(today) || appDate.equals(today)) &&
+                                    !status.equals("CANCELLED") &&
+                                    !status.equals("COMPLETED")) {
+                                upcomingAppointmentsCount++;
+                            }
+                        } catch (Exception e) {
+                            log.warn("Error processing appointment: {}", e.getMessage());
+                        }
+                    }
+
+                    hasUpcomingAppointments = upcomingAppointmentsCount > 0;
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get appointments: {}", e.getMessage());
+            }
+
+            try {
+                activityStoryService.record_activity(
+                        userId,
+                        "DONOR",
+                        "DASHBOARD_VIEWED",
+                        "User viewed donor dashboard"
+                );
+            } catch (Exception e) {
+                log.warn("Failed to record activity: {}", e.getMessage());
+            }
 
             model.addAttribute("donor", donor);
             model.addAttribute("matchingRequests", matchingRequests);
@@ -67,9 +159,21 @@ public class DonorController {
             model.addAttribute("role", role);
             model.addAttribute("email", email);
             model.addAttribute("donor_id", donor.getUserId());
+            model.addAttribute("hasUpcomingAppointments", hasUpcomingAppointments);
+            model.addAttribute("upcomingAppointmentsCount", upcomingAppointmentsCount);
+
             return "donor-dashboard";
-        } catch (Exception e) {log.error("Error in dashboard for user {}: {}", userId, e.getMessage());
-            return "redirect:/donor/complete-profile?token=" + token + "&userId=" + userId + "&role=" + role + "&email=" + email;
+
+        } catch (Exception e) {
+            log.error("Error in dashboard for user {}: {}", userId, e.getMessage(), e);
+
+            // ВАЖНО: Вместо редиректа показываем страницу с ошибкой
+            model.addAttribute("error", "Ошибка загрузки дашборда: " + e.getMessage());
+            model.addAttribute("token", token);
+            model.addAttribute("userId", userId);
+            model.addAttribute("role", role);
+            model.addAttribute("email", email);
+            return "error"; // Создайте error.html в templates
         }
     }
 
@@ -627,4 +731,147 @@ public class DonorController {
         model.addAttribute("email", email);
         return "donor-achievements";
     }
+
+    @GetMapping("/appointments-menu")
+    public String showAppointmentsMenu(@RequestParam String token,
+                                       @RequestParam Long userId,
+                                       @RequestParam String role,
+                                       @RequestParam String email,
+                                       Model model) {
+        try {
+            Optional<Donor> donorOpt = donorRepository.findByUserId(userId);
+            if (donorOpt.isEmpty()) {
+                return "redirect:/donor/complete-profile?token=" + token +
+                        "&userId=" + userId + "&role=" + role + "&email=" + email;
+            }
+
+            Donor donor = donorOpt.get();
+
+            // Get appointments
+            ResponseEntity<List<Map<String, Object>>> appointmentsResponse =
+                    appointmentFeignClient.getDonorAppointments(donor.getUserId());
+
+            List<Map<String, Object>> appointments = List.of();
+            if (appointmentsResponse != null &&
+                    appointmentsResponse.getStatusCode().is2xxSuccessful() &&
+                    appointmentsResponse.getBody() != null) {
+                appointments = appointmentsResponse.getBody();
+            }
+
+            // Separate upcoming and past appointments
+            List<Map<String, Object>> upcomingAppointments = new ArrayList<>();
+            List<Map<String, Object>> pastAppointments = new ArrayList<>();
+
+            LocalDate today = LocalDate.now();
+
+            for (Map<String, Object> appointment : appointments) {
+                try {
+                    if (appointment.get("appointmentDate") == null || appointment.get("status") == null) {
+                        continue;
+                    }
+
+                    LocalDate appDate = LocalDate.parse(appointment.get("appointmentDate").toString());
+                    String status = appointment.get("status").toString();
+
+                    if ((appDate.isAfter(today) || appDate.equals(today)) &&
+                            !status.equals("CANCELLED") &&
+                            !status.equals("COMPLETED")) {
+                        upcomingAppointments.add(appointment);
+                    } else {
+                        pastAppointments.add(appointment);
+                    }
+                } catch (Exception e) {
+                    log.warn("Error processing appointment: {}", e.getMessage());
+                }
+            }
+
+            model.addAttribute("donor", donor);
+            model.addAttribute("upcomingAppointments", upcomingAppointments);
+            model.addAttribute("pastAppointments", pastAppointments);
+            model.addAttribute("token", token);
+            model.addAttribute("userId", userId);
+            model.addAttribute("role", role);
+            model.addAttribute("email", email);
+
+            activityStoryService.record_activity(
+                    userId,
+                    "DONOR",
+                    "APPOINTMENTS_MENU_VIEWED",
+                    "Viewed appointments menu"
+            );
+
+            return "donor-appointments-menu";
+
+        } catch (Exception e) {
+            log.error("Error loading appointments menu: {}", e.getMessage());
+            return "redirect:/donor/dashboard?token=" + token +
+                    "&userId=" + userId + "&role=" + role + "&email=" + email;
+        }
+    }
+
+    @GetMapping("/appointments/api/next-appointment")
+    @ResponseBody
+    public ResponseEntity<?> getNextAppointment(@RequestParam Long userId) {
+        try {
+            ResponseEntity<List<Map<String, Object>>> response =
+                    appointmentFeignClient.getDonorAppointments(userId);
+
+            if (response != null &&
+                    response.getStatusCode().is2xxSuccessful() &&
+                    response.getBody() != null) {
+
+                List<Map<String, Object>> appointments = response.getBody();
+                LocalDate today = LocalDate.now();
+                Optional<Map<String, Object>> nextAppointment = appointments.stream()
+                        .filter(appointment -> {
+                            try {
+                                if (appointment.get("appointmentDate") == null ||
+                                        appointment.get("status") == null) {
+                                    return false;
+                                }
+
+                                LocalDate appDate = LocalDate.parse(appointment.get("appointmentDate").toString());
+                                String status = appointment.get("status").toString();
+
+                                return (appDate.isAfter(today) || appDate.equals(today)) &&
+                                        !status.equals("CANCELLED") &&
+                                        !status.equals("COMPLETED");
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        })
+                        .min((a, b) -> {
+                            LocalDate dateA = LocalDate.parse(a.get("appointmentDate").toString());
+                            LocalDate dateB = LocalDate.parse(b.get("appointmentDate").toString());
+
+                            if (dateA.equals(dateB)) {
+                                LocalTime timeA = LocalTime.parse(a.get("appointmentTime").toString());
+                                LocalTime timeB = LocalTime.parse(b.get("appointmentTime").toString());
+                                return timeA.compareTo(timeB);
+                            }
+                            return dateA.compareTo(dateB);
+                        });
+
+                if (nextAppointment.isPresent()) {
+                    return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "appointment", nextAppointment.get()
+                    ));
+                }
+            }
+
+            return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "message", "No upcoming appointments"
+            ));
+
+        } catch (Exception e) {
+            log.error("Error getting next appointment: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
 }

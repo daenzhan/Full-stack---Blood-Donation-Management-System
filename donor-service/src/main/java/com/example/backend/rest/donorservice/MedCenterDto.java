@@ -9,6 +9,8 @@ public class MedCenterDto {
     private String specialization;
     private Long user_id;
     private String license_file;
+    private String openHours;
+    private Double rating;
 
     public Long getMed_center_id() {
         return med_center_id;
@@ -64,5 +66,21 @@ public class MedCenterDto {
 
     public void setLicense_file(String license_file) {
         this.license_file = license_file;
+    }
+
+    public String getOpenHours() {
+        return openHours;
+    }
+
+    public void setOpenHours(String openHours) {
+        this.openHours = openHours;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
     }
 }

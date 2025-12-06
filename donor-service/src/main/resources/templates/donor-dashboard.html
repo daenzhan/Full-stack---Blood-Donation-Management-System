@@ -933,6 +933,20 @@
             </a>
         </li>
 
+        <li>
+            <a th:href="@{'/donor/appointments/my-appointments?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-calendar-check"></i>
+                My Appointments
+            </a>
+        </li>
+
+        <li>
+            <a th:href="@{'/donor/appointments/schedule?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+                <i class="fas fa-calendar-plus"></i>
+                Book Appointment
+            </a>
+        </li>
+
     </ul>
 </div>
 
@@ -1265,6 +1279,7 @@
                             </a>
                         </div>
 
+
                         <!-- Emergency Contacts -->
                         <div class="action-card">
                             <div>
@@ -1356,6 +1371,25 @@
                                 <i class="fas fa-comments me-1"></i> Chat Now
                             </a>
                         </div>
+
+                        <!-- Appointment Booking Card -->
+                        <div class="action-card">
+                            <div>
+                                <div class="action-icon bg-primary text-white">
+                                    <i class="fas fa-calendar-plus"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Book Appointment</h6>
+                                <p class="text-muted small mb-3">
+                                    Schedule your next blood donation at a convenient time and location
+                                </p>
+                            </div>
+                            <a th:href="@{'/donor/appointments/schedule?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-calendar-alt me-1"></i> Book Now
+                            </a>
+                        </div>
+
+
 
 
                     </div>
@@ -1457,7 +1491,109 @@
             </div>
         </div>
     </div>
+    <!-- Appointments Section -->
+    <div class="row mt-4" th:if="${hasUpcomingAppointments != null}">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Your Appointments
+                        <span class="badge bg-white text-danger ms-2"
+                              th:text="${upcomingAppointmentsCount != null ? upcomingAppointmentsCount : 0}">0</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Show when there are upcoming appointments -->
+                    <div th:if="${hasUpcomingAppointments == true}">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="fw-bold text-dark mb-3">
+                                    <i class="fas fa-clock text-danger me-2"></i>
+                                    Next Appointment
+                                </h6>
+                                <!-- Display next appointment details -->
+                                <div class="card bg-light-red mb-3">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <small class="text-muted d-block">Date & Time</small>
+                                                <strong id="nextAppointmentDate" class="text-danger">Loading...</strong>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted d-block">Medical Center</small>
+                                                <strong id="nextAppointmentCenter">Loading...</strong>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted d-block">Status</small>
+                                                <span class="badge bg-success">Scheduled</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    You have <strong th:text="${upcomingAppointmentsCount}"></strong>
+                                    upcoming appointment(s). Don't forget to prepare for your donation!
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="d-grid gap-2">
+                                    <a th:href="@{'/donor/appointments/my-appointments?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                                       class="btn btn-danger">
+                                        <i class="fas fa-calendar-check me-2"></i>
+                                        View All Appointments
+                                    </a>
+                                    <a th:href="@{'/donor/appointments/schedule?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                                       class="btn btn-outline-danger">
+                                        <i class="fas fa-plus me-2"></i>
+                                        Schedule New Appointment
+                                    </a>
+                                    <a th:href="@{'/donor/appointments/appointments-menu?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                                       class="btn btn-outline-primary">
+                                        <i class="fas fa-cog me-2"></i>
+                                        Manage Appointments
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Show when there are NO upcoming appointments -->
+                    <div th:if="${hasUpcomingAppointments == false}">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="empty-state text-start">
+                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                    <h6 class="text-dark mb-2">No Upcoming Appointments</h6>
+                                    <p class="text-muted mb-4">
+                                        You don't have any scheduled blood donation appointments.
+                                        Schedule your next donation to continue saving lives!
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-grid gap-2">
+                                    <a th:href="@{'/donor/appointments/schedule?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                                       class="btn btn-danger btn-lg">
+                                        <i class="fas fa-plus me-2"></i>
+                                        Schedule First Appointment
+                                    </a>
+                                    <a th:href="@{'/donor/requests?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                                       class="btn btn-outline-danger">
+                                        <i class="fas fa-search me-2"></i>
+                                        Find Urgent Requests
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Floating Action Buttons -->
     <div class="floating-action">
         <button class="btn btn-primary"
@@ -1519,6 +1655,13 @@
             document.getElementById('guidelinesOverlay').classList.remove('open');
         }
 
+        // Add this script function
+        function cancelAppointment(appointmentId) {
+            if (confirm('Are you sure you want to cancel this appointment?')) {
+                window.location.href = `/donor/appointments/cancel/${appointmentId}?token=${token}&userId=${userId}&role=${role}&email=${email}`;
+            }
+        }
+
         // Close modals when clicking on overlay
         document.getElementById('matchingRequestsOverlay').addEventListener('click', closeMatchingRequests);
         document.getElementById('guidelinesOverlay').addEventListener('click', closeGuidelines);
@@ -1533,11 +1676,57 @@
 
         document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
 
+
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
+        // Load next appointment details
+        function loadNextAppointment() {
+            const userId = [[${userId}]];
+
+            fetch(`/donor/appointments/api/next-appointment?userId=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.appointment) {
+                        const appointment = data.appointment;
+
+                        // Format date
+                        const dateObj = new Date(appointment.appointmentDate);
+                        const formattedDate = dateObj.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                        });
+
+                        // Format time
+                        const timeObj = new Date(`2000-01-01T${appointment.appointmentTime}`);
+                        const formattedTime = timeObj.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        // Update UI
+                        document.getElementById('nextAppointmentDate').textContent =
+                            `${formattedDate} at ${formattedTime}`;
+                        document.getElementById('nextAppointmentCenter').textContent =
+                            appointment.medCenterName || `Medical Center #${appointment.medCenterId}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading appointment:', error);
+                    document.getElementById('nextAppointmentDate').textContent = 'No upcoming appointments';
+                    document.getElementById('nextAppointmentCenter').textContent = '-';
+                });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            if ([[${hasUpcomingAppointments}]] === true) {
+                loadNextAppointment();
+            }
+        });
+
     </script>
 </body>
 </html>

@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Donation - BloodConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        :root {
+            --primary-red: #dc3545;
+            --dark-red: #c82333;
+            --light-red: #fff5f5;
+            --accent-red: #ff6b7a;
+            --gradient-red: linear-gradient(135deg, #dc3545, #ff6b7a);
+            --gradient-dark: linear-gradient(135deg, #c82333, #dc3545);
+            --shadow-soft: 0 4px 20px rgba(220, 53, 69, 0.08);
+            --shadow-hover: 0 8px 30px rgba(220, 53, 69, 0.12);
+            --border-light: #ffe6e8;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #fefafa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fefafa 0%, #fff5f5 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: 0 2px 20px rgba(220, 53, 69, 0.05);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header {
+            background: var(--gradient-red);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><path fill="white" d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z"/></svg>') repeat;
+            background-size: 80px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            background: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 1px solid var(--border-light);
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient-red);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            padding: 0 2rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: var(--gradient-red);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .step.completed .step-number {
+            background: #28a745;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .step.active .step-label {
+            color: var(--primary-red);
+            font-weight: 600;
+        }
+
+        .center-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .center-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-red);
+            box-shadow: 0 8px 30px rgba(220, 53, 69, 0.15);
+        }
+
+        .center-card.selected {
+            border-color: var(--primary-red);
+            background: var(--light-red);
+        }
+
+        .center-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-red);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .slot-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .time-slot {
+            padding: 0.75rem 0.5rem;
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-2px);
+        }
+
+        .time-slot.selected {
+            background: var(--gradient-red);
+            color: white;
+            border-color: var(--primary-red);
+        }
+
+        .time-slot.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .time-slot.unavailable {
+            background: #f8f9fa;
+            color: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .time-slot.unavailable:hover {
+            border-color: var(--border-light);
+            transform: none;
+        }
+
+        .calendar-day {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 auto;
+        }
+
+        .calendar-day:hover {
+            background: var(--light-red);
+        }
+
+        .calendar-day.selected {
+            background: var(--gradient-red);
+            color: white;
+        }
+
+        .calendar-day.unavailable {
+            color: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--light-red);
+            border-radius: 50%;
+            border-top-color: var(--primary-red);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .step {
+                padding: 0 1rem;
+            }
+
+            .slot-container {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-white">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{'/donor/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+            <i class="fas fa-heartbeat me-2"></i>
+            BloodConnect
+        </a>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-buttons">
+                <span class="navbar-text me-2 me-md-3 fw-medium text-dark d-none d-sm-block" th:text="'Welcome, ' + ${donor.fullName}"></span>
+                <a th:href="@{'/donor/appointments/my-appointments?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-outline-primary btn-sm me-2">
+                    <i class="fas fa-calendar-alt me-1"></i> My Appointments
+                </a>
+                <a th:href="@{'/donor/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-primary btn-sm">
+                    <i class="fas fa-home me-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-12 col-md-8">
+                <h1 class="display-6 fw-bold mb-2">Schedule Donation</h1>
+                <p class="lead mb-0 opacity-90">Book your blood donation appointment in 3 easy steps</p>
+            </div>
+            <div class="col-12 col-md-4 text-md-end text-center mt-3 mt-md-0">
+                <span class="badge blood-badge" th:text="${donor.bloodType}"
+                      style="background: white; color: var(--primary-red); padding: 0.75rem 1.5rem; border-radius: 25px; font-weight: 700;">
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+        <div class="step active" id="step1">
+            <div class="step-number">1</div>
+            <div class="step-label">Choose Center</div>
+        </div>
+        <div class="step" id="step2">
+            <div class="step-number">2</div>
+            <div class="step-label">Select Date</div>
+        </div>
+        <div class="step" id="step3">
+            <div class="step-number">3</div>
+            <div class="step-label">Pick Time</div>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="step1-content">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-hospital me-2"></i>Select Medical Center</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${medCenters != null && !medCenters.empty}">
+                <div class="row">
+                    <div th:each="center : ${medCenters}" class="col-12 col-md-6 col-lg-4 mb-3">
+                        <div class="card center-card center-selector"
+                             th:attr="data-center-id=${center.med_center_id},
+              data-center-name=${center.name},
+              data-center-location=${center.location ?: 'Location not specified'},
+              data-center-phone=${center.phone ?: 'Phone not specified'}"
+                             onclick="selectCenter(this)">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="bg-light-red rounded-circle p-3 me-3">
+                                        <i class="fas fa-hospital text-danger"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1" th:text="${center.name}">Medical Center</h6>
+                                        <p class="text-muted small mb-1">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            <span th:text="${center.location ?: 'Location not specified'}">Location</span>
+                                        </p>
+                                        <p class="text-muted small mb-0">
+                                            <i class="fas fa-phone me-1"></i>
+                                            <span th:text="${center.phone ?: 'Phone not specified'}">Phone</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-clock me-1"></i>
+                                        <span>9:00-18:00</span>
+                                    </span>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-star me-1"></i>
+                                        <span>4.5</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Select a medical center to see available appointment dates and times.
+                </div>
+            </div>
+            <div th:if="${medCenters == null || medCenters.empty}" class="empty-state">
+                <i class="fas fa-hospital fa-4x mb-4"></i>
+                <h5 class="text-muted mb-3">No Medical Centers Available</h5>
+                <p class="text-muted">Please check back later or contact support.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Select Date -->
+    <div class="card mb-4 d-none" id="step2-content">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Select Date</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning d-none" id="date-alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="date-alert-message"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-12 col-md-8">
+                    <div class="mb-4">
+                        <input type="date"
+                               class="form-control form-control-lg"
+                               id="date-picker"
+                               th:min="${#temporals.format(today, 'yyyy-MM-dd')}"
+                               th:max="${#temporals.format(maxDate, 'yyyy-MM-dd')}"
+                               style="border-radius: 12px; border: 2px solid var(--border-light);">
+                    </div>
+
+                    <div id="calendar-container" class="mb-4">
+                        <div class="text-center mb-3">
+                            <button class="btn btn-outline-primary btn-sm me-2" onclick="prevMonth()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="current-month" class="fw-bold"></span>
+                            <button class="btn btn-outline-primary btn-sm ms-2" onclick="nextMonth()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div id="calendar" class="text-center"></div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="card bg-light-red">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-info-circle me-2 text-danger"></i>
+                                Date Information
+                            </h6>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Selected Center:</small>
+                                <strong id="selected-center-display" class="text-danger">Not selected</strong>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Selected Date:</small>
+                                <strong id="selected-date-display" class="text-danger">Not selected</strong>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Available Slots:</small>
+                                <strong id="available-slots-count" class="text-success">0</strong>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Note:</small>
+                                <p class="small text-muted mb-0">
+                                    Appointments can be scheduled up to 30 days in advance.
+                                    Weekends may have limited availability.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary" onclick="loadTimeSlots()" id="load-slots-btn" disabled>
+                    <i class="fas fa-search me-2"></i>Check Available Times
+                </button>
+                <button class="btn btn-outline-secondary ms-2" onclick="goToStep(1)">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Centers
+                </button>
+            </div>
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-outline-primary" onclick="goToStep(1)">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Centers
+                    </button>
+                    <button class="btn btn-primary" id="next-to-step3" onclick="goToStep(3)">
+                        Next: Choose Time <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4 d-none" id="step3-content">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Select Time Slot</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-12 col-md-8">
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-hospital me-2 text-danger"></i>
+                            Selected Center:
+                            <span id="selected-center-name" class="text-danger">Not selected</span>
+                        </h6>
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-calendar-alt me-2 text-danger"></i>
+                            Selected Date:
+                            <span id="selected-date" class="text-danger">Not selected</span>
+                        </h6>
+                    </div>
+
+                    <div id="loading-slots" class="text-center py-4 d-none">
+                        <div class="loading mb-3"></div>
+                        <p class="text-muted">Loading available time slots...</p>
+                    </div>
+
+                    <div id="slots-container" class="d-none">
+                        <div class="slot-container" id="time-slots"></div>
+                        <div class="alert alert-info" id="no-slots-alert" style="display: none;">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No available time slots for this date. Please select another date.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="card bg-light-red">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-clock me-2 text-danger"></i>
+                                Time Selection
+                            </h6>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Selected Time:</small>
+                                <strong id="selected-time-display" class="text-danger">Not selected</strong>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Duration:</small>
+                                <strong class="text-dark">30-45 minutes</strong>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Preparation:</small>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li>Bring ID card</li>
+                                    <li>Eat before donation</li>
+                                    <li>Stay hydrated</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="confirmation-section" class="d-none">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Appointment Summary
+                        </h6>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Medical Center</small>
+                                <strong id="summary-center">Not selected</strong>
+                            </div>
+                            <div class="col-3">
+                                <small class="text-muted d-block">Date</small>
+                                <strong id="summary-date">Not selected</strong>
+                            </div>
+                            <div class="col-3">
+                                <small class="text-muted d-block">Time</small>
+                                <strong id="summary-time">Not selected</strong>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Additional Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" rows="2"
+                                      placeholder="Any special requirements or notes..."></textarea>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Please arrive 15 minutes before your scheduled time.
+                            You can cancel or reschedule up to 2 hours before the appointment.
+                        </div>
+
+                        <form th:action="@{/donor/appointments/create}" method="post" id="appointment-form">
+                            <input type="hidden" name="medCenterId" id="form-medCenterId">
+                            <input type="hidden" name="appointmentDate" id="form-appointmentDate">
+                            <input type="hidden" name="appointmentTime" id="form-appointmentTime">
+                            <input type="hidden" name="notes" id="form-notes">
+                            <input type="hidden" name="token" th:value="${token}">
+                            <input type="hidden" name="userId" th:value="${userId}">
+                            <input type="hidden" name="role" th:value="${role}">
+                            <input type="hidden" name="email" th:value="${email}">
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-primary" onclick="goToStep(2)">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Date
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-calendar-check me-2"></i>Confirm Appointment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${param.error != null}" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${param.error}"></span>
+    </div>
+
+    <div th:if="${param.success != null}" class="alert alert-success">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${param.success}"></span>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    let selectedCenterId = null;
+    let selectedCenterName = null;
+    let selectedDate = null;
+    let selectedTime = null;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    const datePicker = flatpickr("#date-picker", {
+        minDate: "today",
+        maxDate: new Date().fp_incr(30),
+        onChange: function(selectedDates, dateStr, instance) {
+            selectedDate = dateStr;
+            updateSelectedDateDisplay();
+            document.getElementById('available-slots-count').textContent = '?';
+            document.getElementById('load-slots-btn').disabled = false;
+            updateCalendarSelection();
+        }
+    });
+
+    function goToStep(stepNumber) {
+        console.log('Going to step:', stepNumber);
+
+
+        document.getElementById('step1-content').classList.add('d-none');
+        document.getElementById('step2-content').classList.add('d-none');
+        document.getElementById('step3-content').classList.add('d-none');
+
+        document.getElementById('step1').classList.remove('active', 'completed');
+        document.getElementById('step2').classList.remove('active', 'completed');
+        document.getElementById('step3').classList.remove('active', 'completed');
+
+        if (stepNumber === 1) {
+            document.getElementById('step1-content').classList.remove('d-none');
+            document.getElementById('step1').classList.add('active');
+        } else if (stepNumber === 2) {
+            if (!selectedCenterId) {
+                alert('Please select a medical center first.');
+                return;
+            }
+            document.getElementById('step2-content').classList.remove('d-none');
+            document.getElementById('step1').classList.add('completed');
+            document.getElementById('step2').classList.add('active');
+            renderCalendar();
+        } else if (stepNumber === 3) {
+            if (!selectedDate) {
+                alert('Please select a date first.');
+                return;
+            }
+            document.getElementById('step3-content').classList.remove('d-none');
+            document.getElementById('step1').classList.add('completed');
+            document.getElementById('step2').classList.add('completed');
+            document.getElementById('step3').classList.add('active');
+
+            loadTimeSlots();
+        }
+    }
+    function selectCenter(cardElement) {
+        console.log('Selecting center from element:', cardElement);
+
+        const centerId = cardElement.getAttribute('data-center-id');
+        const centerName = cardElement.getAttribute('data-center-name');
+        const centerLocation = cardElement.getAttribute('data-center-location');
+        const centerPhone = cardElement.getAttribute('data-center-phone');
+
+        console.log('Center data:', { centerId, centerName, centerLocation, centerPhone });
+
+        if (!centerId || !centerName) {
+            console.error('Missing center data');
+            return;
+        }
+
+        selectedCenterId = centerId;
+        selectedCenterName = centerName;
+        document.querySelectorAll('.center-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        cardElement.classList.add('selected');
+        document.getElementById('selected-center-display').textContent = centerName + ' - ' + centerLocation;
+        document.getElementById('selected-center-name').textContent = centerName;
+        document.getElementById('summary-center').textContent = centerName + ' (' + centerLocation + ')';
+        document.getElementById('load-slots-btn').disabled = false;
+        setTimeout(() => {
+            goToStep(2);
+        }, 300);
+    }
+    function renderCalendar() {
+        console.log('Rendering calendar for:', currentMonth + 1, currentYear);
+
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"];
+
+        document.getElementById('current-month').textContent =
+            `${monthNames[currentMonth]} ${currentYear}`;
+
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        const daysInMonth = lastDay.getDate();
+
+        let calendarHTML = '<div class="row mb-2">';
+        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+            calendarHTML += `<div class="col p-1"><small class="text-muted">${day}</small></div>`;
+        });
+        calendarHTML += '</div><div class="row">';
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            calendarHTML += '<div class="col p-1"></div>';
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const cellDate = new Date(currentYear, currentMonth, day);
+            const isToday = cellDate.toDateString() === today.toDateString();
+            const isPast = cellDate < today;
+            const isSelected = selectedDate &&
+                new Date(selectedDate).toDateString() === cellDate.toDateString();
+
+            let cellClass = 'calendar-day';
+            if (isSelected) cellClass += ' selected';
+            if (isPast) cellClass += ' unavailable';
+
+            calendarHTML += `
+                <div class="col p-1">
+                    <div class="${cellClass}"
+                         data-day="${day}"
+                         ${isToday ? 'style="font-weight: bold;"' : ''}>
+                        ${day}
+                        ${isToday ? '<div class="small" style="font-size: 8px;">Today</div>' : ''}
+                    </div>
+                </div>
+            `;
+            if ((firstDay.getDay() + day) % 7 === 0 && day !== daysInMonth) {
+                calendarHTML += '</div><div class="row">';
+            }
+        }
+
+        calendarHTML += '</div>';
+        document.getElementById('calendar').innerHTML = calendarHTML;
+        addCalendarEventListeners();
+    }
+
+    function addCalendarEventListeners() {
+        document.querySelectorAll('.calendar-day:not(.unavailable)').forEach(dayElement => {
+            dayElement.addEventListener('click', function() {
+                const day = this.getAttribute('data-day');
+                console.log('Day clicked:', day);
+                selectCalendarDate(day);
+            });
+        });
+    }
+
+    function selectCalendarDate(day) {
+        console.log('Selecting calendar date:', day);
+
+        selectedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        if (datePicker) {
+            datePicker.setDate(selectedDate, false);
+        }
+
+        updateSelectedDateDisplay();
+        document.querySelectorAll('.calendar-day').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        const selectedDayElement = document.querySelector(`[data-day="${day}"]`);
+        if (selectedDayElement) {
+            selectedDayElement.classList.add('selected');
+        }
+
+        document.getElementById('load-slots-btn').disabled = false;
+        console.log('Date selected:', selectedDate);
+    }
+
+    function prevMonth() {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar();
+    }
+
+    function nextMonth() {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar();
+    }
+
+    function updateSelectedDateDisplay() {
+        if (selectedDate) {
+            const dateObj = new Date(selectedDate);
+            const formattedDate = dateObj.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            const detailedDate = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            document.getElementById('selected-date-display').textContent = detailedDate;
+            document.getElementById('selected-date').textContent = formattedDate;
+            document.getElementById('summary-date').textContent = formattedDate;
+        }
+    }
+
+    function updateCalendarSelection() {
+        if (!selectedDate) return;
+
+        const dateObj = new Date(selectedDate);
+        const selectedDay = dateObj.getDate();
+
+        document.querySelectorAll('.calendar-day').forEach(el => {
+            el.classList.remove('selected');
+            const day = el.getAttribute('data-day');
+            if (day && parseInt(day) === selectedDay) {
+                el.classList.add('selected');
+            }
+        });
+    }
+    async function loadTimeSlots() {
+        console.log('Loading time slots for:', selectedCenterId, selectedDate);
+
+        if (!selectedCenterId || !selectedDate) {
+            alert('Please select a medical center and date first.');
+            return;
+        }
+        document.getElementById('loading-slots').classList.remove('d-none');
+        document.getElementById('slots-container').classList.add('d-none');
+        document.getElementById('no-slots-alert').style.display = 'none';
+        document.getElementById('confirmation-section').classList.add('d-none');
+
+        try {
+            const response = await fetch(`/donor/appointments/get-slots?medCenterId=${selectedCenterId}&date=${selectedDate}`);
+            const data = await response.json();
+
+            console.log('Time slots response:', data);
+
+            document.getElementById('loading-slots').classList.add('d-none');
+            document.getElementById('slots-container').classList.remove('d-none');
+
+            if (data.success && data.slots && data.slots.length > 0) {
+                renderTimeSlots(data.slots);
+                const availableCount = data.slots.filter(slot => slot.isAvailable).length;
+                document.getElementById('available-slots-count').textContent = availableCount;
+            } else {
+                document.getElementById('no-slots-alert').style.display = 'block';
+                document.getElementById('available-slots-count').textContent = '0';
+            }
+        } catch (error) {
+            console.error('Error loading slots:', error);
+            alert('Error loading available time slots. Please try again.');
+        }
+    }
+
+    function renderTimeSlots(slots) {
+        console.log('Rendering time slots:', slots);
+
+        const container = document.getElementById('time-slots');
+        container.innerHTML = '';
+
+        slots.forEach(slot => {
+            const timeStr = slot.time; // "09:00:00"
+            const displayTime = formatTimeForDisplay(timeStr);
+
+            const slotElement = document.createElement('div');
+            slotElement.className = `time-slot ${slot.isAvailable ? '' : 'unavailable'}`;
+            slotElement.textContent = displayTime;
+            slotElement.setAttribute('data-time', timeStr);
+
+            if (slot.isAvailable) {
+                slotElement.addEventListener('click', function() {
+                    selectTimeSlot(timeStr, displayTime, this);
+                });
+            }
+
+            container.appendChild(slotElement);
+        });
+    }
+
+    function formatTimeForDisplay(timeStr) {
+        try {
+            if (timeStr.includes(':')) {
+                const parts = timeStr.split(':');
+                const hours = parseInt(parts[0]);
+                const minutes = parts[1];
+
+                if (hours >= 12) {
+                    const displayHours = hours > 12 ? hours - 12 : hours;
+                    return `${displayHours.toString().padStart(2, '0')}:${minutes} PM`;
+                } else {
+                    const displayHours = hours === 0 ? 12 : hours;
+                    return `${displayHours.toString().padStart(2, '0')}:${minutes} AM`;
+                }
+            }
+            return timeStr;
+        } catch (e) {
+            console.error('Error formatting time:', e);
+            return timeStr;
+        }
+    }
+
+    function selectTimeSlot(time, displayTime, element) {
+        console.log('Selecting time slot:', time, displayTime);
+
+        selectedTime = time;
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.classList.remove('selected');
+        });
+        element.classList.add('selected');
+        document.getElementById('selected-time-display').textContent = displayTime;
+        showConfirmation();
+    }
+
+    function showConfirmation() {
+        console.log('Showing confirmation');
+
+        const displayTime = formatTimeForDisplay(selectedTime);
+        document.getElementById('summary-time').textContent = displayTime;
+        document.getElementById('form-medCenterId').value = selectedCenterId;
+        document.getElementById('form-appointmentDate').value = selectedDate;
+        document.getElementById('form-appointmentTime').value = selectedTime;
+        document.getElementById('confirmation-section').classList.remove('d-none');
+    }
+    document.getElementById('appointment-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        document.getElementById('form-notes').value = document.getElementById('notes').value;
+        if (confirm('Confirm appointment booking?')) {
+            this.submit();
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded - initializing');
+        document.querySelectorAll('.center-card').forEach(card => {
+            card.addEventListener('click', function() {
+                console.log('Center card clicked:', this);
+                selectCenter(this);
+            });
+        });
+        const datePickerInput = document.getElementById('date-picker');
+        if (datePickerInput) {
+            datePickerInput.addEventListener('change', function(e) {
+                selectedDate = this.value;
+                updateSelectedDateDisplay();
+                document.getElementById('available-slots-count').textContent = '?';
+                document.getElementById('load-slots-btn').disabled = false;
+                updateCalendarSelection();
+            });
+        }
+        renderCalendar();
+        updateSelectedDateDisplay();
+    });
+    window.debugInfo = function() {
+        console.log('=== DEBUG INFO ===');
+        console.log('Center ID:', selectedCenterId);
+        console.log('Center Name:', selectedCenterName);
+        console.log('Selected Date:', selectedDate);
+        console.log('Selected Time:', selectedTime);
+        console.log('Current Month:', currentMonth + 1);
+        console.log('Current Year:', currentYear);
+        console.log('Load Slots Button Disabled:', document.getElementById('load-slots-btn').disabled);
+        console.log('=== END DEBUG ===');
+    };
+</script>
+</body>
+</html>

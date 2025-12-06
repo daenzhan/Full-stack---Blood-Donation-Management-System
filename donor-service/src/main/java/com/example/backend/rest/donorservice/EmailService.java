@@ -44,4 +44,16 @@ public class EmailService {
 
         return text.toString();
     }
+
+    public void sendEmail(SimpleMailMessage message) {
+        try {
+            mailSender.send(message);
+            log.info("✅ Email sent successfully to: {}", message.getTo());
+        } catch (Exception e) {
+            log.error("❌ Failed to send email: {}", e.getMessage());
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+
 }

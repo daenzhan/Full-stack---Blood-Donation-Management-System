@@ -16,4 +16,5 @@ public interface DonorStatsRepository extends JpaRepository<DonorStats, Long> {
 
     @Query("SELECT ds FROM DonorStats ds WHERE ds.donorId IN :donorIds")
     List<DonorStats> findByDonorIdIn(@Param("donorIds") List<Long> donorIds);
+
 }

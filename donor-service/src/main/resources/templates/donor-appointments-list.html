@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments - BloodConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #dc3545;
+            --dark-red: #c82333;
+            --light-red: #fff5f5;
+            --accent-red: #ff6b7a;
+            --gradient-red: linear-gradient(135deg, #dc3545, #ff6b7a);
+            --shadow-soft: 0 4px 20px rgba(220, 53, 69, 0.08);
+            --shadow-hover: 0 8px 30px rgba(220, 53, 69, 0.12);
+            --border-light: #ffe6e8;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fefafa 0%, #fff5f5 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: 0 2px 20px rgba(220, 53, 69, 0.05);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #dc3545, #ff6b7a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+
+
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545, #ff6b7a);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+
+        .page-header {
+            background: var(--gradient-red);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .appointment-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .appointment-card.scheduled {
+            border-left-color: #28a745;
+        }
+
+        .appointment-card.completed {
+            border-left-color: #6c757d;
+        }
+
+        .appointment-card.cancelled {
+            border-left-color: #dc3545;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .badge {
+            font-weight: 600;
+        }
+
+        .appointment-details {
+            margin-bottom: 1rem;
+        }
+
+        .appointment-details small {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .appointment-details strong {
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
+
+
+        /* Для кнопок в навигации */
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .nav-buttons .btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .nav-buttons .btn i {
+                margin-right: 0.25rem;
+            }
+
+            .nav-buttons .btn span {
+                display: inline;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav-buttons .navbar-text {
+                display: none;
+            }
+
+            .nav-buttons .btn {
+                padding: 0.4rem 0.6rem;
+            }
+
+            .nav-buttons .btn span {
+                display: none;
+            }
+
+            .nav-buttons .btn i {
+                margin-right: 0 !important;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            .nav-buttons .btn {
+                padding: 0.35rem 0.5rem;
+                min-width: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-white">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{'/donor/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+            <i class="fas fa-heartbeat me-2" style="background: linear-gradient(135deg, #dc3545, #ff6b7a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+            BloodConnect
+        </a>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-buttons">
+                <a th:href="@{'/donor/appointments/schedule?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-primary btn-sm me-2">
+                    <i class="fas fa-plus me-1"></i>New Appointment
+                </a>
+                <a th:href="@{'/donor/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">My Appointments</h1>
+                <p class="lead mb-0 opacity-90">Manage your blood donation appointments</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="badge bg-white text-danger px-3 py-2" th:if="${donor.bloodType != null}">
+                    <i class="fas fa-tint me-1"></i>
+                    Blood Type: <span th:text="${donor.bloodType}"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <!-- Flash Messages -->
+    <div th:if="${param.success != null}">
+        <div class="alert alert-success">
+            <span th:text="${param.success}"></span>
+        </div>
+    </div>
+    <div th:if="${param.error != null}">
+        <div class="alert alert-danger">
+            <span th:text="${param.error}"></span>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 fw-bold">
+                                <i class="fas fa-calendar-check me-2 text-danger"></i>
+                                Appointment Management
+                            </h5>
+                        </div>
+                        <div>
+                            <a th:href="@{'/donor/appointments/schedule?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                               class="btn btn-danger">
+                                <i class="fas fa-plus me-2"></i>Book New Appointment
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div th:if="${appointments != null && !appointments.empty}">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h4 class="fw-bold mb-3">
+                    <i class="fas fa-clock me-2 text-danger"></i>
+                    My Appointments
+                </h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div th:each="appointment : ${appointments}" class="col-md-6 col-lg-4 mb-4">
+                <div th:classappend="'appointment-card card ' +
+                    ${appointment.status == 'SCHEDULED' ? 'scheduled' :
+                      appointment.status == 'COMPLETED' ? 'completed' :
+                      appointment.status == 'CANCELLED' ? 'cancelled' : ''}">
+                    <div class="card-body">
+                        <!-- Status Badge -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span th:classappend="'status-badge ' +
+                                ${appointment.status == 'SCHEDULED' ? 'bg-success text-white' :
+                                  appointment.status == 'COMPLETED' ? 'bg-secondary text-white' :
+                                  appointment.status == 'CANCELLED' ? 'bg-danger text-white' : 'bg-warning text-dark'}">
+                                <i th:classappend="'fas me-1 ' +
+                                    ${appointment.status == 'SCHEDULED' ? 'fa-calendar-check' :
+                                      appointment.status == 'COMPLETED' ? 'fa-check-circle' :
+                                      appointment.status == 'CANCELLED' ? 'fa-times-circle' : 'fa-clock'}"></i>
+                                <span th:text="${appointment.status}">Status</span>
+                            </span>
+                            <small class="text-muted" th:text="${appointment.shortDate ?: ''}"></small>
+                        </div>
+
+                        <!-- Appointment Details -->
+                        <h6 class="fw-bold mb-3" th:text="${appointment.medCenterName ?: 'Medical Center'}">
+                            Medical Center
+                        </h6>
+
+                        <div class="appointment-details">
+                            <small class="text-muted d-block mb-1">
+                                <i class="fas fa-calendar-alt me-1"></i>Date
+                            </small>
+                            <strong th:text="${appointment.formattedDate ?: appointment.appointmentDate}"></strong>
+                        </div>
+
+                        <div class="appointment-details">
+                            <small class="text-muted d-block mb-1">
+                                <i class="fas fa-clock me-1"></i>Time
+                            </small>
+                            <strong th:text="${appointment.formattedTime ?: appointment.appointmentTime}"></strong>
+                        </div>
+
+                        <div class="appointment-details" th:if="${appointment.medCenterLocation != null}">
+                            <small class="text-muted d-block mb-1">
+                                <i class="fas fa-map-marker-alt me-1"></i>Location
+                            </small>
+                            <small th:text="${appointment.medCenterLocation}"></small>
+                        </div>
+
+                        <div class="appointment-details" th:if="${appointment.notes != null && !#strings.isEmpty(appointment.notes)}">
+                            <small class="text-muted d-block mb-1">
+                                <i class="fas fa-sticky-note me-1"></i>Notes
+                            </small>
+                            <small th:text="${appointment.notes}"></small>
+                        </div>
+
+                        <!-- Appointment ID -->
+                        <small class="text-muted d-block mt-2">
+                            ID: <span th:text="${appointment.appointmentId}"></span>
+                        </small>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-3">
+                            <div th:if="${appointment.status == 'SCHEDULED'}">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary btn-sm flex-fill"
+                                            th:onclick="'showRescheduleModal(' + ${appointment.appointmentId} + ')'">
+                                        <i class="fas fa-calendar-alt me-1"></i>Reschedule
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm flex-fill"
+                                            th:onclick="'cancelAppointment(' + ${appointment.appointmentId} + ')'">
+                                        <i class="fas fa-times me-1"></i>Cancel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div th:if="${appointment.status == 'COMPLETED'}">
+                                <button class="btn btn-outline-success btn-sm w-100" disabled>
+                                    <i class="fas fa-check me-1"></i>Completed
+                                </button>
+                            </div>
+
+                            <div th:if="${appointment.status == 'CANCELLED'}">
+                                <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                    <i class="fas fa-ban me-1"></i>Cancelled
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${appointments == null || appointments.empty}" class="empty-state">
+        <i class="fas fa-calendar-times fa-4x mb-4"></i>
+        <h4 class="text-muted mb-3">No Appointments Found</h4>
+        <p class="text-muted mb-4">You don't have any scheduled blood donation appointments.</p>
+        <a th:href="@{'/donor/appointments/schedule?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+           class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Schedule Your First Appointment
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div th:if="${appointments != null && !appointments.empty}" class="row mt-5">
+        <div class="col-md-12">
+            <div class="card bg-light-red">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-chart-bar me-2 text-danger"></i>
+                        Appointment Statistics
+                    </h5>
+                    <div class="row">
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="display-6 fw-bold text-danger"
+                                 th:text="${#lists.size(appointments.?[status == 'SCHEDULED'])}">0</div>
+                            <small class="text-muted">Upcoming</small>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="display-6 fw-bold text-success"
+                                 th:text="${#lists.size(appointments.?[status == 'COMPLETED'])}">0</div>
+                            <small class="text-muted">Completed</small>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="display-6 fw-bold text-warning"
+                                 th:text="${#lists.size(appointments.?[status == 'PENDING'])}">0</div>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="display-6 fw-bold text-secondary"
+                                 th:text="${#lists.size(appointments.?[status == 'CANCELLED'])}">0</div>
+                            <small class="text-muted">Cancelled</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reschedule Modal -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Reschedule Appointment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="rescheduleForm">
+                <div class="modal-body">
+                    <input type="hidden" name="token" th:value="${token}">
+                    <input type="hidden" name="userId" th:value="${userId}">
+                    <input type="hidden" name="role" th:value="${role}">
+                    <input type="hidden" name="email" th:value="${email}">
+
+                    <div class="mb-3">
+                        <label for="newDate" class="form-label">New Date</label>
+                        <input type="date" class="form-control" id="newDate" name="newDate" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newTime" class="form-label">New Time</label>
+                        <input type="time" class="form-control" id="newTime" name="newTime" required>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Please note: You can reschedule up to 2 hours before the appointment time.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm Reschedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle me-2"></i>
+                    Cancel Appointment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="cancelForm">
+                <div class="modal-body">
+                    <input type="hidden" name="token" th:value="${token}">
+                    <input type="hidden" name="userId" th:value="${userId}">
+                    <input type="hidden" name="role" th:value="${role}">
+                    <input type="hidden" name="email" th:value="${email}">
+
+                    <div class="mb-3">
+                        <label for="cancelReason" class="form-label">Reason for Cancellation (Optional)</label>
+                        <textarea class="form-control" id="cancelReason" name="reason" rows="3"
+                                  placeholder="Please provide a reason for cancellation..."></textarea>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> You can cancel up to 2 hours before the appointment time.
+                        Frequent cancellations may affect your donor status.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Appointment</button>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentAppointmentId = null;
+
+    function showRescheduleModal(appointmentId) {
+        currentAppointmentId = appointmentId;
+
+        const form = document.getElementById('rescheduleForm');
+        // Set the form action with proper path
+        form.action = `/donor/appointments/reschedule/${appointmentId}`;
+
+        const newDateInput = document.getElementById('newDate');
+        const newTimeInput = document.getElementById('newTime');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        newDateInput.min = today;
+
+        // Set maximum date to 30 days from now
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 30);
+        newDateInput.max = maxDate.toISOString().split('T')[0];
+
+        const modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
+        modal.show();
+    }
+
+    function cancelAppointment(appointmentId) {
+        currentAppointmentId = appointmentId;
+        const form = document.getElementById('cancelForm');
+        // Set the form action with proper path
+        form.action = `/donor/appointments/cancel/${appointmentId}`;
+
+        const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+        modal.show();
+    }
+
+    // Handle form submissions
+    document.getElementById('rescheduleForm').addEventListener('submit', function(e) {
+        const newDate = document.getElementById('newDate').value;
+        const newTime = document.getElementById('newTime').value;
+
+        if (!newDate || !newTime) {
+            e.preventDefault();
+            alert('Please select both date and time');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to reschedule this appointment?')) {
+            e.preventDefault();
+        }
+    });
+
+    document.getElementById('cancelForm').addEventListener('submit', function(e) {
+        if (!confirm('Are you sure you want to cancel this appointment?')) {
+            e.preventDefault();
+        }
+    });
+
+    // Set time input constraints
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeInput = document.getElementById('newTime');
+        if (timeInput) {
+            timeInput.min = '08:00';
+            timeInput.max = '20:00';
+        }
+
+        // Debug: log appointments data
+        console.log('Appointments data loaded');
+    });
+</script>
+</body>
+</html>

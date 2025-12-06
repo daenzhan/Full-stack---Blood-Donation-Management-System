@@ -31,9 +31,9 @@ public class MedCenterController {
     private static final long max_file_size = 5 * 1024 * 1024; // 5MB
     private static final List<String> allowed_format = Arrays.asList("jpg", "jpeg", "png", "pdf");
     private final ActivityStoryService activityStoryService;
-    private final FavoriteMedCenterService favoriteMedCenterService;
+    private final org.example.medcenterservice.FavoriteMedCenterService favoriteMedCenterService;
 
-    public MedCenterController(MedCenterService medCenterService, ActivityStoryService activityStoryService, FavoriteMedCenterService favoriteMedCenterService) throws IOException {
+    public MedCenterController(MedCenterService medCenterService, ActivityStoryService activityStoryService, org.example.medcenterservice.FavoriteMedCenterService favoriteMedCenterService) throws IOException {
         this.activityStoryService = activityStoryService;
         this.medCenterService = medCenterService;
         this.favoriteMedCenterService = favoriteMedCenterService;

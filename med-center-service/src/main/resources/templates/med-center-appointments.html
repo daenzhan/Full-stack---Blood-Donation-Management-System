@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Appointments - Medical Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #dc3545;
+            --dark-red: #c82333;
+            --light-red: #fff5f5;
+            --border-color: #e9ecef;
+        }
+        body { background-color: #f8f9fa; }
+        .appointment-card { margin-bottom: 1rem; border-left: 4px solid var(--primary-red); }
+        .status-scheduled { border-left-color: #28a745; }
+        .status-completed { border-left-color: #6c757d; }
+        .status-cancelled { border-left-color: var(--primary-red); }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container">
+        <a class="navbar-brand text-danger fw-bold"
+           th:href="@{'/medcenters/dashboard?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+        <span class="navbar-text">
+            <i class="fas fa-hospital me-1 text-danger"></i>
+            <span th:text="${medCenter.name}"></span>
+        </span>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="mb-4">
+        <i class="fas fa-calendar-alt me-2 text-danger"></i>
+        Medical Center Appointments
+    </h2>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-danger" th:text="${totalAppointments}">0</h3>
+                    <p class="text-muted mb-0">Total Appointments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-success" th:text="${activeAppointments}">0</h3>
+                    <p class="text-muted mb-0">Active Appointments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-primary" th:text="${upcomingDates.size()}">0</h3>
+                    <p class="text-muted mb-0">Upcoming Dates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтр по дате -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="/appointments/medcenter" class="row">
+                <input type="hidden" name="token" th:value="${token}">
+                <input type="hidden" name="userId" th:value="${userId}">
+                <input type="hidden" name="role" th:value="${role}">
+                <input type="hidden" name="email" th:value="${email}">
+
+                <div class="col-md-4">
+                    <label class="form-label">Filter by Date:</label>
+                    <input type="date" name="filterDate" th:value="${filterDate}"
+                           class="form-control">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Filter</button>
+                    <a th:href="@{'/appointments/medcenter?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email}}"
+                       class="btn btn-secondary">Today</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список записей -->
+    <div th:if="${appointments != null && !appointments.empty}">
+        <h4 class="mb-3">
+            Appointments for
+            <span class="text-danger" th:text="${#temporals.format(filterDate, 'dd MMMM yyyy')}"></span>
+            (<span th:text="${appointments.size()}"></span>)
+        </h4>
+
+        <div th:each="appointment : ${appointments}">
+            <div th:classappend="'appointment-card card ' +
+                ${appointment.status == 'SCHEDULED'} ? 'status-scheduled' :
+                ${appointment.status == 'COMPLETED'} ? 'status-completed' :
+                ${appointment.status == 'CANCELLED'} ? 'status-cancelled' : ''">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <strong th:text="${#temporals.format(appointment.appointmentTime, 'HH:mm')}"></strong>
+                            <div class="small text-muted"
+                                 th:text="${#temporals.format(appointment.appointmentDate, 'dd/MM/yyyy')}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="mb-1" th:text="${appointment.donorName}"></h6>
+                            <div class="small">
+                                <i class="fas fa-tint text-danger me-1"></i>
+                                <span th:text="${appointment.donorBloodType}"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="small">
+                                <i class="fas fa-phone text-muted me-1"></i>
+                                <span th:text="${appointment.donorPhone}"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <span th:class="${appointment.status == 'SCHEDULED'} ? 'badge bg-success' :
+                                          ${appointment.status == 'COMPLETED'} ? 'badge bg-secondary' :
+                                          ${appointment.status == 'CANCELLED'} ? 'badge bg-danger' : 'badge bg-warning'"
+                                  th:text="${appointment.status}">
+                            </span>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <div th:if="${appointment.status == 'SCHEDULED'}">
+                                <button class="btn btn-sm btn-success"
+                                        th:onclick="'updateStatus(' + ${appointment.appointmentId} + ', \"COMPLETED\")'">
+                                <i class="fas fa-check me-1"></i> Complete
+                                </button>
+                                <button class="btn btn-sm btn-danger ms-1"
+                                        th:onclick="'updateStatus(' + ${appointment.appointmentId} + ', \"CANCELLED\")'">
+                                <i class="fas fa-times me-1"></i> Cancel
+                                </button>
+                            </div>
+                            <div th:if="${appointment.status == 'COMPLETED' || appointment.status == 'CANCELLED'}">
+                                <span class="text-muted">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Appointment is <span th:text="${appointment.status}"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${appointment.notes != null && !appointment.notes.isEmpty()}"
+                         class="mt-2 small text-muted">
+                        <i class="fas fa-sticky-note me-1"></i>
+                        <span th:text="${appointment.notes}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нет записей -->
+    <div th:if="${appointments == null || appointments.empty}" class="text-center py-5">
+        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+        <h4 class="text-muted mb-3">No Appointments</h4>
+        <p class="text-muted mb-4">
+            No appointments found for
+            <span th:text="${#temporals.format(filterDate, 'dd MMMM yyyy')}"></span>
+        </p>
+        <a th:href="@{'/appointments/medcenter?token=' + ${token} + '&userId=' + ${userId} + '&role=' + ${role} + '&email=' + ${email} + '&filterDate=' + ${today}}"
+           class="btn btn-primary">
+            <i class="fas fa-calendar-day me-1"></i> View Today's Appointments
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function updateStatus(appointmentId, status) {
+        if (confirm('Change appointment status to ' + status + '?')) {
+            // Используем новый путь для веб-контроллера
+            fetch('/appointments/medcenter/update-status?appointmentId=' + appointmentId + '&status=' + status, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Status updated successfully');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+        }
+    }
+
+    // Обновление даты при изменении фильтра
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.querySelector('input[name="filterDate"]');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.max = '2100-12-31';
+        }
+    });
+</script>
+</body>
+</html>
